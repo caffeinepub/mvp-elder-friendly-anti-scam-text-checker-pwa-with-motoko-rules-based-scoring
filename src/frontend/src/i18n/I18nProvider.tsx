@@ -26,7 +26,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const value: I18nContextType = {
     language,
     setLanguage,
-    t: translations[language],
+    t: translations[language] as Translations,
   };
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

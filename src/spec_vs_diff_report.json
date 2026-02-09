@@ -1,95 +1,141 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T21:40:50.608Z",
-  "summary": "Diff adds PWA install UX (beforeinstallprompt capture + fallback instructions), quick actions on the dashboard, a new /institucional route and nav link, a Reports canister IDL with typed methods, and UI components for collaborative lookup results and report submission with local rate limiting. However, evidence suggests canister targeting and legacy branding removal requirements are not fully met, and the actual wiring of reports canister calls/submission+history is not clearly implemented in the provided diff summary.",
+  "generatedAt": "2026-02-09T23:43:22.051Z",
+  "summary": "Diff implements new /mission and /how-it-works pages with SEO helper and updates router/nav, but several key requirements are either unverifiable from the truncated diff (Terms/Privacy long-form multilingual content, PWA icons) or appear violated (immutable hook modified; leftover legacy branding/tokens; canister IDs not restricted to the three specified IDs).",
   "missing_requirements": [
     {
-      "id": "REQ-82",
-      "requirement": "All IC calls for reports/scoring must be made exclusively to the reports canister ID 7w5qg-6aaaa-aaaab-ael4a-cai via the existing actor setup (no legacy canister IDs used), with typed actor methods.",
-      "reason": "The diff shows a new typed IDL, but the provided project file summary indicates the actor configuration still targets a legacy canister ID (xpwaq-faaaa-aaaad-qh5pq-cai). There is no diff evidence showing the reports actor is configured to use 7w5qg-6aaaa-aaaab-ael4a-cai.",
+      "id": "REQ-114",
+      "requirement": "Terms page must use exactly the official Terms text previously provided by the user (verbatim) in all supported languages.",
+      "reason": "Diff shows TermsPage structure but does not include the actual official Terms text content; translations content is truncated and cannot confirm verbatim match across pt/en/es/fr/zh/ar/ru.",
       "evidence": [
-        "frontend/src/ic/idl/reports.idl.ts",
-        "frontend-file-summaries.txt (entry for frontend/src/config.ts: \"targets ... xpwaq-faaaa-aaaad-qh5pq-cai\")"
-      ]
-    },
-    {
-      "id": "REQ-83",
-      "requirement": "Submitting a report must call the reports canister submission method(s) and report submissions must be recorded in the existing local-only user history system when logged in (keyed by principal).",
-      "reason": "ReportSubmissionDialog validates and rate-limits, but the diff excerpt does not show any wiring in HomePage that calls reportsActor.submitReport nor any explicit history write (addHistoryItem) on successful report submission. Presence of addHistoryItem in HomePage import is not sufficient without evidence of use for report submissions.",
-      "evidence": [
-        "frontend/src/components/ReportSubmissionDialog.tsx",
-        "frontend/src/pages/HomePage.tsx (truncated)",
-        "frontend/src/hooks/useUserProfile.ts",
-        "frontend/src/utils/userProfileStorage.ts"
-      ]
-    },
-    {
-      "id": "REQ-84",
-      "requirement": "Extend verification UI on \"/\" to verify message/email/phone/crypto against the reports canister and display risk score, report count, categories, and translated disclaimer next to results (while preserving existing extraActor phone/crypto lookups and mainActor.analyzeText behavior).",
-      "reason": "UI state for collaborative results and a CollaborativeResultCard component exist, but the diff excerpt of HomePage is truncated before showing any actual calls to reportsActor.lookupEmail/lookupPhone/lookupMessage/lookupCrypto and rendering of the collaborative results for each tab. The disclaimer translation key exists, but full end-to-end behavior is not evidenced in the truncated diff.",
-      "evidence": [
-        "frontend/src/components/CollaborativeResultCard.tsx",
-        "frontend/src/pages/HomePage.tsx (truncated)",
-        "frontend/src/ic/idl/reports.idl.ts",
+        "frontend/src/pages/TermsPage.tsx",
         "frontend/src/i18n/translations.ts (truncated)"
       ]
     },
     {
-      "id": "REQ-79",
-      "requirement": "Remove legacy branding from user-visible metadata strings (title/description) and ensure no legacy branding remains visible (e.g., Caffeine, ScamGuardian, byHTgamers, \"Desenvolvido por HCoragem\").",
-      "reason": "A user-visible footer link still references caffeine.ai and contains the text \"Built with ... using caffeine.ai\", which violates the requirement to eliminate legacy branding references (Caffeine) from user-visible strings. Additionally, the diff-provided file summary claims the Institutional page displays \"ScamGuardian's\" content, suggesting remaining legacy branding.",
+      "id": "REQ-115",
+      "requirement": "Privacy policy must be brand-new, long, professional, liability-minimizing, and fully multilingual (pt/en/es/fr/zh/ar/ru) via existing i18n structure.",
+      "reason": "PrivacyPage rendering structure is present, but the translation content is truncated; the file summary explicitly says non-pt/en languages are stub entries, which conflicts with the requirement that each supported language contain long, complete content.",
       "evidence": [
-        "frontend/src/components/AppLayout.tsx (footer includes caffeine.ai link and text)",
-        "frontend-file-summaries.txt (entry for frontend/src/pages/InstitutionalPage.tsx mentions \"ScamGuardian\")"
+        "frontend/src/pages/PrivacyPage.tsx",
+        "frontend/src/i18n/translations.ts (truncated)",
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "id": "REQ-80",
-      "requirement": "Install UX fallback instructions should be platform-appropriate and integrated into the UI without failing silently; UX should be multilingual via existing i18n strings.",
-      "reason": "Fallback install instructions returned by usePwaInstall.getInstructions() are hardcoded English strings and do not use the i18n system, so instructions are not multilingual as required for UI strings across supported languages.",
+      "id": "REQ-116",
+      "requirement": "Provide required PWA icon images (192x192 and 512x512) and ensure manifest references valid existing files for installability.",
+      "reason": "Manifest/service worker reference icon paths, but the diff summary does not show the PNG files being added, so existence cannot be verified from the provided changes.",
       "evidence": [
-        "frontend/src/hooks/usePwaInstall.ts",
-        "frontend/src/components/PwaInstallAction.tsx"
+        "frontend/public/service-worker.js",
+        "frontend-file-summaries.txt (manifest references icons)"
+      ]
+    },
+    {
+      "id": "REQ-117",
+      "requirement": "Primary visible PWA install CTA must be exactly \"Baixe a Aplicação AntiFraud gratuitamente\" in Portuguese and translated for all active languages.",
+      "reason": "PwaInstallAction uses i18n key t.installPrimaryButton, but the actual Portuguese string and other language equivalents are not shown (translations file is truncated). Exact-match requirement cannot be verified.",
+      "evidence": [
+        "frontend/src/components/PwaInstallAction.tsx",
+        "frontend/src/i18n/translations.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-118",
+      "requirement": "Remove 100% references to legacy brands (\"Caffeine\"/\"caffeine.ai\" etc.) and keep footer exactly \"by HCoragem\" plain text only.",
+      "reason": "There are still explicit references to \"caffeineAdminToken\" and the summary indicates an InstitutionalPage containing \"ScamGuardian\" content. This contradicts the zero-legacy-branding requirement.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts",
+        "frontend-file-summaries.txt (InstitutionalPage mentions ScamGuardian)"
+      ]
+    },
+    {
+      "id": "REQ-119",
+      "requirement": "Frontend must connect to exactly the three specified canisters only (Main v63rh-lqaaa-aaaaa-qewvq-cai, Extra c6sjf-tqaaa-aaaap-qsiea-cai, Reports 7w5qg-6aaaa-aaaab-ael4a-cai); remove/replace any other canister IDs; readiness report logs active canister IDs/methods.",
+      "reason": "The file summary explicitly states frontend/src/config.ts targets canister ID \"xpwaq-faaaa-aaaad-qh5pq-cai\", which is not one of the three specified canisters. No evidence of a readiness report logging the required three IDs is shown.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/config.ts targets xpwaq-faaaa-aaaad-qh5pq-cai)"
+      ]
+    },
+    {
+      "id": "REQ-120",
+      "requirement": "Reports flow must support submit + lookup for email/phone/message/crypto and show clear empty-state UI when no reports; no seeding and no backend changes.",
+      "reason": "Diff shows lookup handling for email/phone (and likely crypto, truncated), but no evidence of report submission flows for all four types is shown in the provided snippets, and empty-state requirement is specifically phrased for collaborative DB lookups across types; only a generic empty-state card is shown without confirming all types and messages.",
+      "evidence": [
+        "frontend/src/pages/HomePage.tsx (truncated)",
+        "frontend/src/components/CollaborativeResultCard.tsx"
+      ]
+    },
+    {
+      "id": "REQ-121",
+      "requirement": "When collaborative lookup returns no data, show exact Portuguese empty-result message: \"Sem registos conhecidos — base colaborativa em crescimento.\" (and translations for other languages); remove generic technical failure messages and avoid claims of complete worldwide DB.",
+      "reason": "CollaborativeResultCard uses t.collaborativeEmptyState, but the translations snippet does not show that key or the required exact Portuguese sentence; therefore exact compliance cannot be confirmed from the diff. Also some error keys still look generic (e.g., errorAnalyzeMessage), but end-user strings cannot be fully audited due to truncation.",
+      "evidence": [
+        "frontend/src/components/CollaborativeResultCard.tsx",
+        "frontend/src/i18n/translations.ts (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Footer includes a promotional/referral link and copy for caffeine.ai (\"Built with ... using caffeine.ai\"), which is not requested and conflicts with the no-legacy-branding constraint.",
-      "reason": "BuildRequest explicitly requires removing legacy branding references (including Caffeine) from user-visible strings; adding/keeping a caffeine.ai promotional footer is outside scope and contradictory.",
+      "description": "Modified an explicitly immutable hook file (frontend/src/hooks/useActor.ts).",
+      "reason": "BuildRequest constraints state files under immutable frontend paths must not be modified; diff shows modifications to this file.",
       "evidence": [
-        "frontend/src/components/AppLayout.tsx"
+        "frontend/src/hooks/useActor.ts"
       ]
     },
     {
-      "description": "Added React Query QueryClient/QueryClientProvider setup around the app.",
-      "reason": "The BuildRequest does not ask to introduce React Query; this is additional architecture not tied to specified requirements in the diff summary.",
+      "description": "Introduced/kept admin-token plumbing using a parameter named \"caffeineAdminToken\" and related comments mentioning it.",
+      "reason": "BuildRequest requires removing 100% of legacy-brand references including \"Caffeine\"/\"caffeine.ai\"; using \"caffeineAdminToken\" perpetuates that legacy branding.",
       "evidence": [
-        "frontend/src/App.tsx"
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts"
+      ]
+    },
+    {
+      "description": "Institutional page content referencing \"ScamGuardian\" remains in the project.",
+      "reason": "BuildRequest requires removing legacy brands; file summary indicates an InstitutionalPage displaying ScamGuardian content, which is not requested and conflicts with branding requirements.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/pages/InstitutionalPage.tsx mentions ScamGuardian)"
+      ]
+    },
+    {
+      "description": "Backend actor configuration targeting canister ID \"xpwaq-faaaa-aaaad-qh5pq-cai\".",
+      "reason": "BuildRequest explicitly restricts IC calls to exactly three canisters; introducing/using a different canister ID is unrequested and violates constraints.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/config.ts targets xpwaq-faaaa-aaaad-qh5pq-cai)"
+      ]
+    },
+    {
+      "description": "Added PHASE3A_READONLY_FRONTEND_NOCHANGE.md describing a new canister for a future phase.",
+      "reason": "Non-goals/constraints prohibit creating/deploying new backend canisters; this document references a new canister/phase integration not requested for the final release scope.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/PHASE3A_READONLY_FRONTEND_NOCHANGE.md)"
       ]
     }
   ],
   "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/index.html",
-    "frontend/public/manifest.webmanifest",
+    "frontend/public/service-worker.js",
     "frontend/src/App.tsx",
     "frontend/src/components/AppLayout.tsx",
     "frontend/src/components/CollaborativeResultCard.tsx",
-    "frontend/src/components/DashboardQuickActions.tsx",
+    "frontend/src/components/LanguageSelector.tsx",
     "frontend/src/components/PwaInstallAction.tsx",
-    "frontend/src/components/ReportSubmissionDialog.tsx",
-    "frontend/src/hooks/usePwaInstall.ts",
-    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/hooks/useActor.ts",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/ic/idl/reports.idl.ts",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/InstitutionalPage.tsx",
+    "frontend/src/pages/HowItWorksPage.tsx",
+    "frontend/src/pages/MissionPage.tsx",
+    "frontend/src/pages/PrivacyPage.tsx",
+    "frontend/src/pages/TermsPage.tsx",
     "frontend/src/router/useSimpleRouter.ts",
-    "frontend/src/utils/localRateLimit.ts",
-    "frontend/src/utils/userProfileStorage.ts",
+    "frontend/src/utils/seo.ts",
+    "frontend/src/utils/translateBackendResult.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

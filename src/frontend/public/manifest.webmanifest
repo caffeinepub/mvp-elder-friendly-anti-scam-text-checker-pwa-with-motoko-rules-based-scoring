@@ -1,11 +1,13 @@
 {
   "name": "AntiFraud",
   "short_name": "AntiFraud",
-  "description": "AntiFraud / by HCoragem - Advanced fraud detection and prevention platform protecting users from digital scams through intelligent analysis and collaborative reporting.",
+  "description": "Plataforma de verificação e prevenção de fraudes digitais",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/assets/generated/antifraud-pwa-icon.dim_192x192.png",

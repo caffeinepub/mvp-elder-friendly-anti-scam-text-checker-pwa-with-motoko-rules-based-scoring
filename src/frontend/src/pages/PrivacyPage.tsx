@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useI18n } from '@/i18n/I18nProvider';
 import { setSeoMetadata } from '@/utils/seo';
 
-export function TermsPage() {
+export function PrivacyPage() {
   const { t } = useI18n();
 
   useEffect(() => {
     setSeoMetadata(
-      t.termsPageTitle,
-      t.termsPageDescription
+      t.privacyPageTitle,
+      t.privacyPageDescription
     );
   }, [t]);
 
@@ -18,22 +18,22 @@ export function TermsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">{t.termsTitle}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">{t.privacyTitle}</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            {t.termsSubtitle}
+            {t.privacySubtitle}
           </p>
           <p className="text-sm text-muted-foreground italic">
-            {t.termsEffectiveDate}
+            {t.privacyEffectiveDate}
           </p>
         </div>
 
-        {/* Terms Content */}
+        {/* Privacy Content */}
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection1Title}</CardTitle>
+            <CardTitle>{t.privacySection1Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection1Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection1Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -41,10 +41,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection2Title}</CardTitle>
+            <CardTitle>{t.privacySection2Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection2Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection2Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -52,10 +52,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection3Title}</CardTitle>
+            <CardTitle>{t.privacySection3Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection3Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection3Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -63,10 +63,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection4Title}</CardTitle>
+            <CardTitle>{t.privacySection4Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection4Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection4Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -74,10 +74,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection5Title}</CardTitle>
+            <CardTitle>{t.privacySection5Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection5Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection5Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -85,10 +85,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection6Title}</CardTitle>
+            <CardTitle>{t.privacySection6Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection6Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection6Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -96,10 +96,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection7Title}</CardTitle>
+            <CardTitle>{t.privacySection7Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection7Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection7Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>
@@ -107,10 +107,10 @@ export function TermsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection8Title}</CardTitle>
+            <CardTitle>{t.privacySection8Title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection8Paragraphs.map((paragraph: string, index: number) => (
+            {t.privacySection8Paragraphs.map((paragraph: string, index: number) => (
               <p key={index} className="leading-relaxed">{paragraph}</p>
             ))}
           </CardContent>

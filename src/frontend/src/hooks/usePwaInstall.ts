@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -14,13 +15,13 @@ interface PwaInstallState {
 }
 
 export function usePwaInstall(): PwaInstallState {
+  const { t } = useI18n();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [platform, setPlatform] = useState<'android' | 'ios' | 'desktop' | 'unknown'>('unknown');
 
   useEffect(() => {
-    // Detect platform
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     const isAndroid = /android/.test(userAgent);
@@ -37,10 +38,10 @@ export function usePwaInstall(): PwaInstallState {
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
+      setIsInstallable(false);
       return;
     }
 
-    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
@@ -48,15 +49,14 @@ export function usePwaInstall(): PwaInstallState {
       setIsInstallable(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Listen for app installed event
     const handleAppInstalled = () => {
+      console.log('PWA installed successfully');
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
     };
 
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
@@ -74,12 +74,12 @@ export function usePwaInstall(): PwaInstallState {
       await deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
       
-      if (choiceResult.outcome === 'accepted') {
-        setIsInstalled(true);
+      // Only mark as installed when user accepts AND appinstalled event fires
+      // The appinstalled event handler will set isInstalled to true
+      if (choiceResult.outcome === 'dismissed') {
+        setDeferredPrompt(null);
+        setIsInstallable(false);
       }
-      
-      setDeferredPrompt(null);
-      setIsInstallable(false);
     } catch (error) {
       console.error('Error prompting install:', error);
     }
@@ -88,13 +88,13 @@ export function usePwaInstall(): PwaInstallState {
   const getInstructions = (): string => {
     switch (platform) {
       case 'ios':
-        return 'Tap the Share button, then select "Add to Home Screen"';
+        return t.installInstructionsIos;
       case 'android':
-        return 'Tap the menu button (⋮) and select "Install app" or "Add to Home screen"';
+        return t.installInstructionsAndroid;
       case 'desktop':
-        return 'Click the install icon in the address bar or use the browser menu to install';
+        return t.installInstructionsDesktop;
       default:
-        return 'Use your browser\'s menu to install this app';
+        return t.installInstructionsDefault;
     }
   };
 

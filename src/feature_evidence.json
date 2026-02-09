@@ -2,108 +2,152 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-pwa-manifest-and-html-metadata-to-fully-match-the-final-antifraud-by-hcoragem-branding-and-icon-set-manifest-name-and-short-name-must-be-exactly-antifraud-theme-color-background-color-must-match-the-app-theme-and-the-manifest-icons-must-use-antifraud-logo-png-icons-not-vite-svg",
-      "featureTitle": "Update the PWA manifest and HTML metadata to fully match the final AntiFraud / by HCoragem branding and icon set: manifest name and short_name must be exactly \"AntiFraud\"; theme_color/background_color must match the app theme; and the manifest icons must use AntiFraud logo PNG icons (not /vite.svg).",
+      "featureId": "feature-add-two-new-real-institutional-pages-with-long-professional-non-placeholder-content-and-working-navigation-route-mission-mission-global-vision-social-impact-and-system-limitations-and-route-how-it-works-how-verification-works-for-email-phone-message-crypto-scoring-limitations-and-responsible-use-both-pages-must-be-fully-multilingual-pt-en-es-fr-zh-ar-ru-via-the-existing-i18n-system-and-must-include-basic-seo-metadata-document-title-and-meta-description-consistent-with-the-antifraud-by-hcoragem-branding",
+      "featureTitle": "Add two new real institutional pages with long, professional, non-placeholder content and working navigation: route \"/mission\" (mission, global vision, social impact, and system limitations) and route \"/how-it-works\" (how verification works for email/phone/message/crypto, scoring, limitations, and responsible use). Both pages must be fully multilingual (pt/en/es/fr/zh/ar/ru) via the existing i18n system and must include basic SEO metadata (document title and meta description) consistent with the AntiFraud / by HCoragem branding.",
       "files": [
-        "frontend/index.html",
-        "frontend/public/manifest.webmanifest"
+        "frontend/src/App.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/HowItWorksPage.tsx",
+        "frontend/src/pages/MissionPage.tsx",
+        "frontend/src/utils/seo.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-79"
+        "REQ-112"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-an-install-ux-that-attempts-to-show-the-pwa-install-prompt-as-early-as-browsers-allow-and-provides-a-clear-fallback-ui-when-automatic-prompting-is-not-possible-e-g-ios-safari",
-      "featureTitle": "Implement an install UX that attempts to show the PWA install prompt as early as browsers allow, and provides a clear fallback UI when automatic prompting is not possible (e.g., iOS Safari).",
-      "files": [
-        "frontend/src/components/PwaInstallAction.tsx",
-        "frontend/src/hooks/usePwaInstall.ts",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-80"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-new-multilingual-institutional-how-it-works-page-at-route-institucional-and-render-complete-professional-content-describing-core-checks-message-email-phone-crypto-collaborative-database-concept-user-reports-workflow-risk-scoring-and-future-threats-including-quantum-integrate-it-into-the-existing-router-and-top-navigation-without-breaking-existing-routes",
-      "featureTitle": "Add a new multilingual Institutional / How It Works page at route \"/institucional\" and render complete, professional content describing: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum). Integrate it into the existing router and top navigation without breaking existing routes.",
+      "featureId": "feature-update-the-client-side-router-and-top-navigation-so-that-the-informational-routes-are-exactly-mission-how-it-works-terms-and-privacy-and-they-render-the-correct-page-content-preserve-existing-core-flows-on-verification-reporting-authentication-history-without-regressions-if-legacy-institutional-routes-exist-e-g-institucional-and-institucional-mission-keep-them-working-by-redirecting-or-aliasing-to-the-new-routes-without-duplicate-content-or-broken-links",
+      "featureTitle": "Update the client-side router and top navigation so that the informational routes are exactly: \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" (and they render the correct page content). Preserve existing core flows on \"/\" (verification, reporting, authentication, history) without regressions. If legacy institutional routes exist (e.g., \"/institucional\" and \"/institucional/mission\"), keep them working by redirecting or aliasing to the new routes without duplicate content or broken links.",
       "files": [
         "frontend/src/App.tsx",
         "frontend/src/components/AppLayout.tsx",
         "frontend/src/i18n/translations.ts",
-        "frontend/src/pages/InstitutionalPage.tsx"
+        "frontend/src/router/useSimpleRouter.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-81"
+        "REQ-113"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-integrate-the-reports-canister-7w5qg-6aaaa-aaaab-ael4a-cai-by-replacing-the-placeholder-reports-idl-with-the-canister-s-real-candid-interface-and-wiring-typed-frontend-calls-for-a-queries-to-look-up-reported-items-for-email-phone-message-crypto-and-retrieve-risk-score-0-100-report-count-and-categories-and-b-report-submission-from-end-users",
-      "featureTitle": "Integrate the Reports canister (7w5qg-6aaaa-aaaab-ael4a-cai) by replacing the placeholder reports IDL with the canister’s real Candid interface and wiring typed frontend calls for: (a) queries to look up reported items for email/phone/message/crypto and retrieve risk score (0–100), report count, and categories; and (b) report submission from end users.",
+      "featureId": "feature-ensure-the-terms-page-at-route-terms-uses-exactly-the-official-terms-text-previously-provided-by-the-user-verbatim-including-the-date-line-and-all-numbered-sections-in-all-supported-languages-pt-en-es-fr-zh-ar-ru-while-preserving-the-existing-termspage-rendering-structure-section-titles-paragraph-arrays-i18n-driven-rendering",
+      "featureTitle": "Ensure the Terms page at route \"/terms\" uses exactly the official Terms text previously provided by the user (verbatim, including the date line and all numbered sections), in all supported languages (pt/en/es/fr/zh/ar/ru), while preserving the existing TermsPage rendering structure (section titles + paragraph arrays / i18n-driven rendering).",
       "files": [
-        "frontend/src/ic/idl/reports.idl.ts",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-82"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-on-the-main-dashboard-route-add-a-visible-report-flow-that-allows-users-to-submit-a-report-with-fields-type-email-phone-message-crypto-value-category-country-optional-description-apply-minimal-validation-client-side-anti-spam-rate-limiting-and-multilingual-ui-strings",
-      "featureTitle": "On the main dashboard route \"/\", add a visible \"Report\" flow that allows users to submit a report with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Apply minimal validation, client-side anti-spam/rate limiting, and multilingual UI strings.",
-      "files": [
-        "frontend/src/components/ReportSubmissionDialog.tsx",
         "frontend/src/i18n/translations.ts",
-        "frontend/src/pages/HomePage.tsx",
-        "frontend/src/utils/localRateLimit.ts"
+        "frontend/src/pages/TermsPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-83"
+        "REQ-114"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-extend-the-existing-verification-ui-on-so-users-can-verify-message-email-phone-crypto-against-the-collaborative-reports-database-via-the-reports-canister-and-display-risk-score-0-100-number-of-reports-categories-and-a-clear-legal-disclaimer-this-information-is-collaborative-and-does-not-constitute-an-official-decision",
-      "featureTitle": "Extend the existing verification UI on \"/\" so users can verify message/email/phone/crypto against the collaborative reports database (via the reports canister) and display: risk score (0–100), number of reports, categories, and a clear legal disclaimer: \"This information is collaborative and does not constitute an official decision.\"",
+      "featureId": "feature-generate-and-implement-a-brand-new-complete-liability-minimizing-privacy-policy-for-route-privacy-in-all-supported-languages-pt-en-es-fr-zh-ar-ru-using-the-existing-i18n-structure-that-drives-privacypage-section-titles-section-content-arrays-the-privacy-policy-must-be-long-professional-and-suitable-for-an-anti-fraud-informational-tool-include-data-handling-security-retention-user-rights-disclaimers-and-contact-guidance-and-must-not-reference-any-legacy-brands",
+      "featureTitle": "Generate and implement a brand-new, complete, liability-minimizing Privacy Policy for route \"/privacy\" in all supported languages (pt/en/es/fr/zh/ar/ru), using the existing i18n structure that drives PrivacyPage (section titles + section content arrays). The Privacy Policy must be long, professional, and suitable for an anti-fraud informational tool (include data handling, security, retention, user rights, disclaimers, and contact guidance) and must not reference any legacy brands.",
+      "files": [
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/PrivacyPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-115"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-pwa-installability-so-that-installation-completes-successfully-on-supported-platforms-android-desktop-where-install-prompt-exists-validate-and-correct-the-manifest-frontend-public-manifest-webmanifest-icons-start-url-scope-expectations-and-the-service-worker-frontend-public-service-worker-js-caching-strategy-so-they-do-not-break-installability-or-routing-preserve-existing-routes-mission-how-it-works-terms-privacy-and-any-aliased-legacy-routes",
+      "featureTitle": "Fix PWA installability so that installation completes successfully on supported platforms (Android/desktop where install prompt exists). Validate and correct the manifest (frontend/public/manifest.webmanifest), icons, start_url/scope expectations, and the service worker (frontend/public/service-worker.js) caching strategy so they do not break installability or routing. Preserve existing routes (/, /mission, /how-it-works, /terms, /privacy and any aliased legacy routes).",
+      "files": [
+        "frontend/public/service-worker.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-116"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-change-the-visible-pwa-download-install-cta-copy-to-match-the-required-portuguese-text-exactly-for-pt-baixe-a-aplica-o-antifraud-gratuitamente-provide-equivalent-translations-via-the-existing-i18n-system-for-all-active-languages-en-es-fr-zh-ar-ru-ensure-this-cta-is-what-the-user-sees-as-the-primary-install-action-label-not-only-a-hidden-label",
+      "featureTitle": "Change the visible PWA download/install CTA copy to match the required Portuguese text exactly for pt: \"Baixe a Aplicação AntiFraud gratuitamente\". Provide equivalent translations via the existing i18n system for all active languages (en/es/fr/zh/ar/ru). Ensure this CTA is what the user sees as the primary install action label (not only a hidden label).",
+      "files": [
+        "frontend/src/components/PwaInstallAction.tsx",
+        "frontend/src/i18n/translations.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-117"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-enforce-final-global-branding-everywhere-in-the-frontend-remove-100-of-references-to-caffeine-caffeine-ai-and-any-other-legacy-brands-branding-must-be-uniquely-antifraud-as-the-product-name-and-by-hcoragem-as-the-subtitle-the-footer-must-render-only-the-plain-text-by-hcoragem-no-icons-no-links-no-extra-words-across-the-entire-app-shell-apply-this-consistently-across-header-footer-i18n-strings-html-metadata-frontend-index-html-and-pwa-manifest-metadata",
+      "featureTitle": "Enforce final global branding everywhere in the frontend: remove 100% of references to \"Caffeine\" / \"caffeine.ai\" and any other legacy brands. Branding must be uniquely: \"AntiFraud\" as the product name and \"by HCoragem\" as the subtitle. The footer must render only the plain text \"by HCoragem\" (no icons, no links, no extra words) across the entire app shell. Apply this consistently across header, footer, i18n strings, HTML metadata (frontend/index.html), and PWA manifest metadata.",
+      "files": [
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/i18n/translations.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-118"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-reports-den-ncias-database-flow-fully-functional-with-an-initially-empty-database-users-can-submit-reports-email-phone-message-crypto-and-can-query-lookup-existing-reports-when-the-database-has-no-data-for-a-lookup-the-ui-must-show-a-clear-empty-state-not-an-error-do-not-seed-the-database-and-do-not-add-any-new-backend-endpoints-use-the-existing-reports-canister-interface-only",
+      "featureTitle": "Make the Reports (denúncias) database flow fully functional with an initially empty database: users can submit reports (email, phone, message, crypto) and can query/lookup existing reports. When the database has no data for a lookup, the UI must show a clear empty state (not an error). Do not seed the database and do not add any new backend endpoints; use the existing Reports canister interface only.",
       "files": [
         "frontend/src/components/CollaborativeResultCard.tsx",
         "frontend/src/i18n/translations.ts",
@@ -114,19 +158,19 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-84"
+        "REQ-120"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-remove-generic-user-facing-error-copy-for-message-analysis-and-database-checks-e-g-error-analyzing-message-try-again-and-replace-with-specific-helpful-localized-error-states-that-do-not-expose-internal-details",
-      "featureTitle": "Remove generic user-facing error copy for message analysis and database checks (e.g., \"Error analyzing message. Try again\") and replace with specific, helpful, localized error states that do not expose internal details.",
+      "featureId": "feature-remove-generic-technical-failure-messages-e-g-error-analyzing-message-across-message-analysis-and-collaborative-database-checks-replace-them-with-specific-helpful-localized-error-states-that-do-not-expose-internal-details-additionally-when-there-is-no-match-in-the-collaborative-reports-database-show-the-exact-portuguese-empty-result-message-sem-registos-conhecidos-base-colaborativa-em-crescimento-and-provide-equivalent-translations-for-all-other-supported-languages-do-not-claim-a-complete-worldwide-database-anywhere-position-it-as-a-growing-global-collaborative-database",
+      "featureTitle": "Remove generic technical failure messages (e.g., \"Error analyzing message\") across message analysis and collaborative database checks. Replace them with specific, helpful, localized error states that do not expose internal details. Additionally, when there is no match in the collaborative reports database, show the exact Portuguese empty-result message: \"Sem registos conhecidos — base colaborativa em crescimento.\" and provide equivalent translations for all other supported languages. Do not claim a \"complete worldwide database\" anywhere; position it as a growing global collaborative database.",
       "files": [
-        "frontend/src/components/PwaInstallAction.tsx",
-        "frontend/src/components/ReportSubmissionDialog.tsx",
+        "frontend/src/components/CollaborativeResultCard.tsx",
         "frontend/src/i18n/translations.ts",
         "frontend/src/pages/HomePage.tsx"
       ],
@@ -135,18 +179,18 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-85"
+        "REQ-121"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-set-of-quick-action-controls-on-the-main-dashboard-check-risk-focus-scroll-to-the-verification-ui-search-database-open-the-collaborative-lookup-section-report-open-report-submission-ui-and-install-app-triggers-the-install-ux-ensure-the-layout-remains-mobile-friendly-and-accessible",
-      "featureTitle": "Add a set of quick-action controls on the main dashboard: \"Check risk\" (focus/scroll to the verification UI), \"Search database\" (open the collaborative lookup section), \"Report\" (open report submission UI), and \"Install app\" (triggers the install UX). Ensure the layout remains mobile-friendly and accessible.",
+      "featureId": "feature-resolve-the-runtime-failure-where-message-analyses-can-return-generic-technical-errors-by-validating-and-correcting-the-frontend-integration-with-the-main-canister-v63rh-lqaaa-aaaaa-qewvq-cai-method-name-signature-and-query-update-mode-must-match-the-canister-s-real-candid-ensure-analyzetext-calls-succeed-and-render-the-portuguese-backend-response-exactly-as-returned-with-the-existing-optional-translated-block-shown-below-only-when-the-selected-ui-language-is-not-portuguese",
+      "featureTitle": "Resolve the runtime failure where message analyses can return generic technical errors by validating and correcting the frontend integration with the Main canister (v63rh-lqaaa-aaaaa-qewvq-cai): method name, signature, and query/update mode must match the canister’s real Candid. Ensure analyzeText calls succeed and render the Portuguese backend response exactly as returned, with the existing optional translated block shown below only when the selected UI language is not Portuguese.",
       "files": [
-        "frontend/src/components/DashboardQuickActions.tsx",
         "frontend/src/i18n/translations.ts",
         "frontend/src/pages/HomePage.tsx"
       ],
@@ -155,10 +199,11 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-86"
+        "REQ-122"
       ],
       "confidence": "high"
     }

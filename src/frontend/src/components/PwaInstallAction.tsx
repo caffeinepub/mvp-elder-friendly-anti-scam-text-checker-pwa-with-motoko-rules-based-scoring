@@ -16,18 +16,17 @@ export function PwaInstallAction() {
     return (
       <Button onClick={promptInstall} variant="default" size="sm" className="gap-2">
         <Download className="h-4 w-4" />
-        {t.installApp}
+        <span>{t.installPrimaryButton}</span>
       </Button>
     );
   }
 
-  // Show instructions dialog for platforms that don't support prompt
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Download className="h-4 w-4" />
-          {t.installApp}
+          <span>{t.installPrimaryButton}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

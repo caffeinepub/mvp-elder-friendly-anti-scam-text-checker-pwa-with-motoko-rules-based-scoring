@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Search, AlertTriangle, Flag, Download } from 'lucide-react';
+import { Search, AlertTriangle, Flag } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import { PwaInstallAction } from './PwaInstallAction';
 
@@ -16,18 +16,15 @@ export function DashboardQuickActions({ onCheckRisk, onSearchDatabase, onReport 
     <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-start">
       <Button onClick={onCheckRisk} variant="default" size="sm" className="gap-2">
         <AlertTriangle className="h-4 w-4" />
-        <span className="hidden sm:inline">{t.quickActionCheckRisk}</span>
-        <span className="sm:hidden">{t.quickActionCheckRiskShort}</span>
+        <span>{t.quickActionCheckRisk}</span>
       </Button>
       <Button onClick={onSearchDatabase} variant="outline" size="sm" className="gap-2">
         <Search className="h-4 w-4" />
-        <span className="hidden sm:inline">{t.quickActionSearch}</span>
-        <span className="sm:hidden">{t.quickActionSearchShort}</span>
+        <span>{t.quickActionSearchDatabase}</span>
       </Button>
       <Button onClick={onReport} variant="outline" size="sm" className="gap-2">
         <Flag className="h-4 w-4" />
-        <span className="hidden sm:inline">{t.quickActionReport}</span>
-        <span className="sm:hidden">{t.quickActionReportShort}</span>
+        <span>{t.quickActionReportScam}</span>
       </Button>
       <PwaInstallAction />
     </div>

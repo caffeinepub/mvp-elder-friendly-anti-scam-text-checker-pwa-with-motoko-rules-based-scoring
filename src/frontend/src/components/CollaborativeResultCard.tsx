@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Info, CheckCircle2 } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { LookupResult, ReportCategory } from '@/ic/idl/reports.idl';
 
@@ -20,8 +20,8 @@ export function CollaborativeResultCard({ result, loading, error }: Collaborativ
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+      <Alert>
+        <Info className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -31,7 +31,7 @@ export function CollaborativeResultCard({ result, loading, error }: Collaborativ
     return (
       <Alert>
         <CheckCircle2 className="h-4 w-4" />
-        <AlertDescription>{t.collaborativeNoData}</AlertDescription>
+        <AlertDescription>{t.collaborativeEmptyState}</AlertDescription>
       </Alert>
     );
   }

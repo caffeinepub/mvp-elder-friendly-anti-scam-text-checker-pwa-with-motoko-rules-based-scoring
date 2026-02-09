@@ -1,32 +1,49 @@
 import { useState, useEffect } from 'react';
 
-export type Route = '/' | '/institucional' | '/institucional/mission' | '/terms';
+// Module-level shared state for synchronization
+let currentPath = window.location.pathname;
+const listeners = new Set<() => void>();
 
-interface SimpleRouter {
-  currentRoute: Route;
-  navigate: (path: Route) => void;
+// Custom event for navigation
+const NAVIGATION_EVENT = 'simple-router-navigate';
+
+function notifyListeners() {
+  listeners.forEach(listener => listener());
 }
 
-export function useSimpleRouter(): SimpleRouter {
-  const [currentRoute, setCurrentRoute] = useState<Route>(() => {
-    const path = window.location.pathname as Route;
-    return ['/', '/institucional', '/institucional/mission', '/terms'].includes(path) ? path : '/';
-  });
+// Listen for custom navigation events
+window.addEventListener(NAVIGATION_EVENT, () => {
+  currentPath = window.location.pathname;
+  notifyListeners();
+});
+
+// Listen for browser back/forward
+window.addEventListener('popstate', () => {
+  currentPath = window.location.pathname;
+  notifyListeners();
+});
+
+export function useSimpleRouter() {
+  const [route, setRoute] = useState(currentPath);
 
   useEffect(() => {
-    const handlePopState = () => {
-      const path = window.location.pathname as Route;
-      setCurrentRoute(['/', '/institucional', '/institucional/mission', '/terms'].includes(path) ? path : '/');
+    const listener = () => setRoute(currentPath);
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
     };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigate = (path: Route) => {
-    window.history.pushState({}, '', path);
-    setCurrentRoute(path);
+  const navigate = (path: string) => {
+    if (path !== currentPath) {
+      currentPath = path;
+      window.history.pushState({}, '', path);
+      window.dispatchEvent(new Event(NAVIGATION_EVENT));
+    }
   };
 
-  return { currentRoute, navigate };
+  return {
+    currentRoute: route,
+    navigate,
+  };
 }

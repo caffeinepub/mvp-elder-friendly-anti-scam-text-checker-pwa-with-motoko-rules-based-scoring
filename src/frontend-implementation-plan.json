@@ -1,242 +1,328 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "AntiFraud PWA install UX, institutional page, and Reports canister integration (frontend-only)",
+  "title": "AntiFraud final frontend release: institutional content, routing/SEO, PWA installability, branding cleanup, and 3-canister integration reliability",
   "requirements": [
     {
-      "id": "REQ-79",
-      "summary": "Finalize PWA manifest + HTML metadata to match AntiFraud branding and use AntiFraud PNG icons (no Vite defaults, no legacy branding strings).",
+      "id": "REQ-112",
+      "summary": "Add new long-form multilingual institutional pages for /mission and /how-it-works with basic SEO metadata and working navigation",
       "acceptanceCriteria": [
-        "frontend/public/manifest.webmanifest references only AntiFraud-branded PNG icons under /assets/generated (no references to /vite.svg).",
-        "manifest.webmanifest keeps display:\"standalone\" and start_url:\"/\".",
-        "frontend/index.html favicon/link icon is updated to an AntiFraud-branded asset (no /vite.svg).",
-        "No user-visible metadata strings (title/description) contain legacy branding (Caffeine, ScamGuardian, byHTgamers, \"Desenvolvido por HCoragem\")."
+        "Navigating to \"/mission\" renders a complete page with multiple sections covering mission, global vision, social impact, and clear system limitations; no placeholder text remains.",
+        "Navigating to \"/how-it-works\" renders a complete page that explains checks for email/phone/message/crypto, explains scoring at a high level, and includes responsible-use guidance and limitations; no placeholder text remains.",
+        "Both routes work with client-side navigation and browser back/forward without blank pages or full reloads.",
+        "All user-facing strings on these pages are translated for pt/en/es/fr/zh/ar/ru using the existing i18n provider.",
+        "Each page sets an appropriate document.title and meta description for basic SEO (no legacy branding)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/MissionPage.tsx",
+          "operation": "create",
+          "description": "Create the new \"/mission\" page with long, professional institutional content (mission, global vision, social impact, and explicit system limitations) rendered from i18n section titles + paragraph arrays. Use shadcn-ui Card components for consistent layout. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/HowItWorksPage.tsx",
+          "operation": "create",
+          "description": "Create the new \"/how-it-works\" page with long, professional content explaining verification (email/phone/message/crypto), scoring at a high level, limitations, and responsible-use guidance, all driven by i18n section titles + paragraph arrays. Use shadcn-ui components (Card/Accordion as appropriate) for consistent layout. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/seo.ts",
+          "operation": "create",
+          "description": "Add a small helper to set document.title and update/create the meta description tag at runtime for SPA routes, ensuring AntiFraud / by HCoragem branding and no legacy branding."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add full multilingual (pt/en/es/fr/zh/ar/ru) translation keys for Mission and How-It-Works pages using the existing i18n system, with long-form, non-placeholder content organized as section titles + paragraph arrays. Ensure wording is professional and includes system limitations and responsible use guidance (no overclaims)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the new routes \"/mission\" and \"/how-it-works\" into the main route switch so they render the new pages, and ensure they are reachable via client-side navigation without regressions."
+        }
+      ]
+    },
+    {
+      "id": "REQ-113",
+      "summary": "Update router + header navigation to use exactly /mission, /how-it-works, /terms, /privacy; preserve / core flows; alias legacy institutional routes",
+      "acceptanceCriteria": [
+        "Header navigation includes links to \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" and each link renders content immediately.",
+        "No existing verification/reporting features on \"/\" are removed or broken.",
+        "Old institutional routes (if present in the app) do not break; they either redirect to the new routes or render the same content reliably."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/router/useSimpleRouter.ts",
+          "operation": "modify",
+          "description": "Update the router route list so the canonical informational routes are exactly \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" (plus \"/\"). Add legacy-path compatibility by normalizing/aliasing existing institutional paths (e.g., \"/institucional\" and \"/institucional/mission\") to the new canonical routes without duplicating content."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Update top navigation items to link to \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" (and keep Home on \"/\"). Ensure labels come from i18n and reflect AntiFraud branding. Use existing layout structure; keep footer plain text exactly \"by HCoragem\"."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update route-to-page mapping to render correct content for the new informational routes and ensure legacy institutional paths are handled via aliasing/redirect-style mapping (same content, no duplicates). Preserve the existing HomePage functionality on \"/\"."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Adjust navigation translation keys to match the new informational routes (Mission/How it works/Terms/Privacy) across pt/en/es/fr/zh/ar/ru and remove/avoid any legacy institutional naming that no longer exists in nav."
+        }
+      ]
+    },
+    {
+      "id": "REQ-114",
+      "summary": "Replace /terms content with the user-provided official Terms text verbatim in all supported languages while preserving i18n-driven section rendering",
+      "acceptanceCriteria": [
+        "The content shown on \"/terms\" matches the user-provided official Terms text exactly (no paraphrasing, no omissions).",
+        "The Terms content is available and readable for all supported languages via the language selector.",
+        "The global app-shell branding remains AntiFraud / by HCoragem and the footer remains exactly \"by HCoragem\" (plain text only)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/TermsPage.tsx",
+          "operation": "modify",
+          "description": "Preserve the existing TermsPage section-card structure, but update rendering to support section titles + paragraph arrays from i18n (while keeping the same overall visual structure). Use shadcn-ui Card components as already implemented. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Replace the Terms translations for pt/en/es/fr/zh/ar/ru with the exact official Terms text previously provided by the user (verbatim, including the date line and all numbered sections). Keep content structured for the TermsPage renderer (section titles + paragraph arrays) and ensure no legacy branding is introduced."
+        }
+      ]
+    },
+    {
+      "id": "REQ-115",
+      "summary": "Generate and implement a new long-form multilingual Privacy Policy for /privacy using the existing i18n section rendering structure",
+      "acceptanceCriteria": [
+        "The \"/privacy\" page contains long, complete policy content in each supported language (not placeholder text).",
+        "Content is rendered through the existing i18n translation structure used by PrivacyPage (section titles + section body text).",
+        "No references to Caffeine/caffeine.ai/ScamGuardian/byHTgamers/\"Desenvolvido por HCoragem\" appear in any privacy text unless explicitly required by the policy content (do not introduce legacy branding)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PrivacyPage.tsx",
+          "operation": "modify",
+          "description": "Preserve the existing PrivacyPage section-card layout, but update rendering to support section titles + paragraph arrays from i18n (consistent with the requested structure). Use shadcn-ui Card components as already implemented. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Generate a brand-new, long, professional, liability-minimizing Privacy Policy for pt/en/es/fr/zh/ar/ru. Include data handling, security, retention, user rights, disclaimers/limitations, and contact guidance. Structure as section titles + paragraph arrays for PrivacyPage. Ensure no legacy brands are referenced."
+        }
+      ]
+    },
+    {
+      "id": "REQ-116",
+      "summary": "Fix PWA installability by validating manifest/icons and service worker caching so SPA routes work in standalone mode",
+      "acceptanceCriteria": [
+        "On a supported platform (e.g., Chrome/Edge), the install prompt can be accepted and the PWA finishes installation successfully (no failed install).",
+        "The manifest is valid and references valid icon files that exist at the specified paths.",
+        "Service worker does not cause blank pages for SPA routes when installed; navigating directly to informational routes works in standalone mode.",
+        "No regressions to existing PWA behavior (standalone display, start_url, scope) and no broken asset caching."
       ],
       "file_operations": [
         {
           "path": "frontend/public/manifest.webmanifest",
           "operation": "modify",
-          "description": "Update manifest to keep name/short_name exactly \"AntiFraud\", keep start_url \"/\" and display \"standalone\", ensure theme_color/background_color align with the current app theme, and replace the current /vite.svg icon with PNG icons at frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png and frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png."
+          "description": "Validate/correct manifest fields for installability: ensure start_url/scope align with SPA routing, ensure name/short_name are AntiFraud, ensure description matches AntiFraud / by HCoragem branding, and ensure icon paths reference existing files under frontend/public/assets/generated/."
         },
         {
-          "path": "frontend/index.html",
+          "path": "frontend/public/service-worker.js",
           "operation": "modify",
-          "description": "Replace the /vite.svg favicon/link icon references with an AntiFraud-branded PNG under frontend/public/assets/generated (use the PWA icon), and audit/adjust title/description metadata to ensure no legacy branding strings appear."
+          "description": "Update the service worker app-shell route list and navigation fallback so installed standalone mode never shows blank pages on direct navigation to SPA routes, including \"/\", \"/mission\", \"/how-it-works\", \"/terms\", \"/privacy\" and any legacy aliased routes. Ensure caching strategy does not break routing."
         },
         {
           "path": "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
           "operation": "create",
-          "description": "Add the generated Minimalist AntiFraud logo icon (192x192) as a static frontend asset for PWA manifest icons."
+          "description": "Add the generated PWA icon asset at the exact path referenced by the manifest: frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png."
         },
         {
           "path": "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png",
           "operation": "create",
-          "description": "Add the generated Minimalist AntiFraud logo icon (512x512) as a static frontend asset for PWA manifest icons."
+          "description": "Add the generated PWA icon asset at the exact path referenced by the manifest: frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Ensure PWA-related head tags (manifest link, icons, theme-color) are consistent with the corrected manifest and generated icon asset paths, and reflect AntiFraud / by HCoragem branding."
         }
       ]
     },
     {
-      "id": "REQ-80",
-      "summary": "Implement an early PWA install prompt capture with a clear fallback UI for platforms that cannot trigger prompting (e.g., iOS).",
+      "id": "REQ-117",
+      "summary": "Update the primary PWA install CTA copy to the required Portuguese text and add translations for all supported languages",
       "acceptanceCriteria": [
-        "On supporting browsers, the app captures the beforeinstallprompt event and can trigger prompt() via an \"Install App\" quick-action control without requiring navigation away.",
-        "If the install prompt cannot be triggered (e.g., iOS), the \"Install App\" control shows concise platform-appropriate instructions instead of failing silently.",
-        "The install UX does not break existing routing (/ , /institucional/mission, /terms) or Internet Identity behavior."
+        "When UI language is Portuguese (pt), the primary install CTA label is exactly: \"Baixe a Aplicação AntiFraud gratuitamente\".",
+        "When switching to en/es/fr/zh/ar/ru, the install CTA label updates immediately to the correct translation.",
+        "The install CTA remains visible immediately on first load (no navigation required) and still triggers the existing install UX when supported."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/hooks/usePwaInstall.ts",
-          "operation": "create",
-          "description": "Create a dedicated hook to capture the browser install-related events (e.g., beforeinstallprompt) and expose: install availability state, a safe trigger method for prompt(), and a platform-specific fallback instruction payload when prompting is unavailable."
-        },
-        {
-          "path": "frontend/src/components/PwaInstallAction.tsx",
-          "operation": "create",
-          "description": "Add a small UI component that renders an \"Install app\" action and, when prompting is unavailable, shows concise platform-specific instructions (e.g., iOS Safari steps). Use shadcn-ui components (e.g., Button, Dialog/Popover) to present instructions accessibly. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Wire the install hook + PwaInstallAction into the dashboard quick actions so users can trigger prompt() when available, or see fallback instructions when not. Ensure no route changes are required and Internet Identity remains unaffected."
-        }
-      ]
-    },
-    {
-      "id": "REQ-81",
-      "summary": "Add a complete multilingual Institutional / How It Works page at /institucional and wire it into router + top navigation without breaking existing routes.",
-      "acceptanceCriteria": [
-        "Route \"/institucional\" renders a complete page (not blank) in all supported languages (pt/en/es/fr/zh/ar/ru) using the existing i18n system.",
-        "Top navigation provides direct access to \"/institucional\" in addition to existing links.",
-        "Existing routes \"/\", \"/institucional/mission\", and \"/terms\" still render correctly and preserve current behavior."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/InstitutionalPage.tsx",
-          "operation": "modify",
-          "description": "Implement the full Institutional / How It Works page content using the existing i18n system. The page must cover: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum), rendered as a professional multi-section layout. Use shadcn-ui components (e.g., Card, Accordion) for structured content. Verify the component's usage instructions before implementing."
-        },
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add navigation and Institutional / How It Works translation keys and provide complete content for all supported languages (pt/en/es/fr/zh/ar/ru). Ensure wording is professional and does not introduce any legacy branding strings."
+          "description": "Update the install CTA translation key(s) so pt is exactly \"Baixe a Aplicação AntiFraud gratuitamente\" and provide equivalent translations for en/es/fr/zh/ar/ru via the existing i18n system."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/PwaInstallAction.tsx",
           "operation": "modify",
-          "description": "Register route handling for \"/institucional\" to render InstitutionalPage while preserving existing routing behavior for \"/\", \"/institucional/mission\", and \"/terms\"."
+          "description": "Ensure the install CTA label is the primary visible install action text (not hidden behind responsive classes) and uses the updated i18n string for all languages. Keep the existing install UX behavior intact. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/DashboardQuickActions.tsx",
+          "operation": "modify",
+          "description": "If the dashboard presents an install-related quick action, align its visible label with the updated primary install CTA i18n copy so users see the required text immediately on first load. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-118",
+      "summary": "Enforce strict AntiFraud / by HCoragem branding across UI, i18n, HTML metadata, and PWA metadata; remove all legacy brand references",
+      "acceptanceCriteria": [
+        "A repository-wide audit of user-facing UI strings and metadata shows zero occurrences of \"Caffeine\" or \"caffeine.ai\".",
+        "The header shows product name \"AntiFraud\" and subtitle exactly \"by HCoragem\" for all supported languages.",
+        "The footer displays exactly \"by HCoragem\" as plain text only across all routes.",
+        "frontend/index.html title and meta description reference AntiFraud / by HCoragem (no legacy branding).",
+        "frontend/public/manifest.webmanifest name/short_name are exactly \"AntiFraud\" and description aligns with AntiFraud / by HCoragem branding (no legacy branding)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Audit and remove/replace any legacy-brand user-facing strings (e.g., Caffeine/caffeine.ai/ScamGuardian/byHTgamers/\"Desenvolvido por HCoragem\") across all languages. Ensure appTitle is \"AntiFraud\" and appSubtitle is exactly \"by HCoragem\" in every language."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Ensure HTML title and meta description are AntiFraud / by HCoragem branded, with no legacy branding, and that icon references point to the correct generated AntiFraud assets."
+        },
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "modify",
+          "description": "Ensure manifest name/short_name are exactly \"AntiFraud\" and description aligns with AntiFraud / by HCoragem branding; remove any legacy-brand references if present."
         },
         {
           "path": "frontend/src/components/AppLayout.tsx",
           "operation": "modify",
-          "description": "Add a top navigation link/button to \"/institucional\" (in addition to Home/Mission/Terms) using existing navigation patterns and i18n labels. Ensure current routes remain intact and styling stays mobile-friendly."
+          "description": "Confirm header brand rendering is exactly AntiFraud + by HCoragem via i18n across languages, and confirm footer remains exactly plain text \"by HCoragem\" only (no icons/links/extra words) across the entire app shell."
         }
       ]
     },
     {
-      "id": "REQ-82",
-      "summary": "Replace placeholder Reports IDL with the real Candid interface and wire typed frontend calls for collaborative lookup (score/count/categories) and end-user report submission using the existing actor setup and the Reports canister ID.",
+      "id": "REQ-119",
+      "summary": "Ensure frontend uses only the three specified canister IDs and remove any leftover hardcoded IDs/bindings; keep readiness report logging",
       "acceptanceCriteria": [
-        "frontend/src/ic/idl/reports.idl.ts is no longer an empty placeholder and defines the actual query + submit methods exposed by canister 7w5qg-6aaaa-aaaab-ael4a-cai.",
-        "Frontend builds with correct TypeScript types for reportsActor methods (no any-typed gaps for the reports canister).",
-        "All IC calls for reports/scoring are made exclusively to the reports canister ID 7w5qg-6aaaa-aaaab-ael4a-cai via the existing actor setup (no legacy canister IDs used)."
+        "All IC calls (message analysis, extra lookups, reports lookups, report submission) use only the three specified canister IDs.",
+        "Actor initialization succeeds without console errors in a normal session (logged-out and logged-in).",
+        "The developer console readiness report confirms the three canister IDs and that expected methods exist on each actor."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/ic/idl/reports.idl.ts",
-          "operation": "modify",
-          "description": "Replace the placeholder service definition with the Reports canister’s real Candid interface and export strong TypeScript types for all lookup (email/phone/message/crypto) and report submission methods needed by the UI."
-        },
-        {
           "path": "frontend/src/ic/canisterIds.ts",
           "operation": "modify",
-          "description": "Verify the Reports canister ID is set to 7w5qg-6aaaa-aaaab-ael4a-cai and ensure no legacy/incorrect IDs are used for reports-related calls."
+          "description": "Re-audit and enforce the single source of truth for canister IDs: Main v63rh-lqaaa-aaaaa-qewvq-cai, Extra c6sjf-tqaaa-aaaap-qsiea-cai, Reports 7w5qg-6aaaa-aaaab-ael4a-cai. Ensure no other IDs exist in this module."
+        },
+        {
+          "path": "frontend/src/ic/actors.ts",
+          "operation": "modify",
+          "description": "Audit actor creation so all actors always use getCanisterId(...) (no hardcoded IDs elsewhere) and always use HTTPS host configuration."
         },
         {
           "path": "frontend/src/hooks/useAntiFraudActors.ts",
           "operation": "modify",
-          "description": "Ensure the reportsActor is initialized and exposed consistently (alongside mainActor and extraActor) so HomePage can make typed calls to the Reports canister via the existing actor setup."
+          "description": "Ensure actor initialization logs remain reliable and that readiness report continues to log active canister IDs and method presence for all three actors without errors."
         },
         {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/src/ic/readinessReport.ts",
           "operation": "modify",
-          "description": "Update the dashboard logic to use the typed reportsActor methods for collaborative lookups (risk score 0–100, report count, categories) and for end-user report submissions, without changing any backend code."
+          "description": "Audit readiness report checks so they reflect the expected methods on each actor and log the three required canister IDs."
         }
       ]
     },
     {
-      "id": "REQ-83",
-      "summary": "Add a Report submission flow on the main dashboard (/) with minimal validation, local anti-spam cooldown, and multilingual UI; persist submissions in local user history when logged in.",
+      "id": "REQ-120",
+      "summary": "Make the collaborative Reports (denúncias) flow fully functional with an initially empty database (submit + lookup) and explicit empty state",
       "acceptanceCriteria": [
-        "A user can open a report submission UI on \"/\" without breaking the existing tabs/verification flows.",
-        "Submitting a report calls the reports canister submission method(s) (no backend changes to backend/main.mo required).",
-        "Validation prevents empty Type/Value/Category/Country submissions and provides localized error messages.",
-        "A simple local rate limit is enforced per device/session (e.g., cooldown window) and communicates remaining wait time or a clear localized message.",
-        "Report submissions are recorded in the existing local-only user history system when logged in (keyed by principal), without introducing any new backend write endpoints."
+        "Submitting a report for each type (Email/Phone/Message/Crypto) completes successfully using the Reports canister.",
+        "Looking up an item that has no reports shows an explicit empty-state UI (no generic error, no stack traces, no \"service unavailable\" messaging).",
+        "Looking up an item that has reports shows risk score, report count, and categories using the existing UI components.",
+        "No backend changes are introduced to implement this functionality."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
-          "operation": "create",
-          "description": "Create a report submission UI (dialog/sheet) with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Use shadcn-ui components (e.g., Dialog/Sheet, Select, Input, Textarea, Button, Form-like patterns) to keep it accessible and mobile-friendly. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/localRateLimit.ts",
-          "operation": "create",
-          "description": "Add a small utility to enforce a simple client-side cooldown (per device/session) for report submissions and provide remaining-wait-time calculation for UI messaging."
-        },
-        {
-          "path": "frontend/src/i18n/translations.ts",
-          "operation": "modify",
-          "description": "Add i18n keys for the report flow (labels, placeholders, categories helper text if needed, validation errors, cooldown messages, submission success/failure states) for all supported languages."
-        },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Wire the new Report flow into the main dashboard: open/close UI without disrupting existing tabs; validate required fields; apply local cooldown; submit via reportsActor; and record successful submissions into the existing local-only user history when the user is logged in (using the existing useUserProfile helpers)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-84",
-      "summary": "Extend the dashboard verification UI to query the collaborative reports database for message/email/phone/crypto and display score/count/categories plus a translated legal disclaimer, while preserving existing analysis and extra-canister lookups.",
-      "acceptanceCriteria": [
-        "For each item type (message/email/phone/crypto), the UI can display the collaborative risk score (0–100), report count, and categories when the reports canister returns data.",
-        "The disclaimer text is shown next to collaborative database results and is translated for all supported languages.",
-        "Existing functionality is preserved: message analysis still calls mainActor.analyzeText and still shows the original Portuguese backend result exactly as returned, with translated block below when language != pt.",
-        "Existing phone/crypto read-only lookups (extraActor.getPhoneReports/getCryptoReports) continue to function and are not removed."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/i18n/translations.ts",
-          "operation": "modify",
-          "description": "Add i18n keys for collaborative database result presentation (score label, report count label, categories label), empty/no-data states, and the legal disclaimer text (translated for pt/en/es/fr/zh/ar/ru)."
+          "description": "Harden the reports lookup + submission flows to work when the Reports database starts empty: treat empty lookup results as a normal empty state (not an error), keep successful lookups rendering CollaborativeResultCard with risk score/count/categories, and ensure submitReport is invoked for all types (email/phone/message/crypto) through the existing Reports canister actor."
         },
         {
           "path": "frontend/src/components/CollaborativeResultCard.tsx",
-          "operation": "create",
-          "description": "Create a reusable results display component for collaborative lookups that shows: risk score (0–100), report count, categories, and the legal disclaimer. Use shadcn-ui components (e.g., Card, Badge, Alert) for consistent presentation. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "For each tab (message/email/phone/crypto), add a collaborative lookup section powered by reportsActor to fetch and render score/count/categories using CollaborativeResultCard, while preserving: (1) existing message analysis call to mainActor.analyzeText and its Portuguese display + conditional translated block; and (2) existing extraActor.getPhoneReports/getCryptoReports lookups (keep them visible and functional)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-85",
-      "summary": "Replace generic error copy with specific, helpful, localized error states across analysis, lookups, and report flows (without leaking internal details).",
-      "acceptanceCriteria": [
-        "The message-analysis failure state no longer displays the current generic English error text; it shows a more specific localized message (e.g., service unavailable, request failed, try later).",
-        "Phone/crypto/email/report flows also avoid generic error wording and use consistent localized error messages in all supported languages.",
-        "No errors introduce legacy branding strings."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/i18n/translations.ts",
-          "operation": "modify",
-          "description": "Replace generic error strings (e.g., current errorAnalyzeMessage/errorCheckPhone/errorCheckCrypto) with more specific localized error messages and add any missing keys needed for consistent error handling across all flows (analysis, collaborative lookups, report submission, install UX). Ensure no legacy branding appears."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Update error handling to use the new specific i18n messages across message analysis, phone/crypto checks, email checks, collaborative lookups, and report submission. Ensure errors remain user-safe (no internal details) and consistent across tabs/sections."
+          "description": "Ensure the component cleanly differentiates between error vs empty result vs populated result, and displays the localized empty-state message when no result exists. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/components/ReportSubmissionDialog.tsx",
           "operation": "modify",
-          "description": "Ensure the report submission UI maps validation, cooldown, and submission failures to the updated localized, specific error messages (and does not display generic fallback copy)."
-        },
-        {
-          "path": "frontend/src/components/PwaInstallAction.tsx",
-          "operation": "modify",
-          "description": "Ensure install-related failure/unavailability states use concise localized messages (no silent failures, no generic error copy)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-86",
-      "summary": "Add mobile-friendly, accessible quick-action controls on the dashboard: Check risk, Search database, Report, Install app; integrate with install UX and avoid route changes.",
-      "acceptanceCriteria": [
-        "Quick actions are visible on mobile and desktop and have accessible labels and touch targets.",
-        "Each quick action performs its intended navigation/focus behavior without changing routes unexpectedly.",
-        "The \"Install app\" action integrates with the install UX from REQ-80."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/DashboardQuickActions.tsx",
-          "operation": "create",
-          "description": "Create a quick-actions bar component for the HomePage with actions: \"Check risk\", \"Search database\", \"Report\", and \"Install app\". Use shadcn-ui components (e.g., Button, Tooltip) and ensure accessible labels and mobile-friendly touch targets. Verify the component's usage instructions before implementing."
+          "description": "Confirm the dialog supports submitting reports for Email/Phone/Message/Crypto using the existing Reports canister interface and that validation/UX does not assume seeded data. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add i18n keys for quick-action labels and any short helper text required for accessibility for all supported languages."
+          "description": "Add/adjust localized strings needed for empty-state messaging, submission success/failure, and lookup UX across pt/en/es/fr/zh/ar/ru, ensuring no wording implies the database is complete or worldwide."
+        }
+      ]
+    },
+    {
+      "id": "REQ-121",
+      "summary": "Replace generic technical failure messages with specific localized guidance; add exact Portuguese empty-result message for no collaborative match; avoid overclaiming database completeness",
+      "acceptanceCriteria": [
+        "The UI no longer displays the generic string \"Error analyzing message\" (or similar generic technical errors) to end users for analysis/lookups.",
+        "If a collaborative lookup returns no data, the UI shows exactly \"Sem registos conhecidos — base colaborativa em crescimento.\" when language=pt, and an equivalent translation in other languages.",
+        "No page or component copy claims the database is complete or \"worldwide complete\"; copy explicitly frames it as growing/collaborative.",
+        "All new/updated messages are localized via the existing i18n system."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Replace generic user-facing failure copy with specific, helpful, localized guidance (no internal details) across pt/en/es/fr/zh/ar/ru. Update the collaborative empty result string so pt is exactly \"Sem registos conhecidos — base colaborativa em crescimento.\" and provide equivalent translations for other languages. Ensure no translations claim a complete worldwide database."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Wire DashboardQuickActions into the top of the dashboard and implement focus/scroll/open behaviors using refs/state (no route changes): Check risk focuses the relevant verification UI; Search database opens/scrolls to the collaborative lookup section; Report opens the report dialog; Install app uses the REQ-80 install hook/component."
+          "description": "Remove any generic technical end-user error states in analysis and collaborative lookups by switching to the new localized, actionable i18n strings. Ensure empty collaborative matches render the exact localized empty state rather than an error."
+        },
+        {
+          "path": "frontend/src/components/CollaborativeResultCard.tsx",
+          "operation": "modify",
+          "description": "Update the empty-result UI to use the new i18n empty-result message (pt exact text; translated equivalents for other languages) and ensure it is not presented as an error state. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-122",
+      "summary": "Fix message analysis runtime failures by aligning Main canister integration with real Candid; show Portuguese backend text verbatim and show translation block only when UI language is not pt",
+      "acceptanceCriteria": [
+        "Running a message analysis from the main dashboard successfully calls analyzeText on the Main canister and displays the returned Portuguese text exactly as received.",
+        "When UI language is not Portuguese, the app shows the existing translated block directly below the Portuguese backend text; when language is Portuguese, the translated block is hidden.",
+        "No user-facing technical failure message (like \"Error analyzing message\") appears in the normal success path; failures show specific localized guidance without internal details."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/ic/idl/main.idl.ts",
+          "operation": "modify",
+          "description": "Validate and correct the Main canister IDL so the analyzeText method name, signature, and query/update mode match the canister’s real Candid, preventing runtime call failures."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Adjust message analysis rendering so the Portuguese backend response is always shown verbatim as returned, and when UI language is not Portuguese, render the existing translated block directly below it (hide the translated block for pt). Also ensure failures use specific localized guidance (no technical/internal messaging)."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Update localized analysis error/help messages used by the message analysis flow across pt/en/es/fr/zh/ar/ru to be specific and non-technical, and ensure they align with the updated HomePage behavior."
         }
       ]
     }
