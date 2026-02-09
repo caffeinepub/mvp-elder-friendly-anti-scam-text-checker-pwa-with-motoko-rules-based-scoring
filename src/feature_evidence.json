@@ -1,0 +1,166 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-pwa-manifest-and-html-metadata-to-fully-match-the-final-antifraud-by-hcoragem-branding-and-icon-set-manifest-name-and-short-name-must-be-exactly-antifraud-theme-color-background-color-must-match-the-app-theme-and-the-manifest-icons-must-use-antifraud-logo-png-icons-not-vite-svg",
+      "featureTitle": "Update the PWA manifest and HTML metadata to fully match the final AntiFraud / by HCoragem branding and icon set: manifest name and short_name must be exactly \"AntiFraud\"; theme_color/background_color must match the app theme; and the manifest icons must use AntiFraud logo PNG icons (not /vite.svg).",
+      "files": [
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-79"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-an-install-ux-that-attempts-to-show-the-pwa-install-prompt-as-early-as-browsers-allow-and-provides-a-clear-fallback-ui-when-automatic-prompting-is-not-possible-e-g-ios-safari",
+      "featureTitle": "Implement an install UX that attempts to show the PWA install prompt as early as browsers allow, and provides a clear fallback UI when automatic prompting is not possible (e.g., iOS Safari).",
+      "files": [
+        "frontend/src/components/PwaInstallAction.tsx",
+        "frontend/src/hooks/usePwaInstall.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-80"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-new-multilingual-institutional-how-it-works-page-at-route-institucional-and-render-complete-professional-content-describing-core-checks-message-email-phone-crypto-collaborative-database-concept-user-reports-workflow-risk-scoring-and-future-threats-including-quantum-integrate-it-into-the-existing-router-and-top-navigation-without-breaking-existing-routes",
+      "featureTitle": "Add a new multilingual Institutional / How It Works page at route \"/institucional\" and render complete, professional content describing: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum). Integrate it into the existing router and top navigation without breaking existing routes.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/InstitutionalPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-81"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-integrate-the-reports-canister-7w5qg-6aaaa-aaaab-ael4a-cai-by-replacing-the-placeholder-reports-idl-with-the-canister-s-real-candid-interface-and-wiring-typed-frontend-calls-for-a-queries-to-look-up-reported-items-for-email-phone-message-crypto-and-retrieve-risk-score-0-100-report-count-and-categories-and-b-report-submission-from-end-users",
+      "featureTitle": "Integrate the Reports canister (7w5qg-6aaaa-aaaab-ael4a-cai) by replacing the placeholder reports IDL with the canister’s real Candid interface and wiring typed frontend calls for: (a) queries to look up reported items for email/phone/message/crypto and retrieve risk score (0–100), report count, and categories; and (b) report submission from end users.",
+      "files": [
+        "frontend/src/ic/idl/reports.idl.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-82"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-main-dashboard-route-add-a-visible-report-flow-that-allows-users-to-submit-a-report-with-fields-type-email-phone-message-crypto-value-category-country-optional-description-apply-minimal-validation-client-side-anti-spam-rate-limiting-and-multilingual-ui-strings",
+      "featureTitle": "On the main dashboard route \"/\", add a visible \"Report\" flow that allows users to submit a report with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Apply minimal validation, client-side anti-spam/rate limiting, and multilingual UI strings.",
+      "files": [
+        "frontend/src/components/ReportSubmissionDialog.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/src/utils/localRateLimit.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-83"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-extend-the-existing-verification-ui-on-so-users-can-verify-message-email-phone-crypto-against-the-collaborative-reports-database-via-the-reports-canister-and-display-risk-score-0-100-number-of-reports-categories-and-a-clear-legal-disclaimer-this-information-is-collaborative-and-does-not-constitute-an-official-decision",
+      "featureTitle": "Extend the existing verification UI on \"/\" so users can verify message/email/phone/crypto against the collaborative reports database (via the reports canister) and display: risk score (0–100), number of reports, categories, and a clear legal disclaimer: \"This information is collaborative and does not constitute an official decision.\"",
+      "files": [
+        "frontend/src/components/CollaborativeResultCard.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-84"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-remove-generic-user-facing-error-copy-for-message-analysis-and-database-checks-e-g-error-analyzing-message-try-again-and-replace-with-specific-helpful-localized-error-states-that-do-not-expose-internal-details",
+      "featureTitle": "Remove generic user-facing error copy for message analysis and database checks (e.g., \"Error analyzing message. Try again\") and replace with specific, helpful, localized error states that do not expose internal details.",
+      "files": [
+        "frontend/src/components/PwaInstallAction.tsx",
+        "frontend/src/components/ReportSubmissionDialog.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-85"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-set-of-quick-action-controls-on-the-main-dashboard-check-risk-focus-scroll-to-the-verification-ui-search-database-open-the-collaborative-lookup-section-report-open-report-submission-ui-and-install-app-triggers-the-install-ux-ensure-the-layout-remains-mobile-friendly-and-accessible",
+      "featureTitle": "Add a set of quick-action controls on the main dashboard: \"Check risk\" (focus/scroll to the verification UI), \"Search database\" (open the collaborative lookup section), \"Report\" (open report submission UI), and \"Install app\" (triggers the install UX). Ensure the layout remains mobile-friendly and accessible.",
+      "files": [
+        "frontend/src/components/DashboardQuickActions.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-86"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

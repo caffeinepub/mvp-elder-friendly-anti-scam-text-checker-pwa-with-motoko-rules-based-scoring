@@ -1,0 +1,191 @@
+{
+  "kind": "build_request",
+  "title": "Finalize AntiFraud PWA install UX, institutional pages, and reports canister integration (queries + user submissions)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-79",
+      "text": "Update the PWA manifest and HTML metadata to fully match the final AntiFraud / by HCoragem branding and icon set: manifest name and short_name must be exactly \"AntiFraud\"; theme_color/background_color must match the app theme; and the manifest icons must use AntiFraud logo PNG icons (not /vite.svg).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Quando o utilizador aceder ao link da aplicação, deve aparecer imediatamente o prompt de instalação (Add to Home Screen / Install). O manifest PWA deve estar atualizado com: name: \"AntiFraud\" short_name: \"AntiFraud\" icons: novo logótipo minimalista “AntiFraud / by HCoragem” theme_color e background_color: consistentes com o design da aplicação display: standalone"
+        ]
+      },
+      "acceptanceCriteria": [
+        "frontend/public/manifest.webmanifest references only AntiFraud-branded PNG icons under /assets/generated (no references to /vite.svg).",
+        "manifest.webmanifest keeps display:\"standalone\" and start_url:\"/\".",
+        "frontend/index.html favicon/link icon is updated to an AntiFraud-branded asset (no /vite.svg).",
+        "No user-visible metadata strings (title/description) contain legacy branding (Caffeine, ScamGuardian, byHTgamers, \"Desenvolvido por HCoragem\")."
+      ]
+    },
+    {
+      "id": "REQ-80",
+      "text": "Implement an install UX that attempts to show the PWA install prompt as early as browsers allow, and provides a clear fallback UI when automatic prompting is not possible (e.g., iOS Safari).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Quando o utilizador aceder ao link da aplicação, deve aparecer imediatamente o prompt de instalação (Add to Home Screen / Install).",
+          "Botões de acesso rápido: consultar base de dados, denunciar, verificar risco, instalar app."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On supporting browsers, the app captures the beforeinstallprompt event and can trigger prompt() via an \"Install App\" quick-action control without requiring navigation away.",
+        "If the install prompt cannot be triggered (e.g., iOS), the \"Install App\" control shows concise platform-appropriate instructions instead of failing silently.",
+        "The install UX does not break existing routing (/ , /institucional/mission, /terms) or Internet Identity behavior."
+      ]
+    },
+    {
+      "id": "REQ-81",
+      "text": "Add a new multilingual Institutional / How It Works page at route \"/institucional\" and render complete, professional content describing: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum). Integrate it into the existing router and top navigation without breaking existing routes.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Como funciona / Institucional: detalhar funcionalidades, consultas, denúncias e scoring.",
+          "Páginas institucionais\nMissão: explicar claramente que a aplicação protege pessoas, educa sobre fraudes, envolve a comunidade e usa inteligência colaborativa, IA e algoritmos avançados, incluindo ameaças futuras (ex.: computação quântica)."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Route \"/institucional\" renders a complete page (not blank) in all supported languages (pt/en/es/fr/zh/ar/ru) using the existing i18n system.",
+        "Top navigation provides direct access to \"/institucional\" in addition to existing links.",
+        "Existing routes \"/\", \"/institucional/mission\", and \"/terms\" still render correctly and preserve current behavior."
+      ]
+    },
+    {
+      "id": "REQ-82",
+      "text": "Integrate the Reports canister (7w5qg-6aaaa-aaaab-ael4a-cai) by replacing the placeholder reports IDL with the canister’s real Candid interface and wiring typed frontend calls for: (a) queries to look up reported items for email/phone/message/crypto and retrieve risk score (0–100), report count, and categories; and (b) report submission from end users.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "O canister de denúncias 7w5qg-6aaaa-aaaab-ael4a-cai fornece métodos de consulta e scoring.",
+          "Permitir que utilizadores: Consultem emails, números de telefone, mensagens e endereços de criptomoedas já reportados. Visualizem score de risco (0–100), nº de denúncias e categorias.",
+          "Permitir submissão de denúncias pelos utilizadores..."
+        ]
+      },
+      "acceptanceCriteria": [
+        "frontend/src/ic/idl/reports.idl.ts is no longer an empty placeholder and defines the actual query + submit methods exposed by canister 7w5qg-6aaaa-aaaab-ael4a-cai.",
+        "Frontend builds with correct TypeScript types for reportsActor methods (no any-typed gaps for the reports canister).",
+        "All IC calls for reports/scoring are made exclusively to the reports canister ID 7w5qg-6aaaa-aaaab-ael4a-cai via the existing actor setup (no legacy canister IDs used)."
+      ]
+    },
+    {
+      "id": "REQ-83",
+      "text": "On the main dashboard route \"/\", add a visible \"Report\" flow that allows users to submit a report with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Apply minimal validation, client-side anti-spam/rate limiting, and multilingual UI strings.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Permitir submissão de denúncias pelos utilizadores com campos:\nTipo (email / telefone / mensagem / endereço cripto)\nValor\nCategoria\nPaís\nDescrição opcional\nAplicar validação mínima, rate-limit e anti-spam."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A user can open a report submission UI on \"/\" without breaking the existing tabs/verification flows.",
+        "Submitting a report calls the reports canister submission method(s) (no backend changes to backend/main.mo required).",
+        "Validation prevents empty Type/Value/Category/Country submissions and provides localized error messages.",
+        "A simple local rate limit is enforced per device/session (e.g., cooldown window) and communicates remaining wait time or a clear localized message.",
+        "Report submissions are recorded in the existing local-only user history system when logged in (keyed by principal), without introducing any new backend write endpoints."
+      ]
+    },
+    {
+      "id": "REQ-84",
+      "text": "Extend the existing verification UI on \"/\" so users can verify message/email/phone/crypto against the collaborative reports database (via the reports canister) and display: risk score (0–100), number of reports, categories, and a clear legal disclaimer: \"This information is collaborative and does not constitute an official decision.\"",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Na página principal / dashboard, incluir campos para verificar qualquer mensagem, email, número ou endereço cripto e retornar score de risco + aviso legal, usando dados da base de denúncias.",
+          "Vejam aviso legal claro: “Esta informação é colaborativa e não constitui decisão oficial”."
+        ]
+      },
+      "acceptanceCriteria": [
+        "For each item type (message/email/phone/crypto), the UI can display the collaborative risk score (0–100), report count, and categories when the reports canister returns data.",
+        "The disclaimer text is shown next to collaborative database results and is translated for all supported languages.",
+        "Existing functionality is preserved: message analysis still calls mainActor.analyzeText and still shows the original Portuguese backend result exactly as returned, with translated block below when language != pt.",
+        "Existing phone/crypto read-only lookups (extraActor.getPhoneReports/getCryptoReports) continue to function and are not removed."
+      ]
+    },
+    {
+      "id": "REQ-85",
+      "text": "Remove generic user-facing error copy for message analysis and database checks (e.g., \"Error analyzing message. Try again\") and replace with specific, helpful, localized error states that do not expose internal details.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Remover mensagens genéricas de erro (ex.: “Error analyzing message. Try again”)."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The message-analysis failure state no longer displays the current generic English error text; it shows a more specific localized message (e.g., service unavailable, request failed, try later).",
+        "Phone/crypto/email/report flows also avoid generic error wording and use consistent localized error messages in all supported languages.",
+        "No errors introduce legacy branding strings."
+      ]
+    },
+    {
+      "id": "REQ-86",
+      "text": "Add a set of quick-action controls on the main dashboard: \"Check risk\" (focus/scroll to the verification UI), \"Search database\" (open the collaborative lookup section), \"Report\" (open report submission UI), and \"Install app\" (triggers the install UX). Ensure the layout remains mobile-friendly and accessible.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-20"
+        ],
+        "quotes": [
+          "Botões de acesso rápido: consultar base de dados, denunciar, verificar risco, instalar app.",
+          "Interface limpa, confiável, credível, profissional."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Quick actions are visible on mobile and desktop and have accessible labels and touch targets.",
+        "Each quick action performs its intended navigation/focus behavior without changing routes unexpectedly.",
+        "The \"Install app\" action integrates with the install UX from REQ-80."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts(x) or frontend/src/hooks/useActor.ts (immutable paths).",
+    "Preserve existing routes and core flows: \"/\" (verification + message analysis), \"/institucional/mission\", and \"/terms\" must keep working with no regressions.",
+    "Keep the message analysis integration behavior: call main canister v63rh-lqaaa-aaaaa-qewvq-cai analyzeText(text: Text) and display the Portuguese backend response exactly as returned; show a translated block only when language != pt.",
+    "All Internet Computer calls must target ONLY these canister IDs: Main v63rh-lqaaa-aaaaa-qewvq-cai, Extra c6sjf-tqaaa-aaaap-qsiea-cai, Reports 7w5qg-6aaaa-aaaab-ael4a-cai.",
+    "The app must not use WebRTC/peer discovery/LAN scanning APIs; network calls must be HTTPS to the Internet Computer boundary.",
+    "Do not add new backend write endpoints in backend/main.mo as part of this change (reports submissions must use the existing reports canister)."
+  ],
+  "nonGoals": [
+    "Implementing or changing the Motoko backend logic of the external reports canister (7w5qg-6aaaa-aaaab-ael4a-cai).",
+    "Adding third-party analytics, external databases, or external fraud-scoring services.",
+    "Adding new authentication providers beyond Internet Identity."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimalist AntiFraud logo icon, black/white flat mark (antifraud-pwa-icon.dim_192x192.png)",
+      "Minimalist AntiFraud logo icon, black/white flat mark (antifraud-pwa-icon.dim_512x512.png)"
+    ],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

@@ -1,0 +1,244 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "AntiFraud PWA install UX, institutional page, and Reports canister integration (frontend-only)",
+  "requirements": [
+    {
+      "id": "REQ-79",
+      "summary": "Finalize PWA manifest + HTML metadata to match AntiFraud branding and use AntiFraud PNG icons (no Vite defaults, no legacy branding strings).",
+      "acceptanceCriteria": [
+        "frontend/public/manifest.webmanifest references only AntiFraud-branded PNG icons under /assets/generated (no references to /vite.svg).",
+        "manifest.webmanifest keeps display:\"standalone\" and start_url:\"/\".",
+        "frontend/index.html favicon/link icon is updated to an AntiFraud-branded asset (no /vite.svg).",
+        "No user-visible metadata strings (title/description) contain legacy branding (Caffeine, ScamGuardian, byHTgamers, \"Desenvolvido por HCoragem\")."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "modify",
+          "description": "Update manifest to keep name/short_name exactly \"AntiFraud\", keep start_url \"/\" and display \"standalone\", ensure theme_color/background_color align with the current app theme, and replace the current /vite.svg icon with PNG icons at frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png and frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Replace the /vite.svg favicon/link icon references with an AntiFraud-branded PNG under frontend/public/assets/generated (use the PWA icon), and audit/adjust title/description metadata to ensure no legacy branding strings appear."
+        },
+        {
+          "path": "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
+          "operation": "create",
+          "description": "Add the generated Minimalist AntiFraud logo icon (192x192) as a static frontend asset for PWA manifest icons."
+        },
+        {
+          "path": "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated Minimalist AntiFraud logo icon (512x512) as a static frontend asset for PWA manifest icons."
+        }
+      ]
+    },
+    {
+      "id": "REQ-80",
+      "summary": "Implement an early PWA install prompt capture with a clear fallback UI for platforms that cannot trigger prompting (e.g., iOS).",
+      "acceptanceCriteria": [
+        "On supporting browsers, the app captures the beforeinstallprompt event and can trigger prompt() via an \"Install App\" quick-action control without requiring navigation away.",
+        "If the install prompt cannot be triggered (e.g., iOS), the \"Install App\" control shows concise platform-appropriate instructions instead of failing silently.",
+        "The install UX does not break existing routing (/ , /institucional/mission, /terms) or Internet Identity behavior."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/usePwaInstall.ts",
+          "operation": "create",
+          "description": "Create a dedicated hook to capture the browser install-related events (e.g., beforeinstallprompt) and expose: install availability state, a safe trigger method for prompt(), and a platform-specific fallback instruction payload when prompting is unavailable."
+        },
+        {
+          "path": "frontend/src/components/PwaInstallAction.tsx",
+          "operation": "create",
+          "description": "Add a small UI component that renders an \"Install app\" action and, when prompting is unavailable, shows concise platform-specific instructions (e.g., iOS Safari steps). Use shadcn-ui components (e.g., Button, Dialog/Popover) to present instructions accessibly. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Wire the install hook + PwaInstallAction into the dashboard quick actions so users can trigger prompt() when available, or see fallback instructions when not. Ensure no route changes are required and Internet Identity remains unaffected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-81",
+      "summary": "Add a complete multilingual Institutional / How It Works page at /institucional and wire it into router + top navigation without breaking existing routes.",
+      "acceptanceCriteria": [
+        "Route \"/institucional\" renders a complete page (not blank) in all supported languages (pt/en/es/fr/zh/ar/ru) using the existing i18n system.",
+        "Top navigation provides direct access to \"/institucional\" in addition to existing links.",
+        "Existing routes \"/\", \"/institucional/mission\", and \"/terms\" still render correctly and preserve current behavior."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/InstitutionalPage.tsx",
+          "operation": "modify",
+          "description": "Implement the full Institutional / How It Works page content using the existing i18n system. The page must cover: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum), rendered as a professional multi-section layout. Use shadcn-ui components (e.g., Card, Accordion) for structured content. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add navigation and Institutional / How It Works translation keys and provide complete content for all supported languages (pt/en/es/fr/zh/ar/ru). Ensure wording is professional and does not introduce any legacy branding strings."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register route handling for \"/institucional\" to render InstitutionalPage while preserving existing routing behavior for \"/\", \"/institucional/mission\", and \"/terms\"."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Add a top navigation link/button to \"/institucional\" (in addition to Home/Mission/Terms) using existing navigation patterns and i18n labels. Ensure current routes remain intact and styling stays mobile-friendly."
+        }
+      ]
+    },
+    {
+      "id": "REQ-82",
+      "summary": "Replace placeholder Reports IDL with the real Candid interface and wire typed frontend calls for collaborative lookup (score/count/categories) and end-user report submission using the existing actor setup and the Reports canister ID.",
+      "acceptanceCriteria": [
+        "frontend/src/ic/idl/reports.idl.ts is no longer an empty placeholder and defines the actual query + submit methods exposed by canister 7w5qg-6aaaa-aaaab-ael4a-cai.",
+        "Frontend builds with correct TypeScript types for reportsActor methods (no any-typed gaps for the reports canister).",
+        "All IC calls for reports/scoring are made exclusively to the reports canister ID 7w5qg-6aaaa-aaaab-ael4a-cai via the existing actor setup (no legacy canister IDs used)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/ic/idl/reports.idl.ts",
+          "operation": "modify",
+          "description": "Replace the placeholder service definition with the Reports canister’s real Candid interface and export strong TypeScript types for all lookup (email/phone/message/crypto) and report submission methods needed by the UI."
+        },
+        {
+          "path": "frontend/src/ic/canisterIds.ts",
+          "operation": "modify",
+          "description": "Verify the Reports canister ID is set to 7w5qg-6aaaa-aaaab-ael4a-cai and ensure no legacy/incorrect IDs are used for reports-related calls."
+        },
+        {
+          "path": "frontend/src/hooks/useAntiFraudActors.ts",
+          "operation": "modify",
+          "description": "Ensure the reportsActor is initialized and exposed consistently (alongside mainActor and extraActor) so HomePage can make typed calls to the Reports canister via the existing actor setup."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update the dashboard logic to use the typed reportsActor methods for collaborative lookups (risk score 0–100, report count, categories) and for end-user report submissions, without changing any backend code."
+        }
+      ]
+    },
+    {
+      "id": "REQ-83",
+      "summary": "Add a Report submission flow on the main dashboard (/) with minimal validation, local anti-spam cooldown, and multilingual UI; persist submissions in local user history when logged in.",
+      "acceptanceCriteria": [
+        "A user can open a report submission UI on \"/\" without breaking the existing tabs/verification flows.",
+        "Submitting a report calls the reports canister submission method(s) (no backend changes to backend/main.mo required).",
+        "Validation prevents empty Type/Value/Category/Country submissions and provides localized error messages.",
+        "A simple local rate limit is enforced per device/session (e.g., cooldown window) and communicates remaining wait time or a clear localized message.",
+        "Report submissions are recorded in the existing local-only user history system when logged in (keyed by principal), without introducing any new backend write endpoints."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "operation": "create",
+          "description": "Create a report submission UI (dialog/sheet) with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Use shadcn-ui components (e.g., Dialog/Sheet, Select, Input, Textarea, Button, Form-like patterns) to keep it accessible and mobile-friendly. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/localRateLimit.ts",
+          "operation": "create",
+          "description": "Add a small utility to enforce a simple client-side cooldown (per device/session) for report submissions and provide remaining-wait-time calculation for UI messaging."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add i18n keys for the report flow (labels, placeholders, categories helper text if needed, validation errors, cooldown messages, submission success/failure states) for all supported languages."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Wire the new Report flow into the main dashboard: open/close UI without disrupting existing tabs; validate required fields; apply local cooldown; submit via reportsActor; and record successful submissions into the existing local-only user history when the user is logged in (using the existing useUserProfile helpers)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-84",
+      "summary": "Extend the dashboard verification UI to query the collaborative reports database for message/email/phone/crypto and display score/count/categories plus a translated legal disclaimer, while preserving existing analysis and extra-canister lookups.",
+      "acceptanceCriteria": [
+        "For each item type (message/email/phone/crypto), the UI can display the collaborative risk score (0–100), report count, and categories when the reports canister returns data.",
+        "The disclaimer text is shown next to collaborative database results and is translated for all supported languages.",
+        "Existing functionality is preserved: message analysis still calls mainActor.analyzeText and still shows the original Portuguese backend result exactly as returned, with translated block below when language != pt.",
+        "Existing phone/crypto read-only lookups (extraActor.getPhoneReports/getCryptoReports) continue to function and are not removed."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add i18n keys for collaborative database result presentation (score label, report count label, categories label), empty/no-data states, and the legal disclaimer text (translated for pt/en/es/fr/zh/ar/ru)."
+        },
+        {
+          "path": "frontend/src/components/CollaborativeResultCard.tsx",
+          "operation": "create",
+          "description": "Create a reusable results display component for collaborative lookups that shows: risk score (0–100), report count, categories, and the legal disclaimer. Use shadcn-ui components (e.g., Card, Badge, Alert) for consistent presentation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "For each tab (message/email/phone/crypto), add a collaborative lookup section powered by reportsActor to fetch and render score/count/categories using CollaborativeResultCard, while preserving: (1) existing message analysis call to mainActor.analyzeText and its Portuguese display + conditional translated block; and (2) existing extraActor.getPhoneReports/getCryptoReports lookups (keep them visible and functional)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-85",
+      "summary": "Replace generic error copy with specific, helpful, localized error states across analysis, lookups, and report flows (without leaking internal details).",
+      "acceptanceCriteria": [
+        "The message-analysis failure state no longer displays the current generic English error text; it shows a more specific localized message (e.g., service unavailable, request failed, try later).",
+        "Phone/crypto/email/report flows also avoid generic error wording and use consistent localized error messages in all supported languages.",
+        "No errors introduce legacy branding strings."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Replace generic error strings (e.g., current errorAnalyzeMessage/errorCheckPhone/errorCheckCrypto) with more specific localized error messages and add any missing keys needed for consistent error handling across all flows (analysis, collaborative lookups, report submission, install UX). Ensure no legacy branding appears."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update error handling to use the new specific i18n messages across message analysis, phone/crypto checks, email checks, collaborative lookups, and report submission. Ensure errors remain user-safe (no internal details) and consistent across tabs/sections."
+        },
+        {
+          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "operation": "modify",
+          "description": "Ensure the report submission UI maps validation, cooldown, and submission failures to the updated localized, specific error messages (and does not display generic fallback copy)."
+        },
+        {
+          "path": "frontend/src/components/PwaInstallAction.tsx",
+          "operation": "modify",
+          "description": "Ensure install-related failure/unavailability states use concise localized messages (no silent failures, no generic error copy)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-86",
+      "summary": "Add mobile-friendly, accessible quick-action controls on the dashboard: Check risk, Search database, Report, Install app; integrate with install UX and avoid route changes.",
+      "acceptanceCriteria": [
+        "Quick actions are visible on mobile and desktop and have accessible labels and touch targets.",
+        "Each quick action performs its intended navigation/focus behavior without changing routes unexpectedly.",
+        "The \"Install app\" action integrates with the install UX from REQ-80."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DashboardQuickActions.tsx",
+          "operation": "create",
+          "description": "Create a quick-actions bar component for the HomePage with actions: \"Check risk\", \"Search database\", \"Report\", and \"Install app\". Use shadcn-ui components (e.g., Button, Tooltip) and ensure accessible labels and mobile-friendly touch targets. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add i18n keys for quick-action labels and any short helper text required for accessibility for all supported languages."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Wire DashboardQuickActions into the top of the dashboard and implement focus/scroll/open behaviors using refs/state (no route changes): Check risk focuses the relevant verification UI; Search database opens/scrolls to the collaborative lookup section; Report opens the report dialog; Install app uses the REQ-80 install hook/component."
+        }
+      ]
+    }
+  ]
+}

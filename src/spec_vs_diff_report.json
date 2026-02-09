@@ -1,0 +1,95 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T21:40:50.608Z",
+  "summary": "Diff adds PWA install UX (beforeinstallprompt capture + fallback instructions), quick actions on the dashboard, a new /institucional route and nav link, a Reports canister IDL with typed methods, and UI components for collaborative lookup results and report submission with local rate limiting. However, evidence suggests canister targeting and legacy branding removal requirements are not fully met, and the actual wiring of reports canister calls/submission+history is not clearly implemented in the provided diff summary.",
+  "missing_requirements": [
+    {
+      "id": "REQ-82",
+      "requirement": "All IC calls for reports/scoring must be made exclusively to the reports canister ID 7w5qg-6aaaa-aaaab-ael4a-cai via the existing actor setup (no legacy canister IDs used), with typed actor methods.",
+      "reason": "The diff shows a new typed IDL, but the provided project file summary indicates the actor configuration still targets a legacy canister ID (xpwaq-faaaa-aaaad-qh5pq-cai). There is no diff evidence showing the reports actor is configured to use 7w5qg-6aaaa-aaaab-ael4a-cai.",
+      "evidence": [
+        "frontend/src/ic/idl/reports.idl.ts",
+        "frontend-file-summaries.txt (entry for frontend/src/config.ts: \"targets ... xpwaq-faaaa-aaaad-qh5pq-cai\")"
+      ]
+    },
+    {
+      "id": "REQ-83",
+      "requirement": "Submitting a report must call the reports canister submission method(s) and report submissions must be recorded in the existing local-only user history system when logged in (keyed by principal).",
+      "reason": "ReportSubmissionDialog validates and rate-limits, but the diff excerpt does not show any wiring in HomePage that calls reportsActor.submitReport nor any explicit history write (addHistoryItem) on successful report submission. Presence of addHistoryItem in HomePage import is not sufficient without evidence of use for report submissions.",
+      "evidence": [
+        "frontend/src/components/ReportSubmissionDialog.tsx",
+        "frontend/src/pages/HomePage.tsx (truncated)",
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/utils/userProfileStorage.ts"
+      ]
+    },
+    {
+      "id": "REQ-84",
+      "requirement": "Extend verification UI on \"/\" to verify message/email/phone/crypto against the reports canister and display risk score, report count, categories, and translated disclaimer next to results (while preserving existing extraActor phone/crypto lookups and mainActor.analyzeText behavior).",
+      "reason": "UI state for collaborative results and a CollaborativeResultCard component exist, but the diff excerpt of HomePage is truncated before showing any actual calls to reportsActor.lookupEmail/lookupPhone/lookupMessage/lookupCrypto and rendering of the collaborative results for each tab. The disclaimer translation key exists, but full end-to-end behavior is not evidenced in the truncated diff.",
+      "evidence": [
+        "frontend/src/components/CollaborativeResultCard.tsx",
+        "frontend/src/pages/HomePage.tsx (truncated)",
+        "frontend/src/ic/idl/reports.idl.ts",
+        "frontend/src/i18n/translations.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-79",
+      "requirement": "Remove legacy branding from user-visible metadata strings (title/description) and ensure no legacy branding remains visible (e.g., Caffeine, ScamGuardian, byHTgamers, \"Desenvolvido por HCoragem\").",
+      "reason": "A user-visible footer link still references caffeine.ai and contains the text \"Built with ... using caffeine.ai\", which violates the requirement to eliminate legacy branding references (Caffeine) from user-visible strings. Additionally, the diff-provided file summary claims the Institutional page displays \"ScamGuardian's\" content, suggesting remaining legacy branding.",
+      "evidence": [
+        "frontend/src/components/AppLayout.tsx (footer includes caffeine.ai link and text)",
+        "frontend-file-summaries.txt (entry for frontend/src/pages/InstitutionalPage.tsx mentions \"ScamGuardian\")"
+      ]
+    },
+    {
+      "id": "REQ-80",
+      "requirement": "Install UX fallback instructions should be platform-appropriate and integrated into the UI without failing silently; UX should be multilingual via existing i18n strings.",
+      "reason": "Fallback install instructions returned by usePwaInstall.getInstructions() are hardcoded English strings and do not use the i18n system, so instructions are not multilingual as required for UI strings across supported languages.",
+      "evidence": [
+        "frontend/src/hooks/usePwaInstall.ts",
+        "frontend/src/components/PwaInstallAction.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Footer includes a promotional/referral link and copy for caffeine.ai (\"Built with ... using caffeine.ai\"), which is not requested and conflicts with the no-legacy-branding constraint.",
+      "reason": "BuildRequest explicitly requires removing legacy branding references (including Caffeine) from user-visible strings; adding/keeping a caffeine.ai promotional footer is outside scope and contradictory.",
+      "evidence": [
+        "frontend/src/components/AppLayout.tsx"
+      ]
+    },
+    {
+      "description": "Added React Query QueryClient/QueryClientProvider setup around the app.",
+      "reason": "The BuildRequest does not ask to introduce React Query; this is additional architecture not tied to specified requirements in the diff summary.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AppLayout.tsx",
+    "frontend/src/components/CollaborativeResultCard.tsx",
+    "frontend/src/components/DashboardQuickActions.tsx",
+    "frontend/src/components/PwaInstallAction.tsx",
+    "frontend/src/components/ReportSubmissionDialog.tsx",
+    "frontend/src/hooks/usePwaInstall.ts",
+    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/i18n/translations.ts",
+    "frontend/src/ic/idl/reports.idl.ts",
+    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/pages/InstitutionalPage.tsx",
+    "frontend/src/router/useSimpleRouter.ts",
+    "frontend/src/utils/localRateLimit.ts",
+    "frontend/src/utils/userProfileStorage.ts",
+    "project_state.json"
+  ]
+}

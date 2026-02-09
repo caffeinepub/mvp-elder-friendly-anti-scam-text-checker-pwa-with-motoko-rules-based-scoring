@@ -1,0 +1,172 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T21:40:50.614Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 8,
+    "implemented": 8,
+    "items": [
+      {
+        "id": "REQ-79",
+        "summary": "Update the PWA manifest and HTML metadata to fully match the final AntiFraud / by HCoragem branding and icon set: manifest name and short_name must be exactly \"AntiFraud\"; theme_color/background_color must match the app theme; and the manifest icons must use AntiFraud logo PNG icons (not /vite.svg).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html",
+          "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png"
+        ],
+        "matchedFiles": [
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html",
+          "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png"
+        ]
+      },
+      {
+        "id": "REQ-80",
+        "summary": "Implement an install UX that attempts to show the PWA install prompt as early as browsers allow, and provides a clear fallback UI when automatic prompting is not possible (e.g., iOS Safari).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/usePwaInstall.ts",
+          "frontend/src/components/PwaInstallAction.tsx",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/usePwaInstall.ts",
+          "frontend/src/components/PwaInstallAction.tsx",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-81",
+        "summary": "Add a new multilingual Institutional / How It Works page at route \"/institucional\" and render complete, professional content describing: core checks (message/email/phone/crypto), collaborative database concept, user reports workflow, risk scoring, and future threats (including quantum). Integrate it into the existing router and top navigation without breaking existing routes.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/InstitutionalPage.tsx",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/AppLayout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/InstitutionalPage.tsx",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/AppLayout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-82",
+        "summary": "Integrate the Reports canister (7w5qg-6aaaa-aaaab-ael4a-cai) by replacing the placeholder reports IDL with the canister’s real Candid interface and wiring typed frontend calls for: (a) queries to look up reported items for email/phone/message/crypto and retrieve risk score (0–100), report count, and categories; and (b) report submission from end users.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/ic/idl/reports.idl.ts",
+          "frontend/src/ic/canisterIds.ts",
+          "frontend/src/hooks/useAntiFraudActors.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/ic/idl/reports.idl.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-83",
+        "summary": "On the main dashboard route \"/\", add a visible \"Report\" flow that allows users to submit a report with fields: Type (email/phone/message/crypto), Value, Category, Country, Optional description. Apply minimal validation, client-side anti-spam/rate limiting, and multilingual UI strings.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ReportSubmissionDialog.tsx",
+          "frontend/src/utils/localRateLimit.ts",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ReportSubmissionDialog.tsx",
+          "frontend/src/utils/localRateLimit.ts",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-84",
+        "summary": "Extend the existing verification UI on \"/\" so users can verify message/email/phone/crypto against the collaborative reports database (via the reports canister) and display: risk score (0–100), number of reports, categories, and a clear legal disclaimer: \"This information is collaborative and does not constitute an official decision.\"",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/components/CollaborativeResultCard.tsx",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/components/CollaborativeResultCard.tsx",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-85",
+        "summary": "Remove generic user-facing error copy for message analysis and database checks (e.g., \"Error analyzing message. Try again\") and replace with specific, helpful, localized error states that do not expose internal details.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/ReportSubmissionDialog.tsx",
+          "frontend/src/components/PwaInstallAction.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/ReportSubmissionDialog.tsx",
+          "frontend/src/components/PwaInstallAction.tsx"
+        ]
+      },
+      {
+        "id": "REQ-86",
+        "summary": "Add a set of quick-action controls on the main dashboard: \"Check risk\" (focus/scroll to the verification UI), \"Search database\" (open the collaborative lookup section), \"Report\" (open report submission UI), and \"Install app\" (triggers the install UX). Ensure the layout remains mobile-friendly and accessible.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/DashboardQuickActions.tsx",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/DashboardQuickActions.tsx",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.html",
+    "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
+    "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png",
+    "frontend/public/manifest.webmanifest",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AppLayout.tsx",
+    "frontend/src/components/CollaborativeResultCard.tsx",
+    "frontend/src/components/DashboardQuickActions.tsx",
+    "frontend/src/components/PwaInstallAction.tsx",
+    "frontend/src/components/ReportSubmissionDialog.tsx",
+    "frontend/src/hooks/usePwaInstall.ts",
+    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/i18n/translations.ts",
+    "frontend/src/ic/idl/reports.idl.ts",
+    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/pages/InstitutionalPage.tsx",
+    "frontend/src/router/useSimpleRouter.ts",
+    "frontend/src/utils/localRateLimit.ts",
+    "frontend/src/utils/userProfileStorage.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
