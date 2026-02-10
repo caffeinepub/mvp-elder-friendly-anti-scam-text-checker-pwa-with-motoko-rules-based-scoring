@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 
 // Consent version - bump this to force re-consent
-const CONSENT_VERSION = 2;
+const CONSENT_VERSION = 1;
 const CONSENT_STORAGE_KEY = 'antifraud_consent_state';
 
 interface ConsentState {
   version: number;
-  cookiesAccepted: boolean;
-  termsAccepted: boolean;
-  privacyAccepted: boolean;
+  accepted: boolean;
   timestamp: number;
 }
 
@@ -22,13 +20,8 @@ export function useConsentGate() {
       const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
       if (stored) {
         const state: ConsentState = JSON.parse(stored);
-        // Check if consent is valid (same version and all accepted)
-        if (
-          state.version === CONSENT_VERSION &&
-          state.cookiesAccepted &&
-          state.termsAccepted &&
-          state.privacyAccepted
-        ) {
+        // Check if consent is valid (same version and accepted)
+        if (state.version === CONSENT_VERSION && state.accepted) {
           setConsentRequired(false);
         }
       }
@@ -43,9 +36,7 @@ export function useConsentGate() {
     try {
       const state: ConsentState = {
         version: CONSENT_VERSION,
-        cookiesAccepted: true,
-        termsAccepted: true,
-        privacyAccepted: true,
+        accepted: true,
         timestamp: Date.now(),
       };
       localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(state));

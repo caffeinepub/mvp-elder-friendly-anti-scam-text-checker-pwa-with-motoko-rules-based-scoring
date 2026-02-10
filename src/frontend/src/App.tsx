@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { InternetIdentityProvider } from './hooks/useInternetIdentity';
 import { I18nProvider } from './i18n/I18nProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSimpleRouter, setNavigationGuard } from './router/useSimpleRouter';
+import { useSimpleRouter } from './router/useSimpleRouter';
 import { useConsentGate } from './hooks/useConsentGate';
 import { ConsentGateModal } from './components/ConsentGateModal';
 import { AppLayout } from './components/AppLayout';
@@ -12,7 +12,7 @@ import { HomePage } from './pages/HomePage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { DocumentationPage } from './pages/DocumentationPage';
-import { pwaRuntime } from './pwa/pwaRuntime';
+import { setupPWAInstall } from './pwa/install';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,31 +29,26 @@ function AppContent() {
 
   useEffect(() => {
     document.title = 'AntiFraud / by HCoragem';
-    
-    // Initialize PWA runtime (register service worker and capture beforeinstallprompt)
-    pwaRuntime.registerServiceWorker().catch((error) => {
-      console.error('Failed to initialize PWA runtime:', error);
-    });
   }, []);
 
-  // Set navigation guard to restrict routes when consent is required
+  // Setup PWA install flow
   useEffect(() => {
-    if (consentRequired && !isLoading) {
-      setNavigationGuard((path: string) => {
-        // Only allow /terms and /privacy when consent is required
-        if (path === '/terms' || path === '/privacy') {
-          return null; // Allow navigation
-        }
-        return '/'; // Redirect to home (which will be blocked by UI)
-      });
-    } else {
-      setNavigationGuard(null); // Remove guard when consent is given
-    }
+    setupPWAInstall();
+  }, []);
 
-    return () => {
-      setNavigationGuard(null);
-    };
-  }, [consentRequired, isLoading]);
+  // Register service worker on app load for PWA functionality
+  useEffect(() => {
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  }, []);
 
   // Render page based on current route
   let pageContent: React.ReactNode;
@@ -110,9 +105,7 @@ function AppContent() {
         style={{
           pointerEvents: consentRequired && !isLoading ? 'none' : 'auto',
           opacity: consentRequired && !isLoading ? 0.5 : 1,
-          userSelect: consentRequired && !isLoading ? 'none' : 'auto',
         }}
-        inert={consentRequired && !isLoading ? ('' as any) : undefined}
       >
         <AppLayout>{pageContent}</AppLayout>
       </div>

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
-import { PwaInstallAction } from '@/components/PwaInstallAction';
+import { InstallButton } from '@/components/InstallButton';
 import { StructuredAnalysisResultCard } from '@/components/StructuredAnalysisResultCard';
 import { 
   analyzeMessage, 
@@ -88,31 +88,31 @@ export function HomePage() {
   };
 
   return (
-    <main className="flex-1 container mx-auto px-4 py-10 sm:py-12 max-w-6xl">
-      <div className="space-y-10 sm:space-y-12">
+    <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+      <div className="space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-5 sm:space-y-6">
+        <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <Shield className="h-16 w-16 sm:h-20 sm:w-20 text-primary" />
+            <Shield className="h-16 w-16 text-primary" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
             {t.homeTitle}
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
             {t.homeSubtitle}
           </p>
         </div>
 
-        {/* PWA Install Action */}
+        {/* Minimal Install Button */}
         <div className="flex justify-center">
-          <PwaInstallAction />
+          <InstallButton />
         </div>
 
         {/* Verification Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl sm:text-3xl">{t.verificationTitle}</CardTitle>
-            <CardDescription className="text-base sm:text-lg">{t.verificationDescription}</CardDescription>
+            <CardTitle className="text-2xl">{t.verificationTitle}</CardTitle>
+            <CardDescription>{t.verificationDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

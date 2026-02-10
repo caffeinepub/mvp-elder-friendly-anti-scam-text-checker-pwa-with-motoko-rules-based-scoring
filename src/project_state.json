@@ -1,34 +1,183 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Project to proceed with targeted visible fixes only: PWA behavior, mandatory modal, and page layout adjustments; avoid a full rebuild.",
+  "projectStateVersion": 13,
+  "summary": "Expandir o escopo do rebuild do AntiFraud (by HCoragem) para além de PWA/CTA instalável, incluindo app móvel nativa para Android e iOS e preparação para publicação na Google Play e App Store, mantendo conteúdo PT oficial, traduções multilíngues, antifraude 100% frontend, modal obrigatório de cookies/termos e validação de rotas/navegação.",
   "architectural_notes": [
-    "Avoid full rebuild; proceed with targeted fixes only (PWA, mandatory modal, page layout)."
+    "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
+    "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
+    "Conteúdo fonte oficial é PT; demais idiomas são traduções derivadas dele.",
+    "App deve funcionar como PWA com CTA instalável em todos os idiomas.",
+    "Além do PWA, suportar builds nativas Android/iOS e fluxo de publicação nas lojas (Play Store/App Store).",
+    "Correção atual deve focar apenas no fluxo de instalação PWA (beforeinstallprompt/WebAPK) sem alterações em UI/cores/layout/menus/conteúdo/traduções nem em rotas/páginas/consentimento.",
+    "Ficheiros PWA localizam-se em: frontend/public/manifest.webmanifest (manifest) e frontend/public/service-worker.js (service worker).",
+    "Evitar dependência de rebuild automático de AI para conteúdo institucional; textos PT oficiais devem ser copiados/colados verbatim no frontend.",
+    "Motor antifraude deve permanecer 100% frontend e isolado, sem chamadas a backend/canisters.",
+    "Decisão confirmada: substituir completamente o fluxo atual de instalação PWA (usePwaInstall, PwaInstallAction, fallbacks, cooldowns e prompts antigos) por um modelo minimalista com `setupPWAInstall()` (captura `beforeinstallprompt` e limpa no `appinstalled`) + `triggerPWAInstall()` (chama `deferredPrompt.prompt()` e avalia `userChoice`), e o botão “Baixar Aplicação” deve chamar exclusivamente `triggerPWAInstall()`."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Falha/erro no processo de rebuild final (AI hiccup); necessário tentar novamente em etapas.",
+    "Fluxo atual de instalação PWA/CTA pode não disparar beforeinstallprompt corretamente e/ou não resultar em WebAPK real (apenas atalho), com ausência do app em Configurações > Apps e no app drawer.",
+    "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida."
+  ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-pwa-behavior-so-the-app-is-clearly-installable-as-a-real-standalone-pwa-not-just-a-shortcut-by-ensuring-the-service-worker-is-registered-at-runtime-becomes-the-controlling-service-worker-for-the-page-and-the-install-cta-reliably-triggers-the-captured-beforeinstallprompt-flow-when-available",
-      "title": "Fix PWA behavior so the app is clearly installable as a real standalone PWA (not just a shortcut) by ensuring the service worker is registered at runtime, becomes the controlling service worker for the page, and the install CTA reliably triggers the captured `beforeinstallprompt` flow when available.",
+      "id": "feature-when-the-app-is-installable-beforeinstallprompt-available-and-not-already-installed-show-a-prominent-install-prompt-on-the-home-page-that-asks-the-user-whether-they-want-to-install-the-app-now-the-prompt-must-offer-clear-actions-e-g-install-now-and-not-now-and-must-not-repeatedly-nag-the-user-after-dismissal-persist-dismissal-choice-locally-with-a-reasonable-cooldown",
+      "title": "When the app is installable (beforeinstallprompt available) and not already installed, show a prominent install prompt on the Home page that asks the user whether they want to install the app now. The prompt must offer clear actions (e.g., \"Install now\" and \"Not now\"), and must not repeatedly nag the user after dismissal (persist dismissal choice locally with a reasonable cooldown).",
       "reqIds": [
-        "REQ-1"
+        "REQ-8"
       ],
       "version": 1
     },
     {
-      "id": "feature-make-the-consent-gate-modal-strictly-non-dismissible-until-the-user-accepts-all-required-consents-cookies-terms-privacy-including-preventing-dismissal-via-esc-outside-click-and-any-other-dialog-close-interactions-acceptance-must-remain-persisted-via-the-existing-localstorage-consent-state",
-      "title": "Make the consent gate modal strictly non-dismissible until the user accepts all required consents (cookies + terms + privacy), including preventing dismissal via ESC, outside click, and any other dialog-close interactions; acceptance must remain persisted via the existing localStorage consent state.",
+      "id": "feature-improve-the-non-installable-install-ux-especially-ios-so-that-the-home-page-install-prompt-cta-provides-platform-specific-instructions-via-the-existing-instructions-dialog-with-wording-that-clearly-explains-how-to-add-the-app-to-the-home-screen-ensure-the-instructions-are-reachable-from-the-new-home-page-install-prompt-when-native-install-prompting-is-not-available",
+      "title": "Improve the non-installable install UX (especially iOS) so that the Home page install prompt/CTA provides platform-specific instructions via the existing instructions dialog, with wording that clearly explains how to add the app to the home screen. Ensure the instructions are reachable from the new Home page install prompt when native install prompting is not available.",
       "reqIds": [
-        "REQ-2"
+        "REQ-9"
       ],
       "version": 1
     },
     {
-      "id": "feature-adjust-page-layout-styling-targeted-ui-layout-corrections-only-to-improve-spacing-rhythm-visual-hierarchy-and-readability-across-the-main-pages-home-mission-how-it-works-terms-privacy-without-rewriting-or-changing-the-existing-content",
-      "title": "Adjust page layout styling (targeted UI/layout corrections only) to improve spacing rhythm, visual hierarchy, and readability across the main pages (Home, Mission, How It Works, Terms, Privacy) without rewriting or changing the existing content.",
+      "id": "feature-add-an-in-app-informational-message-english-ui-text-explaining-that-the-current-deliverable-is-a-progressive-web-app-pwa-that-can-be-installed-from-the-browser-on-android-ios-and-that-publishing-as-native-apps-to-google-play-and-apple-app-store-is-not-part-of-this-build-output-place-the-message-in-the-install-ui-flow-e-g-within-the-install-dialog-note",
+      "title": "Add an in-app informational message (English UI text) explaining that the current deliverable is a Progressive Web App (PWA) that can be installed from the browser on Android/iOS, and that publishing as native apps to Google Play and Apple App Store is not part of this build output. Place the message in the install UI flow (e.g., within the install dialog/note).",
       "reqIds": [
-        "REQ-3"
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-home-page-install-cta-triggers-a-real-working-native-pwa-install-prompt-beforeinstallprompt-on-android-chrome-and-desktop-chrome-edge-when-the-app-is-installable-and-provide-a-user-visible-fallback-instructions-dialog-when-the-install-prompt-is-not-available-or-the-deferred-prompt-is-missing",
+      "title": "Ensure the Home page install CTA triggers a real, working native PWA install prompt (beforeinstallprompt) on Android Chrome and desktop Chrome/Edge when the app is installable, and provide a user-visible fallback (instructions dialog) when the install prompt is not available or the deferred prompt is missing.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-installed-state-detection-so-that-the-install-cta-is-hidden-disabled-only-when-the-app-is-truly-installed-standalone-display-mode-and-ios-standalone-and-ensure-state-updates-correctly-after-successful-installation-appinstalled-event",
+      "title": "Improve installed-state detection so that the install CTA is hidden/disabled only when the app is truly installed (standalone display-mode and iOS standalone), and ensure state updates correctly after successful installation (appinstalled event).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-and-adjust-pwa-installability-prerequisites-manifest-service-worker-so-that-accepting-the-prompt-on-android-results-in-a-full-installed-pwa-experience-webapk-where-supported-by-the-browser-rather-than-a-simple-homescreen-shortcut-without-changing-app-ui-content",
+      "title": "Verify and adjust PWA installability prerequisites (manifest + service worker) so that accepting the prompt on Android results in a full installed PWA experience (WebAPK where supported by the browser) rather than a simple homescreen shortcut, without changing app UI content.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-pwa-manifest-at-frontend-public-manifest-webmanifest-to-include-webapk-relevant-fields-while-keeping-the-existing-antifraud-branding-and-icon-references-unchanged-add-a-stable-app-id-and-set-prefer-related-applications-explicitly-to-false",
+      "title": "Update the PWA manifest at `frontend/public/manifest.webmanifest` to include WebAPK-relevant fields while keeping the existing AntiFraud branding and icon references unchanged: add a stable app `id` and set `prefer_related_applications` explicitly to `false`.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-service-worker-adjustments-in-frontend-public-service-worker-js-to-ensure-stable-installability-prerequisites-without-interfering-with-the-install-prompt-flow-including-ensuring-required-offline-fallback-assets-are-available-to-the-service-worker-cache-preload",
+      "title": "Apply the service worker adjustments in `frontend/public/service-worker.js` to ensure stable installability prerequisites without interfering with the install prompt flow, including ensuring required offline fallback assets are available to the service worker cache preload.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-application-registers-frontend-public-service-worker-js-on-app-load-using-an-editable-frontend-entry-point-do-not-modify-immutable-paths-so-the-service-worker-is-actually-controlling-the-page-under-normal-usage",
+      "title": "Ensure the application registers `frontend/public/service-worker.js` on app load using an editable frontend entry point (do not modify immutable paths), so the service worker is actually controlling the page under normal usage.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-validate-that-the-existing-install-cta-flow-home-page-install-ui-triggers-a-real-native-pwa-install-prompt-when-the-app-is-installable-and-falls-back-to-instructions-when-the-prompt-is-unavailable-using-the-existing-usepwainstall-pwainstallaction-implementation",
+      "title": "Validate that the existing install CTA flow (Home page install UI) triggers a real native PWA install prompt when the app is installable, and falls back to instructions when the prompt is unavailable, using the existing `usePwaInstall` + `PwaInstallAction` implementation.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-completely-replace-the-current-pwa-installation-flow-implementation-including-usepwainstall-pwainstallaction-fallback-logic-cooldown-dismissal-behavior-and-any-auto-prompts-with-a-minimal-flow-based-only-on-setuppwainstall-and-triggerpwainstall-as-specified-by-the-user",
+      "title": "Completely replace the current PWA installation flow implementation (including `usePwaInstall`, `PwaInstallAction` fallback logic, cooldown/dismissal behavior, and any auto-prompts) with a minimal flow based only on `setupPWAInstall()` and `triggerPWAInstall()` as specified by the user.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-or-fully-replace-frontend-src-pwa-install-ts-with-exactly-the-user-specified-implementation-that-captures-beforeinstallprompt-into-a-module-level-deferredprompt-via-setuppwainstall-clears-it-on-appinstalled-and-exposes-triggerpwainstall-that-calls-deferredprompt-prompt-and-returns-whether-the-outcome-was-accepted",
+      "title": "Create (or fully replace) `frontend/src/pwa/install.ts` with exactly the user-specified implementation that captures `beforeinstallprompt` into a module-level `deferredPrompt` via `setupPWAInstall()`, clears it on `appinstalled`, and exposes `triggerPWAInstall()` that calls `deferredPrompt.prompt()` and returns whether the outcome was accepted.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-setuppwainstall-is-called-exactly-once-on-frontend-app-startup-by-adding-the-user-specified-useeffect-setuppwainstall-in-frontend-src-app-tsx-or-equivalent-editable-root-component-without-modifying-any-immutable-frontend-paths",
+      "title": "Ensure `setupPWAInstall()` is called exactly once on frontend app startup by adding the user-specified `useEffect(() => { setupPWAInstall(); }, []);` in `frontend/src/App.tsx` (or equivalent editable root component), without modifying any immutable frontend paths.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-home-page-install-cta-button-labeled-baixar-aplica-o-currently-rendered-via-frontend-src-components-pwainstallaction-tsx-on-frontend-src-pages-homepage-tsx-so-that-clicking-it-calls-exclusively-triggerpwainstall-and-performs-no-other-install-related-behavior-no-fallback-no-instructions-dialog-no-cooldown-dismiss-logic-no-additional-prompts",
+      "title": "Update the existing Home page install CTA button labeled “Baixar Aplicação” (currently rendered via `frontend/src/components/PwaInstallAction.tsx` on `frontend/src/pages/HomePage.tsx`) so that clicking it calls exclusively `triggerPWAInstall()` and performs no other install-related behavior (no fallback, no instructions dialog, no cooldown/dismiss logic, no additional prompts).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-frontend-public-service-worker-js-with-exactly-the-user-provided-service-worker-implementation-cache-name-antifraud-v4-app-shell-containing-only-manifest-webmanifest-and-the-two-generated-pwa-icon-assets-install-caches-app-shell-activate-clears-old-caches-fetch-is-network-first-with-cache-fallback-to-align-pwa-installability-prerequisites-for-real-webapk-on-android",
+      "title": "Replace `frontend/public/service-worker.js` with exactly the user-provided service worker implementation (cache name `antifraud-v4`, `APP_SHELL` containing only `/`, `/manifest.webmanifest`, and the two generated PWA icon assets; install caches `APP_SHELL`; activate clears old caches; fetch is network-first with cache fallback), to align PWA installability prerequisites for real WebAPK on Android.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-temporarily-replace-frontend-public-manifest-webmanifest-with-the-exact-minimal-test-manifest-provided-by-the-user-including-description-teste-pwa-webapk-antifraud-id-start-url-scope-display-standalone-prefer-related-applications-false-and-the-existing-generated-192-512-icon-paths",
+      "title": "Temporarily replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest provided by the user (including `description: \"Teste PWA WebAPK AntiFraud\"`, `id: \"/\"`, `start_url: \"/\"`, `scope: \"/\"`, `display: \"standalone\"`, `prefer_related_applications: false`, and the existing generated 192/512 icon paths).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-temporarily-replace-frontend-public-service-worker-js-with-the-exact-minimal-test-service-worker-provided-by-the-user-including-const-cache-name-antifraud-test-the-app-shell-array-install-activate-handlers-and-the-network-first-fetch-with-cache-fallback-implementation",
+      "title": "Temporarily replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `const CACHE_NAME = 'antifraud-test';`, the `APP_SHELL` array, install/activate handlers, and the network-first fetch with cache fallback implementation).",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-temporarily-replace-frontend-src-pwa-install-ts-with-the-exact-minimal-beforeinstallprompt-capture-implementation-provided-by-the-user-including-a-module-level-deferredprompt-setting-window-pwa-can-install-true-false-and-logging-statements-ensure-typescript-compiles-by-declaring-the-window-pwa-can-install-property-via-a-local-declare-global-augmentation-in-the-same-file",
+      "title": "Temporarily replace `frontend/src/pwa/install.ts` with the exact minimal `beforeinstallprompt` capture implementation provided by the user, including a module-level `deferredPrompt`, setting `window.PWA_CAN_INSTALL = true/false`, and logging statements. Ensure TypeScript compiles by declaring the `window.PWA_CAN_INSTALL` property (via a local `declare global` augmentation in the same file).",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-components-installbutton-tsx-implementing-the-user-provided-minimal-install-button-behavior-on-click-call-triggerpwainstall-if-it-returns-false-show-a-simple-alert-indicating-the-app-is-not-yet-eligible-for-installation-wire-this-button-into-the-existing-ui-by-replacing-the-home-page-install-cta-rendering-so-the-home-page-uses-installbutton-instead-of-pwainstallaction-without-changing-any-other-page-content-navigation-consent-flow-or-translations",
+      "title": "Create `frontend/src/components/InstallButton.tsx` implementing the user-provided minimal install button behavior: on click, call `triggerPWAInstall()`; if it returns false, show a simple alert indicating the app is not yet eligible for installation. Wire this button into the existing UI by replacing the Home page install CTA rendering so the Home page uses `InstallButton` instead of `PwaInstallAction`, without changing any other page content, navigation, consent flow, or translations.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-developer-facing-repeatable-android-chrome-validation-checklist-in-a-new-markdown-file-e-g-frontend-pwa-webapk-android-test-md-that-mirrors-the-user-s-exact-required-steps-uninstall-existing-app-from-android-settings-apps-remove-homescreen-shortcut-clear-chrome-data-open-the-site-in-chrome-navigate-1-2-pages-press-the-install-button-confirm-the-native-install-prompt-appears-and-finally-confirm-antifraud-appears-in-android-settings-apps-and-in-the-app-drawer-the-checklist-must-end-with-the-only-two-allowed-outcome-statements-apareceu-como-app-em-defini-es-apps-and-ainda-s-atalho",
+      "title": "Add a developer-facing, repeatable Android Chrome validation checklist (in a new markdown file, e.g. `frontend/PWA_WEBAPK_ANDROID_TEST.md`) that mirrors the user’s exact required steps: uninstall existing app from Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open the site in Chrome, navigate 1–2 pages, press the install button, confirm the native install prompt appears, and finally confirm AntiFraud appears in Android Settings > Apps and in the app drawer. The checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\".",
+      "reqIds": [
+        "REQ-27"
       ],
       "version": 1
     }
@@ -36,24 +185,122 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Apply visible PWA behavior fixes (targeted, user-facing) without full rebuild",
+      "summary": "Aplicar conteúdo PT verbatim nas páginas institucionais (/mission, /how-it-works, /terms, /privacy).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Make the modal mandatory (cannot be skipped/dismissed until action/acknowledgement)",
+      "summary": "Gerar traduções multilíngues a partir do PT oficial (EN/ES/FR/ZH/AR/RU).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Adjust/fix the layout of the pages (targeted UI/layout corrections)",
+      "summary": "Ativar motor antifraude 100% frontend com heurísticas e alto risco para palavras‑chave críticas.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Configurar PWA e CTA instalável corretamente em todos os idiomas.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Ativar modal obrigatório de cookies e termos, bloqueando UI até aceitação.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Aplicar branding final: produto “AntiFraud”, subtítulo/rodapé “by HCoragem”, e remover legado antigo.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Validar navegação, aliases e estabilidade das rotas.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Apply the official Portuguese (PT) content verbatim to the institutional routes `/mission`, `/how-it-works`, `/terms`, and `/privacy`, ensuring these pages render the complete PT text exactly as defined in the PT translation source (no rewrites, no truncation, no placeholder sections).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Generate and integrate complete multilingual UI translations derived from the official PT source for languages: EN, ES, FR, ZH, AR, RU. This must include all institutional page content (mission/how-it-works/terms/privacy) plus all app UI strings used in navigation, consent, PWA install CTA, and analysis results.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Enable a 100% frontend antifraud engine using deterministic heuristics, including a mandatory 'High risk' override when critical keywords are detected (as defined for PT and extended appropriately for other supported languages). Ensure this high-risk trigger is applied consistently in the structured analysis flow used on the homepage message checks.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Configure PWA installability and ensure the install CTA renders correctly in all supported languages, including localized button labels, instructions, and install status messaging.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Enforce a mandatory consent gate modal requiring acceptance of cookies and the Terms/Privacy policy, blocking all app interaction until consent is given. The consent UI must be fully localized for all supported languages and must link users to `/terms` and `/privacy` for review before acceptance.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Apply final branding across the app: product name 'AntiFraud' and subtitle/footer 'by HCoragem', and remove any remaining legacy/old branding or institutional legacy navigation artifacts while preserving necessary route aliases for compatibility.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Validate navigation, route aliases, and overall route stability for the SPA, including canonical routes, legacy aliases, and the 404 SPA fallback behavior for all institutional pages.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Criar aplicação móvel nativa para Android e iOS do AntiFraud e preparar o processo de distribuição/publicação nas lojas (Google Play e Apple App Store), incluindo build, assinaturas/provisionamento e artefatos necessários para submissão.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Corrigir exclusivamente o fluxo de instalação da PWA: beforeinstallprompt funcional (Android/desktop) para o CTA “Baixe a Aplicação AntiFraud gratuitamente”, garantir criação de WebAPK real (não atalho) e validar que aparece em Configurações > Apps e no app drawer, sem alterar cores/layouts/menus/conteúdo/traduções e sem mexer em navegação/páginas/consentimento/rebuild completo.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Criar checklist visível e auditável (passo a passo) para validar objetivamente no dispositivo cada funcionalidade (PWA/instalação, modal, páginas institucionais, branding, idiomas, motor antifraude) antes de novos builds/rebuilds.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Targeted visible fixes: PWA install behavior, mandatory consent modal, and page layout polish (no full rebuild)",
+  "projectName": "AntiFraud",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

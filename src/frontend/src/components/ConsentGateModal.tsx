@@ -24,14 +24,12 @@ export function ConsentGateModal({ open, onAccept }: ConsentGateModalProps) {
   const { navigate } = useSimpleRouter();
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   // Reset checkboxes when modal opens
   useEffect(() => {
     if (open) {
       setCookiesAccepted(false);
       setTermsAccepted(false);
-      setPrivacyAccepted(false);
     }
   }, [open]);
 
@@ -44,12 +42,12 @@ export function ConsentGateModal({ open, onAccept }: ConsentGateModalProps) {
   };
 
   const handleAccept = () => {
-    if (cookiesAccepted && termsAccepted && privacyAccepted) {
+    if (cookiesAccepted && termsAccepted) {
       onAccept();
     }
   };
 
-  const canAccept = cookiesAccepted && termsAccepted && privacyAccepted;
+  const canAccept = cookiesAccepted && termsAccepted;
 
   // Prevent ESC key from closing the modal
   const handleEscapeKeyDown = (e: KeyboardEvent) => {
@@ -99,21 +97,6 @@ export function ConsentGateModal({ open, onAccept }: ConsentGateModalProps) {
               className="text-sm font-medium leading-relaxed cursor-pointer"
             >
               {t.consentTermsLabel}
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="privacy-consent"
-              checked={privacyAccepted}
-              onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
-              aria-label={t.consentPrivacyLabel || 'Aceito a Política de Privacidade'}
-            />
-            <Label
-              htmlFor="privacy-consent"
-              className="text-sm font-medium leading-relaxed cursor-pointer"
-            >
-              {t.consentPrivacyLabel || 'Aceito a Política de Privacidade'}
             </Label>
           </div>
 

@@ -7,9 +7,6 @@ const listeners = new Set<() => void>();
 // Custom event for navigation
 const NAVIGATION_EVENT = 'simple-router-navigate';
 
-// Navigation guard callback (set by App.tsx)
-let navigationGuard: ((path: string) => string | null) | null = null;
-
 function notifyListeners() {
   listeners.forEach(listener => listener());
 }
@@ -38,14 +35,6 @@ export function useSimpleRouter() {
   }, []);
 
   const navigate = (path: string) => {
-    // Apply navigation guard if set
-    if (navigationGuard) {
-      const guardedPath = navigationGuard(path);
-      if (guardedPath !== null) {
-        path = guardedPath;
-      }
-    }
-
     if (path !== currentPath) {
       currentPath = path;
       window.history.pushState({}, '', path);
@@ -57,9 +46,4 @@ export function useSimpleRouter() {
     currentRoute: route,
     navigate,
   };
-}
-
-// Export function to set navigation guard (used by App.tsx)
-export function setNavigationGuard(guard: ((path: string) => string | null) | null) {
-  navigationGuard = guard;
 }

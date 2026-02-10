@@ -1,103 +1,92 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Targeted frontend fixes for PWA installability, strict consent gating, and institutional page layout polish",
+  "title": "Temporary minimal WebAPK install test (manifest + SW + install capture + install button)",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Ensure runtime service worker registration/activation control and make the existing install CTA reliably trigger the captured beforeinstallprompt flow when available.",
+      "id": "REQ-23",
+      "summary": "Replace the PWA manifest with the exact user-provided minimal test manifest while keeping the existing generated icon paths.",
       "acceptanceCriteria": [
-        "On first load in a supported browser, the app registers `public/service-worker.js` and `navigator.serviceWorker.controller` becomes non-null after activation/refresh (i.e., the service worker controls the page).",
-        "When `beforeinstallprompt` is available, the existing install CTA (from `PwaInstallAction`) triggers the native install prompt via the stored deferred prompt event (no link-like fallback behavior while install is actually available).",
-        "PWA behavior remains compatible with the existing manifest at `frontend/public/manifest.webmanifest` and the existing service worker routes/caching logic in `frontend/public/service-worker.js` (no breaking changes to offline navigation fallback)."
+        "`frontend/public/manifest.webmanifest` matches the user-provided JSON content exactly (field names/values preserved).",
+        "Manifest continues to reference `/assets/generated/antifraud-pwa-icon.dim_192x192.png` and `/assets/generated/antifraud-pwa-icon.dim_512x512.png`.",
+        "No other manifest fields are added beyond what the user specified."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pwa/pwaRuntime.ts",
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "modify",
+          "description": "Replace the entire file contents with the exact minimal manifest JSON provided by the user in msg-20 (including description \"Teste PWA WebAPK AntiFraud\", id/start_url/scope \"/\", display \"standalone\", prefer_related_applications false, and the existing generated icon paths). Ensure the final file matches exactly with no extra fields."
+        }
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "summary": "Replace the service worker with the exact user-provided minimal test service worker (antifraud-test cache, app shell caching, activation cleanup, network-first fetch with cache fallback).",
+      "acceptanceCriteria": [
+        "`frontend/public/service-worker.js` matches the user-provided JavaScript content exactly, including `CACHE_NAME = 'antifraud-test'`.",
+        "On first load in production, the service worker installs and caches `APP_SHELL` without errors.",
+        "On activation, old caches are removed (all caches except `antifraud-test`)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/service-worker.js",
+          "operation": "modify",
+          "description": "Replace the entire file contents with the exact minimal test service worker JavaScript provided by the user in msg-20 (must include `const CACHE_NAME = 'antifraud-test';`, the required `APP_SHELL` array, install/activate handlers, and the required network-first fetch with cache fallback logic). Ensure the final file matches exactly."
+        }
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "summary": "Replace the PWA install capture module with the exact minimal beforeinstallprompt capture/trigger implementation (including window.PWA_CAN_INSTALL) and ensure TypeScript compiles.",
+      "acceptanceCriteria": [
+        "`setupPWAInstall()` prevents default on `beforeinstallprompt` and stores the event in a module-level `deferredPrompt`.",
+        "`setupPWAInstall()` sets `window.PWA_CAN_INSTALL = true` when `beforeinstallprompt` fires and sets it to `false` on `appinstalled`.",
+        "`triggerPWAInstall()` returns `false` when `deferredPrompt` is null; otherwise calls `prompt()`, awaits `userChoice`, clears `deferredPrompt`, and returns `true` only when outcome is `'accepted'`.",
+        "The frontend TypeScript build succeeds without `window.PWA_CAN_INSTALL` type errors."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pwa/install.ts",
+          "operation": "modify",
+          "description": "Replace the entire module with the exact minimal implementation provided by the user in msg-20: module-level `deferredPrompt`, `setupPWAInstall()` that captures `beforeinstallprompt` (preventDefault + store), sets `window.PWA_CAN_INSTALL = true/false`, includes the specified logging statements, and `triggerPWAInstall()` behavior per requirements. Add a local `declare global` augmentation in this same file to type `window.PWA_CAN_INSTALL` so TypeScript compiles."
+        }
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "summary": "Create a minimal InstallButton component using triggerPWAInstall() with an alert fallback, and swap Home page install CTA to use it instead of PwaInstallAction without changing any other behavior/content.",
+      "acceptanceCriteria": [
+        "A new file `frontend/src/components/InstallButton.tsx` exists and imports `triggerPWAInstall` from `../pwa/install` (or an equivalent correct relative path).",
+        "Home page no longer renders `PwaInstallAction` and instead renders `InstallButton` in the same general location in the component tree.",
+        "No other Home page functionality (tabs, analysis flows) is modified.",
+        "No consent modal logic, routing, or institutional pages are modified as part of this change."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InstallButton.tsx",
           "operation": "create",
-          "description": "Add a small PWA runtime singleton to (1) register the service worker at runtime and track when it becomes controlling, and (2) capture/store the `beforeinstallprompt` event as early as possible for later prompting. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/usePwaInstall.ts",
-          "operation": "modify",
-          "description": "Update the hook to read/install from the shared PWA runtime stored deferred prompt (rather than relying solely on a component-mounted listener), so `isInstallable` and `promptInstall()` stay accurate even if `beforeinstallprompt` fires before `HomePage` fully mounts. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Initialize the PWA runtime during app startup (without touching `frontend/src/main.tsx`) so service worker registration happens on first render, clients are claimed, and the global `beforeinstallprompt` capture is active regardless of current route. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/PwaInstallAction.tsx",
-          "operation": "modify",
-          "description": "Ensure the install CTA always calls the prompt function when installability is available (and does not open the instructions dialog in that case), aligning UI behavior with the stored deferred prompt flow. This uses shadcn-ui Button/Dialog patterns—verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Make the consent gate modal strictly non-dismissible until all required consents are accepted, while persisting acceptance using the existing localStorage consent state.",
-      "acceptanceCriteria": [
-        "While consent is required, the modal cannot be closed by pressing ESC, clicking outside the dialog, or any overlay interaction; only the explicit accept action (enabled after all checkboxes are checked) can remove the gate.",
-        "After acceptance, consent is persisted using the existing storage key/versioning in `frontend/src/hooks/useConsentGate.ts`, and the modal does not reappear on refresh unless the consent version is bumped.",
-        "The app remains blocked from use while consent is required (no interaction with core app UI)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ConsentGateModal.tsx",
-          "operation": "modify",
-          "description": "Harden the modal against all dismiss interactions by preventing outside-click/overlay dismissal and any implicit close events in addition to the existing ESC prevention; keep acceptance only via the explicit accept action after all checkboxes are checked. This uses the shadcn-ui AlertDialog—verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Tighten the interaction-blocking wrapper while consent is required to ensure the core app UI remains non-interactive (including navigation interactions) until acceptance, while keeping /terms and /privacy viewable as currently guarded. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Apply targeted layout/styling adjustments to improve spacing rhythm, hierarchy, and readability across Home and institutional pages without changing existing content.",
-      "acceptanceCriteria": [
-        "Institutional pages using `InstitutionalPageLayout` have consistent section spacing and mobile-friendly typography (no cramped separators or uneven vertical rhythm).",
-        "The Home page layout remains centered and readable across mobile and desktop with consistent container spacing relative to the sticky header and footer.",
-        "No changes are made to antifraud analysis logic or the textual content itself; changes are limited to layout/styling/composition."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/InstitutionalPageLayout.tsx",
-          "operation": "modify",
-          "description": "Refine the institutional layout wrapper spacing (container padding, vertical rhythm, and content stack spacing) to make Mission/How It Works/Terms/Privacy consistent across breakpoints without altering the rendered text. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Adjust the existing institutional typography rules to improve readability and spacing consistency (e.g., reduce cramped stacked elements and avoid constraining full-width layout containers while keeping comfortable line lengths for text). Verify the component's usage instructions before implementing."
+          "description": "Create the minimal install CTA component exactly as requested: on click call `triggerPWAInstall()`; if it returns false, show a simple alert stating the app is not yet eligible for installation. Keep styling consistent with the existing CTA by using the existing shadcn/ui Button component (do not modify any files under `frontend/src/components/ui`). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Polish the Home page layout spacing (hero spacing, section rhythm, and responsive container padding) to better align with the sticky header/footer while keeping the existing content and antifraud analysis behavior unchanged. This page uses shadcn-ui Card/Tabs components—verify the component's usage instructions before implementing."
-        },
+          "description": "Replace the Home page install CTA rendering by removing `PwaInstallAction` usage and rendering the new `InstallButton` in the same location in the component tree. Do not change any other Home page content, analysis logic, consent flow, navigation, or translations."
+        }
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "summary": "Add a developer-facing Android Chrome WebAPK validation checklist markdown file with the exact required steps and only the two allowed final outcome statements.",
+      "acceptanceCriteria": [
+        "A markdown file exists in the repo containing the full step-by-step checklist in a clean, auditable format.",
+        "The checklist includes the final verification step: Android Settings > Apps contains AntiFraud (not only a shortcut).",
+        "The document contains the two exact final outcome phrases, with no additional outcome variants."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/pages/TermsPage.tsx",
-          "operation": "modify",
-          "description": "Reduce visual clutter and improve vertical rhythm by tuning separator spacing and section composition (layout-only), without changing any Terms content. Uses shadcn-ui Card/Separator—verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/PrivacyPage.tsx",
-          "operation": "modify",
-          "description": "Reduce visual clutter and improve vertical rhythm by tuning separator spacing and section composition (layout-only), without changing any Privacy content. Uses shadcn-ui Card/Separator—verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/MissionPage.tsx",
-          "operation": "modify",
-          "description": "Apply small layout-only class adjustments (e.g., card spacing and typography consistency) to align with the updated `InstitutionalPageLayout`, without editing any textual content. Uses shadcn-ui Card—verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HowItWorksPage.tsx",
-          "operation": "modify",
-          "description": "Apply small layout-only class adjustments (e.g., accordion/card spacing and typography consistency) to align with the updated `InstitutionalPageLayout`, without editing any textual content. Uses shadcn-ui Accordion/Card—verify the component's usage instructions before implementing."
+          "path": "frontend/PWA_WEBAPK_ANDROID_TEST.md",
+          "operation": "create",
+          "description": "Create a markdown checklist mirroring the user's required manual Android Chrome steps: uninstall existing app via Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open site in Chrome, navigate 1–2 pages, press the install button, confirm native install prompt appears, and confirm AntiFraud appears in Android Settings > Apps and in the app drawer. End the document with only these two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\"."
         }
       ]
     }

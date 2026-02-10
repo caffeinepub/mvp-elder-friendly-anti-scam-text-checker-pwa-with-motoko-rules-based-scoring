@@ -1,22 +1,24 @@
 {
   "name": "AntiFraud",
   "short_name": "AntiFraud",
-  "description": "Plataforma de verificação e prevenção de fraudes digitais",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/",
+  "description": "Teste PWA WebAPK AntiFraud",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "./assets/generated/antifraud-pwa-icon.dim_192x192.png",
+      "src": "/assets/generated/antifraud-pwa-icon.dim_192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./assets/generated/antifraud-pwa-icon.dim_512x512.png",
+      "src": "/assets/generated/antifraud-pwa-icon.dim_512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

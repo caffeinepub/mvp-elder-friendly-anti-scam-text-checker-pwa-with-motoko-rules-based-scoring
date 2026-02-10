@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Apply targeted, visible frontend fixes to improve PWA installability, enforce a non-dismissible mandatory consent gate, and polish page layout styling without rebuilding or changing content/analysis logic.
+**Goal:** Temporarily implement a minimal PWA/WebAPK install test flow by swapping in user-provided manifest, service worker, and install capture logic, plus a simple install button on the Home page.
 
 **Planned changes:**
-- Ensure the existing service worker (`public/service-worker.js`) is registered at runtime and becomes the controlling service worker for the page (with activation/refresh behavior working as expected).
-- Fix the PWA install CTA behavior so `PwaInstallAction` reliably uses the captured `beforeinstallprompt` deferred prompt when available (triggering the native install prompt instead of fallback behavior).
-- Make the consent gate modal strictly non-dismissible until all required consents (cookies + terms + privacy) are accepted; prevent closing via ESC, outside click, or overlay interactions; keep persistence via the existing localStorage consent version/state.
-- Apply targeted layout/styling adjustments to `InstitutionalPageLayout` and main pages (Home, Mission, How It Works, Terms, Privacy) to improve spacing rhythm, readability, and consistent container behavior across mobile/desktop—without changing text content.
+- Replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest content provided by the user, keeping the existing generated 192/512 icon paths.
+- Replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `CACHE_NAME = 'antifraud-test'`, app-shell caching, activation cleanup, and network-first fetch with cache fallback).
+- Replace `frontend/src/pwa/install.ts` with the user-provided minimal `beforeinstallprompt` capture + `triggerPWAInstall()` implementation, including a local TypeScript `declare global` for `window.PWA_CAN_INSTALL`.
+- Add `frontend/src/components/InstallButton.tsx` that calls `triggerPWAInstall()` on click and alerts when install is not yet eligible; update the Home page to render `InstallButton` instead of `PwaInstallAction` without changing any other Home content/behavior.
+- Add `frontend/PWA_WEBAPK_ANDROID_TEST.md` containing the repeatable Android Chrome validation checklist and ending with only the two allowed outcome statements.
 
-**User-visible outcome:** The app installs as a proper standalone PWA via a reliable install prompt when supported, users must accept required consents before using the app, and key pages feel more consistent and readable across devices.
+**User-visible outcome:** The Home page shows a minimal Install button that triggers the native install prompt when eligible; developers also have a step-by-step Android Chrome checklist to confirm whether AntiFraud installs as a real app (WebAPK) versus only a shortcut.

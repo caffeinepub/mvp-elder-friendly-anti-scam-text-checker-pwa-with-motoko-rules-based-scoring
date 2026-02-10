@@ -1,94 +1,58 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T15:37:41.786Z",
-  "summary": "Diff implements a new PWA runtime singleton and updates the install CTA behavior, plus broad layout/typography tweaks for Home and institutional pages. Consent gating is strengthened at the App container level, but the diff provides no evidence that the consent modal itself is made strictly non-dismissible (ESC/outside click). Several additional features/changes appear beyond the targeted PWA/consent/layout scope (i18n expansion, language selector, backend typing/config, translation utilities, manifest/index.html changes, etc.).",
+  "generatedAt": "2026-02-10T21:34:57.795Z",
+  "summary": "Most of the requested temporary WebAPK/PWA install test flow is implemented (new InstallButton, Home page wiring, minimal install capture, service worker added, and Android checklist added). However, the manifest is not the exact minimal JSON (extra fields were added), and the Android checklist does not end with only the two allowed outcome statements (extra content appears after them).",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Make the consent gate modal strictly non-dismissible until the user accepts all required consents (cookies + terms + privacy), including preventing dismissal via ESC, outside click, and any other dialog-close interactions; acceptance must remain persisted via the existing localStorage consent state.",
-      "reason": "The diff shows App-level interaction blocking (pointerEvents/inert) and a navigation guard, but does not include any changes/evidence inside the consent modal component to disable ESC key, outside click, or other dialog close interactions. Without explicit modal-level controls, the modal may still be dismissible even if the underlying app UI is blocked.",
+      "id": "REQ-23",
+      "requirement": "Replace frontend/public/manifest.webmanifest with the exact minimal test manifest provided by the user, with no additional fields beyond what the user specified.",
+      "reason": "The manifest shown includes additional fields beyond the specified minimal set, so it cannot match the user-provided JSON exactly.",
       "evidence": [
-        "frontend/src/App.tsx (ConsentGateModal usage + pointerEvents/inert, but no modal behavior changes shown)"
+        "frontend/public/manifest.webmanifest"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "requirement": "The Android Chrome validation checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\" (with no additional outcome variants, and the checklist must end with them).",
+      "reason": "The document includes additional sections/content after the two outcome phrases (e.g., \"Notas Técnicas\"), so it does not end with only those statements.",
+      "evidence": [
+        "frontend/PWA_WEBAPK_ANDROID_TEST.md"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Expanded i18n scope including sessionStorage-persisted language state and new translation dictionary changes beyond requested PWA/consent/layout polish.",
-      "reason": "BuildRequest did not request adding/changing language persistence mechanisms or broad translation dictionary updates; only targeted PWA, mandatory consent gating, and layout polish were requested.",
+      "description": "Added extra manifest fields not requested for the minimal test manifest (e.g., background_color, theme_color, orientation, and icon type/purpose).",
+      "reason": "REQ-23 requires the manifest to match the user-provided minimal JSON exactly with no additional fields.",
       "evidence": [
-        "frontend/src/i18n/I18nProvider.tsx",
-        "frontend/src/i18n/translations.ts"
-      ]
-    },
-    {
-      "description": "Added a global LanguageSelector with 7 supported languages and flags.",
-      "reason": "BuildRequest explicitly lists non-goals unrelated to adding new user-facing feature sets; a new language selector and multi-language expansion were not requested as part of PWA/consent/layout fixes.",
-      "evidence": [
-        "frontend/src/components/LanguageSelector.tsx"
-      ]
-    },
-    {
-      "description": "Added a frontend utility to translate backend analysis results (translateBackendResult).",
-      "reason": "This is a new feature affecting how antifraud results are presented/translated; not requested in the targeted visible fixes and risks interacting with antifraud output presentation scope.",
-      "evidence": [
-        "frontend/src/utils/translateBackendResult.ts"
-      ]
-    },
-    {
-      "description": "Backend actor configuration / Candid interface / TS type definition changes on the frontend side.",
-      "reason": "BuildRequest states backend changes are out of scope unless strictly required for visible frontend fixes; no evidence ties these changes to PWA install behavior, consent modal dismissibility, or layout spacing.",
-      "evidence": [
-        "frontend/src/config.ts",
-        "frontend/src/backend.idl.ts",
-        "frontend/src/backend.d.ts"
-      ]
-    },
-    {
-      "description": "Added a phase documentation file about a read-only database canister integration (Phase 3a).",
-      "reason": "Not requested by the BuildRequest; introduces unrelated project documentation and phase planning.",
-      "evidence": [
-        "frontend/PHASE3A_READONLY_FRONTEND_NOCHANGE.md"
-      ]
-    },
-    {
-      "description": "Modified/added PWA manifest and index.html references (base-path safe icon/manifest handling).",
-      "reason": "REQ-1 requires runtime SW registration and prompt handling while remaining compatible with existing manifest/service worker; changing manifest/index.html behavior is not explicitly requested in the diff summary and may exceed the targeted runtime fix scope.",
-      "evidence": [
-        "frontend/index.html",
         "frontend/public/manifest.webmanifest"
       ]
     },
     {
-      "description": "Router behavior additions for legacy alias handling (/institucional → /mission) and route normalization.",
-      "reason": "Not requested by PWA/consent/layout requirements; introduces new navigation behavior beyond stated scope.",
+      "description": "InstallButton includes additional UI elements (lucide Download icon) beyond the explicitly requested minimal behavior.",
+      "reason": "REQ-26 asked for minimal behavior (click triggers triggerPWAInstall and alert if not eligible) and cautioned against visual design changes beyond swapping the CTA component.",
       "evidence": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/InstallButton.tsx"
       ]
     },
     {
-      "description": "Tailwind configuration changes expanding the design system (font sizes, OKLCH tokens).",
-      "reason": "While some styling tweaks are requested, the diff summary indicates broad Tailwind config customization which may exceed 'targeted' layout corrections.",
+      "description": "Android WebAPK checklist includes extra explanatory/technical notes after the required final outcome statements.",
+      "reason": "REQ-27 requires the checklist to end with only the two allowed outcome statements.",
       "evidence": [
-        "frontend/tailwind.config.js"
+        "frontend/PWA_WEBAPK_ANDROID_TEST.md"
       ]
     }
   ],
   "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/InstitutionalPageLayout.tsx",
-    "frontend/src/components/PwaInstallAction.tsx",
-    "frontend/src/hooks/usePwaInstall.ts",
-    "frontend/src/index.css",
+    "frontend/PWA_WEBAPK_ANDROID_TEST.md",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/service-worker.js",
+    "frontend/src/components/InstallButton.tsx",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/HowItWorksPage.tsx",
-    "frontend/src/pages/MissionPage.tsx",
-    "frontend/src/pages/PrivacyPage.tsx",
-    "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/pwa/pwaRuntime.ts",
+    "frontend/src/pwa/install.ts",
     "project_state.json"
   ]
 }
