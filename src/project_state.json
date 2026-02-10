@@ -1,18 +1,17 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 45,
-  "summary": "Escopo final confirmado do AntiFraud: rebranding GLOBAL e TOTAL para identidade única **“AntiFraud / by HCoragem”** — substituir 100% de quaisquer strings/branding anteriores (incl. “Desenvolvido por HCoragem”, ScamGuardian, byHTgamers e qualquer referência a Caffeine) em UI/i18n/header/footer/logos/PWA manifest/metadados/títulos; rodapé deve exibir **exclusivamente** \"by HCoragem\". Criar/atualizar páginas institucionais multilíngues completas, com texto longo real (sem placeholders), navegação funcional e SEO básico: **/mission** (missão/visão global/impacto social/limites do sistema), **/how-it-works** (como funciona verificação email/telefone/mensagem/carteira + scoring + limites/uso responsável), **/terms** (usar exatamente o texto oficial previamente fornecido) e **/privacy** (Política de Privacidade nova, completa, multilíngue PT/EN/ES/FR/ZH(CN)/AR/RU). Corrigir PWA para instalação realmente funcional (manifest + service worker), com botão de instalação/baixar exibindo exatamente “Baixe a Aplicação AntiFraud gratuitamente” e tradução via i18n para todos os idiomas ativos; ícones PWA válidos (placeholder textual minimalista “AntiFraud / by HCoragem” aceitável). Frontend deve usar exclusivamente os 3 canisters existentes (principal v63rh-lqaaa-aaaaa-qewvq-cai, extra c6sjf-tqaaa-aaaap-qsiea-cai, denúncias 7w5qg-6aaaa-aaaab-ael4a-cai) **sem backend novo**, preservando funcionalidades (verificações mensagem/email/telefone/cripto, scoring e base colaborativa/denúncias). A base de denúncias inicia vazia porém funcional: permite submeter denúncias (email/telefone/mensagem/carteira) e consultar denúncias; quando vazio, mostrar estado vazio claro (não erro). Remover erros genéricos (ex. “Error analyzing message”) e, quando não houver correspondência, exibir “Sem registos conhecidos — base colaborativa em crescimento.”; nunca prometer “base mundial completa”.",
+  "projectStateVersion": 55,
+  "summary": "Escopo reforçado: conteúdo institucional/legal/funcional **oficial** do AntiFraud / by HCoragem foi fornecido pelo usuário e deve ser aplicado **verbatim** (não resumir, não reescrever, não “otimizar”) nas páginas e i18n/rotas finais (/mission, /how-it-works, /terms, /privacy), mantendo o motor antifraude 100% heurístico no frontend e resultados estruturados no idioma selecionado.",
   "architectural_notes": [
     "MVP runs on Internet Computer: frontend web/PWA + backend Motoko canister.",
-    "Scam analysis is performed in the backend canister using rules/patterns/keywords/context scoring (no external AI APIs; no frontend ML required).",
     "MVP explicitly excludes voice-to-text, emergency button, and advanced features until after core flow works.",
-    "Backend Motoko deve expor analyzeText(text : Text) : async Text e nesta fase retornar apenas uma resposta mock (ex. “Risco médio – backend Motoko ativo”).",
-    "Frontend deve chamar o canister existente ao clicar em “Analisar” e renderizar o texto retornado.",
-    "Integração frontend→canister confirmada: a chamada a analyzeText no canister existente funciona e a resposta mock é recebida e renderizada corretamente; avançar para substituir mock por análise real baseada em regras/scoring no Motoko.",
-    "Implementação da análise no backend Motoko será faseada (2a palavras‑chave → 2b padrões de endereços crypto → 2c scoring Baixo/Médio/Alto + explicações) para validar cada passo antes de avançar.",
-    "Fase 2a: analyzeText retorna apenas mensagens fixas baseadas em correspondência de palavras‑chave (sem scoring e sem explicações detalhadas).",
     "Projeto renomeado para AntiFraud; preservar arquitetura/compatibilidade existente (Fase 2c/Fase 3a), mantendo i18n global com tradução abaixo do resultado PT retornado pelo backend.",
-    "Branding ScamGuardian foi explicitamente descontinuado; AntiFraud é o único nome oficial em UI/i18n/PWA manifest/metadados e páginas legais."
+    "Branding ScamGuardian foi explicitamente descontinuado; AntiFraud é o único nome oficial em UI/i18n/PWA manifest/metadados e páginas legais.",
+    "Decisão confirmada: frontend será 100% React + TypeScript (sem SvelteKit).",
+    "Decisão confirmada: análises de Mensagem/Email/Telefone/Cripto serão 100% heurísticas no frontend, sem chamadas a canisters; resposta única e estruturada (Risco/Explicação/Recomendação) no idioma selecionado (não misturar idiomas).",
+    "Decisão confirmada: rotas institucionais finais são /mission, /how-it-works, /terms, /privacy; manter aliases/redirects para rotas antigas para compatibilidade e deep links.",
+    "Heuristics requirement refinement: if analysis input contains any mandatory HIGH-RISK keywords (dinheiro, lucro, promoção, oportunidade, grátis, encontros, investimento, criptomoeda), the Risk output must be set to \"Alto\" and the result must remain single-language for the current UI session (no PT/EN mixing); remove/hide any legacy backend analysis response for these four flows.",
+    "Conteúdo institucional/legal/funcional oficial fornecido pelo usuário deve ser incorporado verbatim (sem resumo/rewrite/otimização) nas páginas e traduções, preservando o tom/profissionalismo e consistência de idioma por sessão."
   ],
   "known_issues": [
     "Initial full app generation attempt failed (\"Our AI couldn't handle that request\"); user requested retry starting with MVP scope.",
@@ -27,7 +26,6 @@
     "PWA: prompt de instalação aparece mas a instalação falha (possível problema no manifest.webmanifest e/ou service worker)."
   ],
   "isFixRequest": true,
-  "imageRequirements": "## Required Images\n- Minimalistic PWA icon with the text \"AntiFraud / by HCoragem\" on a clean solid background (antifraud-pwa-icon.dim_192x192.png)\n- Minimalistic PWA icon with the text \"AntiFraud / by HCoragem\" on a clean solid background (antifraud-pwa-icon.dim_512x512.png)",
   "existing_features": [
     {
       "id": "feature-create-an-mvp-mobile-friendly-web-app-pwa-capable-that-runs-well-on-android-and-ios-browsers-including-responsive-layout-for-small-screens-and-touch-targets-sized-for-older-users",
@@ -868,6 +866,126 @@
         "REQ-122"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-deployment-so-the-server-always-serves-a-valid-non-empty-base-html-document-for-the-spa-i-e-a-proper-index-html-with-the-react-root-element-and-module-script-instead-of-responding-with-an-empty-html-body",
+      "title": "Fix the deployment so the server always serves a valid, non-empty base HTML document for the SPA (i.e., a proper index.html with the React root element and module script), instead of responding with an empty HTML body.",
+      "reqIds": [
+        "REQ-123"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-compiled-spa-is-served-correctly-for-direct-navigation-hard-refresh-deep-links-to-these-routes-mission-terms-privacy-and-how-it-works-or-an-explicit-equivalent-route-that-is-linked-in-navigation",
+      "title": "Ensure the compiled SPA is served correctly for direct navigation (hard refresh / deep links) to these routes: \"/\", \"/mission\", \"/terms\", \"/privacy\", and \"/how-it-works\" (or an explicit equivalent route that is linked in navigation).",
+      "reqIds": [
+        "REQ-124"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-pwa-installability-assets-are-present-and-correctly-served-the-web-manifest-at-manifest-webmanifest-and-the-service-worker-script-at-service-worker-js-or-the-project-s-configured-sw-path-with-correct-content-types-and-no-empty-responses",
+      "title": "Ensure PWA installability assets are present and correctly served: the web manifest at \"/manifest.webmanifest\" and the service worker script at \"/service-worker.js\" (or the project’s configured SW path), with correct content types and no empty responses.",
+      "reqIds": [
+        "REQ-125"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-add-an-appropriate-antifraud-logo-image-asset-for-the-app-branding-and-ensure-it-is-used-by-the-header-logo-area-and-does-not-break-existing-layout-navigation-or-accessibility",
+      "title": "Generate and add an appropriate AntiFraud logo image asset for the app branding and ensure it is used by the header/logo area (and does not break existing layout, navigation, or accessibility).",
+      "reqIds": [
+        "REQ-126"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-required-pages-mission-terms-privacy-how-it-works-render-real-non-placeholder-institutional-legal-content-as-already-defined-by-the-project-s-i18n-content-system-and-are-not-blank-in-production-builds",
+      "title": "Ensure the required pages (\"/mission\", \"/terms\", \"/privacy\", \"/how-it-works\") render real, non-placeholder institutional/legal content as already defined by the project’s i18n/content system, and are not blank in production builds.",
+      "reqIds": [
+        "REQ-128"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-message-analysis-action-on-the-home-page-so-that-clicking-the-existing-analyze-message-button-performs-a-100-frontend-only-heuristic-analysis-no-calls-to-any-internet-computer-canister-and-produces-a-structured-result-with-exactly-three-visible-fields-risk-low-medium-high-explanation-short-and-recommendation-practical-next-step",
+      "title": "Replace the current Message analysis action on the Home page so that clicking the existing “Analyze Message” button performs a 100% frontend-only heuristic analysis (no calls to any Internet Computer canister) and produces a structured result with exactly three visible fields: Risk (Low/Medium/High), Explanation (short), and Recommendation (practical next step).",
+      "reqIds": [
+        "REQ-129"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-email-phone-and-crypto-actions-on-the-home-page-so-that-clicking-the-existing-buttons-performs-100-frontend-only-heuristic-analysis-no-calls-to-any-internet-computer-canister-and-produces-the-same-structured-three-field-result-risk-explanation-recommendation-for-each-type",
+      "title": "Replace the current Email, Phone, and Crypto actions on the Home page so that clicking the existing buttons performs 100% frontend-only heuristic analysis (no calls to any Internet Computer canister) and produces the same structured three-field result (Risk, Explanation, Recommendation) for each type.",
+      "reqIds": [
+        "REQ-130"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-adjust-frontend-heuristic-utilities-so-the-four-analyses-message-email-phone-crypto-can-generate-the-structured-output-risk-explanation-recommendation-while-remaining-fully-offline-no-external-services-no-backend-calls-and-based-on-publicly-known-scam-patterns-osint-inspired-heuristics-such-as-urgency-language-credential-requests-suspicious-domains-tlds-abnormal-formatting-and-crypto-address-patterns",
+      "title": "Implement/adjust frontend heuristic utilities so the four analyses (message/email/phone/crypto) can generate the structured output (Risk, Explanation, Recommendation) while remaining fully offline (no external services, no backend calls) and based on publicly-known scam patterns (OSINT-inspired heuristics such as urgency language, credential requests, suspicious domains/TLDs, abnormal formatting, and crypto-address patterns).",
+      "reqIds": [
+        "REQ-131"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-or-update-i18n-strings-so-the-structured-analysis-ui-field-labels-and-any-helper-error-text-shown-as-part-of-these-analysis-results-is-fully-localized-for-all-supported-languages-pt-en-es-fr-zh-ar-ru-while-keeping-existing-branding-pages-translations-and-layout-unchanged-beyond-what-is-necessary-to-display-the-three-fields",
+      "title": "Add or update i18n strings so the structured analysis UI (field labels and any helper/error text shown as part of these analysis results) is fully localized for all supported languages (pt/en/es/fr/zh/ar/ru), while keeping existing branding, pages, translations, and layout unchanged beyond what is necessary to display the three fields.",
+      "reqIds": [
+        "REQ-132"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-change-does-not-alter-or-break-any-non-analysis-canister-driven-flows-e-g-report-submission-and-any-existing-reports-database-functionality-outside-these-four-replaced-analysis-actions-and-do-not-modify-any-backend-motoko-canister-code",
+      "title": "Ensure the change does not alter or break any non-analysis canister-driven flows (e.g., report submission and any existing reports database functionality outside these four replaced analysis actions), and do not modify any backend Motoko canister code.",
+      "reqIds": [
+        "REQ-133"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-user-provided-official-antifraud-by-hcoragem-institutional-legal-functional-content-verbatim-no-summarizing-rewriting-substituting-or-optimizing-into-the-frontend-content-system-so-it-is-rendered-on-the-informational-pages-at-exactly-these-routes-mission-and-how-it-works-the-portuguese-pt-version-must-match-the-official-text-exactly-as-provided-by-the-user",
+      "title": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim (no summarizing, rewriting, substituting, or “optimizing”) into the frontend content system so it is rendered on the informational pages at exactly these routes: \"/mission\" and \"/how-it-works\". The Portuguese (pt) version must match the official text exactly as provided by the user.",
+      "reqIds": [
+        "REQ-152"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-message-analysis-ui-placeholder-to-exactly-match-the-required-portuguese-string-for-pt-cole-aqui-a-mensagem-recebida-and-add-equivalent-translations-for-en-es-fr-zh-ar-ru-using-the-existing-i18n-system",
+      "title": "Update the Message analysis UI placeholder to exactly match the required Portuguese string for pt: \"Cole aqui a mensagem recebida\" and add equivalent translations for en/es/fr/zh/ar/ru using the existing i18n system.",
+      "reqIds": [
+        "REQ-153"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enforce-single-language-per-session-structured-analysis-output-for-the-four-home-analyses-message-email-phone-crypto-risk-explanation-recommendation-must-be-produced-entirely-in-the-currently-selected-ui-language-with-no-mixed-language-fragments-and-without-calling-any-internet-computer-canister-methods",
+      "title": "Enforce single-language-per-session structured analysis output for the four Home analyses (Message, Email, Phone, Crypto): Risk/Explanation/Recommendation must be produced entirely in the currently selected UI language, with no mixed-language fragments, and without calling any Internet Computer canister methods.",
+      "reqIds": [
+        "REQ-154"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-mandatory-high-risk-keyword-overrides-for-message-analysis-if-the-analyzed-input-contains-any-of-these-portuguese-keywords-case-insensitive-the-structured-result-risk-must-be-high-dinheiro-lucro-promo-o-oportunidade-gr-tis-encontros-investimento-criptomoeda",
+      "title": "Implement mandatory High-risk keyword overrides for Message analysis: if the analyzed input contains any of these Portuguese keywords (case-insensitive) the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
+      "reqIds": [
+        "REQ-155"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-informational-routing-remains-stable-and-legacy-compatible-the-app-must-render-the-correct-pages-for-mission-how-it-works-terms-and-privacy-and-legacy-institutional-routes-at-minimum-institucional-and-institucional-mission-must-continue-to-work-via-alias-redirect-behavior-without-broken-navigation",
+      "title": "Ensure informational routing remains stable and legacy-compatible: the app must render the correct pages for \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\", and legacy institutional routes (at minimum: \"/institucional\" and \"/institucional/mission\") must continue to work via alias/redirect behavior without broken navigation.",
+      "reqIds": [
+        "REQ-156"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -890,18 +1008,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-4",
-      "summary": "MVP: Motoko canister endpoint to receive text and return analysis result",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "MVP: Rules-based scam detection + scoring (Low/Medium/High) with simple explanation text",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
       "id": "AR-6",
       "summary": "Post-MVP (deferred): Voice-to-text using browser Web Speech API",
       "reqIds": [],
@@ -911,66 +1017,6 @@
       "id": "AR-7",
       "summary": "Post-MVP (deferred): Emergency button screen with stop instructions and trusted contacts",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add a Motoko canister endpoint that accepts suspicious text and returns a basic scam-risk analysis result with: a risk level (Low/Medium/High) and a short, plain-English explanation.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Implement basic rules-based scam detection and scoring in Motoko, using clear heuristics (keywords/patterns/urgency cues) to map inputs to Low/Medium/High risk, and generate a simple explanation describing the main signals found.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Implement real rules-based scam detection and scoring in the Motoko backend by replacing the current static mock response in `backend/main.mo` `analyzeText(text : Text) : async Text` with deterministic heuristics that compute a risk level (Low Risk / Medium Risk / High Risk) and a plain-English explanation of the main signals found.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Keep the existing public API exactly the same: `analyzeText` must remain `analyzeText(text : Text) : async Text` and the Candid interface must remain text-in/text-out (no new methods, no signature changes).",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add basic input normalization and safe handling in backend analysis: trim whitespace, perform case-insensitive matching for rule checks, and return a helpful plain-English response when the input is empty/whitespace-only (even though the frontend already blocks empty submissions).",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Fase 2b (backend Motoko): deteção por padrão de endereços de criptomoedas (ex.: EVM 0x…, BTC 1/3/bc1) sem validação/API externa; tratar como sinal forte (risco alto) e explicar em linguagem simples",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Fase 2c (backend Motoko): scoring completo Baixo/Médio/Alto combinando palavras‑chave, crypto e outros padrões, com explicações simples para idosos",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Update the existing Motoko canister logic in `backend/main.mo` so `analyzeText(text : Text) : async Text` detects cryptocurrency address patterns in the input text (no blockchain/API calls). If any crypto address is detected, return exactly: \"⚠️ Risco Alto – a mensagem contém um endereço de criptomoeda.\". If no crypto address is detected, fall back to the existing Phase 2a keyword-based logic and return exactly the same Phase 2a strings currently used (\"⚠️ Possível burla detectada\" / \"✅ Nenhum sinal de burla detectado\").",
-      "reqIds": [
-        "REQ-15"
-      ],
       "status": "pending"
     },
     {
@@ -1213,6 +1259,176 @@
       "reqIds": [
         "REQ-119"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-92",
+      "summary": "Verify the frontend initializes and uses components that consume exactly these three Internet Computer canisters (and no others): Main = v63rh-lqaaa-aaaaa-qewvq-cai, Extra = c6sjf-tqaaa-aaaap-qsiea-cai, Reports = 7w5qg-6aaaa-aaaab-ael4a-cai; ensure actor initialization succeeds in production and the existing readiness report logs the active canister IDs and expected methods.",
+      "reqIds": [
+        "REQ-127"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-93",
+      "summary": "Implementar motor antifraude 100% frontend: substituir os botões existentes (Mensagem/Email/Telefone/Cripto) para gerar e exibir resultado estruturado (Risco/Explicação/Recomendação) sem chamadas a canisters e sem exibir resposta original do backend ou tradução adicional.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-94",
+      "summary": "Unificar rotas institucionais finais (/mission, /how-it-works, /terms, /privacy) e manter aliases/redirects para rotas antigas sem quebrar navegação, deep links e PWA",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-95",
+      "summary": "Ensure the Home dashboard analyses (Message, Email, Phone, Crypto) are 100% frontend-only heuristic analyses and never call any Internet Computer canister methods as part of generating the analysis result.",
+      "reqIds": [
+        "REQ-134"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-96",
+      "summary": "Make heuristic analysis results fully localized and single-language: the Risk label/value, Explanation, and Recommendation shown for Message/Email/Phone/Crypto must be produced in the currently selected UI language via the existing i18n system, with no mixed-language phrases in any result.",
+      "reqIds": [
+        "REQ-135"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-97",
+      "summary": "Complete i18n coverage for all user-facing UI strings used across the app shell and pages (Home, Mission, How It Works, Terms, Privacy, navigation, PWA install UI, report UI, collaborative database UI) for the supported languages already in the project (pt/en/es/fr/zh/ar/ru).",
+      "reqIds": [
+        "REQ-136"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-98",
+      "summary": "Update the Portuguese Message textarea placeholder to exactly: \"Cole aqui a mensagem recebida\" and provide equivalent translations for other supported languages, using the existing i18n translations structure.",
+      "reqIds": [
+        "REQ-137"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-99",
+      "summary": "Unify informational routing to the final routes \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" and keep legacy institutional routes working via redirects/aliases (at minimum: \"/institucional\" and \"/institucional/mission\").",
+      "reqIds": [
+        "REQ-138"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-100",
+      "summary": "Fix and harden PWA installability so installation completes successfully on supported platforms, while keeping existing routes working offline-safe (no blank HTML, no broken deep links).",
+      "reqIds": [
+        "REQ-139"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-101",
+      "summary": "Ensure the primary visible PWA install call-to-action text is localized, and in Portuguese (pt) it is exactly: \"Baixe a Aplicação AntiFraud gratuitamente\".",
+      "reqIds": [
+        "REQ-140"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-102",
+      "summary": "Replace ALL Message/Email/Phone/Crypto analysis actions on the Home page with a 100% frontend-only heuristic engine and remove any display/usage of legacy backend analysis responses for these four analyses.",
+      "reqIds": [
+        "REQ-141"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-103",
+      "summary": "Enforce single-language-per-session analysis output: every analysis result (Risk/Explanation/Recommendation) must be generated in the currently selected UI language for the session, with zero mixed-language phrases (e.g., no English fragments when the session language is Portuguese).",
+      "reqIds": [
+        "REQ-142"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-104",
+      "summary": "Implement mandatory High-Risk keyword overrides: if the analyzed input contains any of these Portuguese keywords (case-insensitive), the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
+      "reqIds": [
+        "REQ-143"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-105",
+      "summary": "Update the Portuguese Message textarea placeholder to exactly \"Cole aqui a mensagem recebida\" and provide equivalent translations for all other supported languages via the existing i18n system.",
+      "reqIds": [
+        "REQ-144"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-106",
+      "summary": "Ensure the structured analysis response format is always present and professional: Risk (Low/Medium/High), Explanation (clear, professional), and Recommendation (a concrete next step for the user), for all four analysis types.",
+      "reqIds": [
+        "REQ-145"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-107",
+      "summary": "Create and fully populate the informational pages at exactly these routes with long, professional, credible, multilingual content (pt/en/es/fr/zh/ar/ru): \"/mission\", \"/how-it-works\", \"/terms\", \"/privacy\".",
+      "reqIds": [
+        "REQ-146"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-108",
+      "summary": "Make navigation links functional so that clicking top navigation items changes the page (client-side) and the browser back/forward buttons work across \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\".",
+      "reqIds": [
+        "REQ-147"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-109",
+      "summary": "Fix and harden PWA installability so installation completes successfully as an installed app on supported platforms by validating and correcting the web manifest and service worker behavior (including start_url/scope expectations, icon paths/sizes, and navigation fallback).",
+      "reqIds": [
+        "REQ-148"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-110",
+      "summary": "Ensure the primary visible PWA install call-to-action text is localized; in Portuguese (pt) it must be exactly: \"Baixe a Aplicação AntiFraud gratuitamente\"; provide equivalent translations for all other supported languages.",
+      "reqIds": [
+        "REQ-149"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-111",
+      "summary": "Perform a complete branding audit and remove 100% of any references to \"Caffeine\" (including \"caffeine.ai\") from frontend UI copy, i18n strings, HTML metadata, and PWA metadata. Final branding must be uniquely: product name \"AntiFraud\" and subtitle \"by HCoragem\".",
+      "reqIds": [
+        "REQ-150"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-112",
+      "summary": "Add a developer-facing build completion note (non-user-facing) summarizing what was changed for this rebuild and explicitly listing any items that could not be implemented, without exposing sensitive data.",
+      "reqIds": [
+        "REQ-151"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-113",
+      "summary": "Aplicar o CONTEÚDO FINAL OFICIAL AntiFraud / by HCoragem (institucional/legal/funcional) exatamente como fornecido: não resumir, não substituir, não reescrever, não otimizar; usar verbatim nas páginas/i18n das rotas /mission, /how-it-works, /terms, /privacy.",
+      "reqIds": [],
       "status": "pending"
     }
   ],

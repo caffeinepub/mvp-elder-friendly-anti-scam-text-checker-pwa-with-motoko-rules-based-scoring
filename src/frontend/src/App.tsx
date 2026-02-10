@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { currentRoute } = useSimpleRouter();
+  const { currentRoute, navigate } = useSimpleRouter();
 
   useEffect(() => {
     document.title = 'AntiFraud / by HCoragem';
@@ -29,8 +29,19 @@ function AppContent() {
   // Render page based on current route
   let pageContent: React.ReactNode;
   
-  // Normalize route for legacy compatibility
-  const normalizedRoute = currentRoute.replace(/^\/institucional(\/mission)?$/, '/mission');
+  // Normalize route for legacy compatibility and trailing slashes
+  let normalizedRoute = currentRoute
+    .replace(/\/$/, '') // Remove trailing slash
+    .toLowerCase();
+  
+  // Legacy alias handling: /institucional and /institucional/mission → /mission
+  if (normalizedRoute === '/institucional' || normalizedRoute === '/institucional/mission') {
+    // Update client-side route to canonical /mission
+    if (currentRoute !== '/mission') {
+      navigate('/mission');
+    }
+    normalizedRoute = '/mission';
+  }
   
   switch (normalizedRoute) {
     case '/mission':
@@ -45,8 +56,12 @@ function AppContent() {
     case '/privacy':
       pageContent = <PrivacyPage />;
       break;
+    case '':
     case '/':
+      pageContent = <HomePage />;
+      break;
     default:
+      // Unknown route - redirect to home
       pageContent = <HomePage />;
       break;
   }

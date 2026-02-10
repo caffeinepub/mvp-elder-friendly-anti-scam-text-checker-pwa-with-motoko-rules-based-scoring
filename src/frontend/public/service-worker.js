@@ -1,4 +1,4 @@
-const CACHE_NAME = 'antifraud-v1';
+const CACHE_NAME = 'antifraud-v2';
 const APP_SHELL_ROUTES = ['/', '/mission', '/how-it-works', '/terms', '/privacy', '/institucional', '/institucional/mission'];
 
 // Install event - cache app shell
@@ -8,9 +8,14 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/',
         '/manifest.webmanifest',
+        '/assets/generated/antifraud-logo-icon.dim_256x256.png',
         '/assets/generated/antifraud-pwa-icon.dim_192x192.png',
         '/assets/generated/antifraud-pwa-icon.dim_512x512.png',
-      ]);
+      ]).catch((err) => {
+        console.warn('Service worker cache preload failed:', err);
+        // Continue installation even if some assets fail
+        return Promise.resolve();
+      });
     })
   );
   self.skipWaiting();
@@ -45,12 +50,26 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache successful responses
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
+          // Only cache successful HTML responses with content
+          if (response.ok && response.status === 200) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+              // Clone and verify response has content before caching
+              return response.clone().text().then((text) => {
+                if (text && text.trim().length > 0 && text.includes('<div id="root">')) {
+                  const responseClone = new Response(text, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers,
+                  });
+                  caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(request, responseClone.clone());
+                  });
+                  return responseClone;
+                }
+                return response;
+              });
+            }
           }
           return response;
         })
@@ -59,7 +78,13 @@ self.addEventListener('fetch', (event) => {
           const pathname = url.pathname.replace(/\/$/, '') || '/';
           if (APP_SHELL_ROUTES.includes(pathname)) {
             return caches.match('/').then((cachedResponse) => {
-              return cachedResponse || new Response('Offline', { status: 503 });
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // Fallback to 404 page if no cache available
+              return caches.match('/404.html').then((fallback) => {
+                return fallback || new Response('Offline', { status: 503 });
+              });
             });
           }
           return new Response('Offline', { status: 503 });

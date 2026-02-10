@@ -1,141 +1,58 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T23:43:22.051Z",
-  "summary": "Diff implements new /mission and /how-it-works pages with SEO helper and updates router/nav, but several key requirements are either unverifiable from the truncated diff (Terms/Privacy long-form multilingual content, PWA icons) or appear violated (immutable hook modified; leftover legacy branding/tokens; canister IDs not restricted to the three specified IDs).",
+  "generatedAt": "2026-02-10T11:31:52.380Z",
+  "summary": "Diff implements client-side routing normalization with legacy aliases for /institucional(/mission) → /mission, updates pt Message placeholder to the required string in i18n, and switches Home analyses to a frontend-only structuredFraudAnalysis engine with localized templates. However, the diff summary does not provide evidence that the official AntiFraud Portuguese institutional content was applied verbatim to /mission and /how-it-works, nor that the mandatory High-risk keyword overrides for Message analysis were implemented.",
   "missing_requirements": [
     {
-      "id": "REQ-114",
-      "requirement": "Terms page must use exactly the official Terms text previously provided by the user (verbatim) in all supported languages.",
-      "reason": "Diff shows TermsPage structure but does not include the actual official Terms text content; translations content is truncated and cannot confirm verbatim match across pt/en/es/fr/zh/ar/ru.",
+      "id": "REQ-152",
+      "requirement": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim into the existing i18n/content structure for /mission and /how-it-works (pt must match exactly).",
+      "reason": "The diff summary shows routing to MissionPage/HowItWorksPage and mentions translation keys exist, but does not show the actual official Portuguese text being inserted verbatim into the content system (MissionPage/HowItWorksPage content not included).",
       "evidence": [
-        "frontend/src/pages/TermsPage.tsx",
+        "frontend/src/App.tsx",
         "frontend/src/i18n/translations.ts (truncated)"
       ]
     },
     {
-      "id": "REQ-115",
-      "requirement": "Privacy policy must be brand-new, long, professional, liability-minimizing, and fully multilingual (pt/en/es/fr/zh/ar/ru) via existing i18n structure.",
-      "reason": "PrivacyPage rendering structure is present, but the translation content is truncated; the file summary explicitly says non-pt/en languages are stub entries, which conflicts with the requirement that each supported language contain long, complete content.",
+      "id": "REQ-155",
+      "requirement": "Implement mandatory High-risk keyword overrides for Message analysis for Portuguese keywords (case-insensitive): dinheiro, lucro, promoção, oportunidade, grátis, encontros, investimento, criptomoeda.",
+      "reason": "structuredFraudAnalysis.ts is truncated and the shown portion contains only localized templates; there is no visible implementation of the specified keyword override logic that forces Risk='High' when any listed keyword appears.",
       "evidence": [
-        "frontend/src/pages/PrivacyPage.tsx",
-        "frontend/src/i18n/translations.ts (truncated)",
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "id": "REQ-116",
-      "requirement": "Provide required PWA icon images (192x192 and 512x512) and ensure manifest references valid existing files for installability.",
-      "reason": "Manifest/service worker reference icon paths, but the diff summary does not show the PNG files being added, so existence cannot be verified from the provided changes.",
-      "evidence": [
-        "frontend/public/service-worker.js",
-        "frontend-file-summaries.txt (manifest references icons)"
-      ]
-    },
-    {
-      "id": "REQ-117",
-      "requirement": "Primary visible PWA install CTA must be exactly \"Baixe a Aplicação AntiFraud gratuitamente\" in Portuguese and translated for all active languages.",
-      "reason": "PwaInstallAction uses i18n key t.installPrimaryButton, but the actual Portuguese string and other language equivalents are not shown (translations file is truncated). Exact-match requirement cannot be verified.",
-      "evidence": [
-        "frontend/src/components/PwaInstallAction.tsx",
-        "frontend/src/i18n/translations.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-118",
-      "requirement": "Remove 100% references to legacy brands (\"Caffeine\"/\"caffeine.ai\" etc.) and keep footer exactly \"by HCoragem\" plain text only.",
-      "reason": "There are still explicit references to \"caffeineAdminToken\" and the summary indicates an InstitutionalPage containing \"ScamGuardian\" content. This contradicts the zero-legacy-branding requirement.",
-      "evidence": [
-        "frontend/src/hooks/useActor.ts",
-        "frontend/src/utils/urlParams.ts",
-        "frontend-file-summaries.txt (InstitutionalPage mentions ScamGuardian)"
-      ]
-    },
-    {
-      "id": "REQ-119",
-      "requirement": "Frontend must connect to exactly the three specified canisters only (Main v63rh-lqaaa-aaaaa-qewvq-cai, Extra c6sjf-tqaaa-aaaap-qsiea-cai, Reports 7w5qg-6aaaa-aaaab-ael4a-cai); remove/replace any other canister IDs; readiness report logs active canister IDs/methods.",
-      "reason": "The file summary explicitly states frontend/src/config.ts targets canister ID \"xpwaq-faaaa-aaaad-qh5pq-cai\", which is not one of the three specified canisters. No evidence of a readiness report logging the required three IDs is shown.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/config.ts targets xpwaq-faaaa-aaaad-qh5pq-cai)"
-      ]
-    },
-    {
-      "id": "REQ-120",
-      "requirement": "Reports flow must support submit + lookup for email/phone/message/crypto and show clear empty-state UI when no reports; no seeding and no backend changes.",
-      "reason": "Diff shows lookup handling for email/phone (and likely crypto, truncated), but no evidence of report submission flows for all four types is shown in the provided snippets, and empty-state requirement is specifically phrased for collaborative DB lookups across types; only a generic empty-state card is shown without confirming all types and messages.",
-      "evidence": [
-        "frontend/src/pages/HomePage.tsx (truncated)",
-        "frontend/src/components/CollaborativeResultCard.tsx"
-      ]
-    },
-    {
-      "id": "REQ-121",
-      "requirement": "When collaborative lookup returns no data, show exact Portuguese empty-result message: \"Sem registos conhecidos — base colaborativa em crescimento.\" (and translations for other languages); remove generic technical failure messages and avoid claims of complete worldwide DB.",
-      "reason": "CollaborativeResultCard uses t.collaborativeEmptyState, but the translations snippet does not show that key or the required exact Portuguese sentence; therefore exact compliance cannot be confirmed from the diff. Also some error keys still look generic (e.g., errorAnalyzeMessage), but end-user strings cannot be fully audited due to truncation.",
-      "evidence": [
-        "frontend/src/components/CollaborativeResultCard.tsx",
-        "frontend/src/i18n/translations.ts (truncated)"
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Modified an explicitly immutable hook file (frontend/src/hooks/useActor.ts).",
-      "reason": "BuildRequest constraints state files under immutable frontend paths must not be modified; diff shows modifications to this file.",
+      "description": "Institutional pages updated/added with 'ScamGuardian' vision/values/quantum-threat preparedness content.",
+      "reason": "BuildRequest only asks for official AntiFraud content on /mission and /how-it-works and legacy route compatibility; it does not request new or different institutional narrative content about 'ScamGuardian'.",
       "evidence": [
-        "frontend/src/hooks/useActor.ts"
+        "frontend/src/pages/InstitutionalPage.tsx",
+        "frontend/src/pages/InstitutionalMissionPage.tsx",
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Introduced/kept admin-token plumbing using a parameter named \"caffeineAdminToken\" and related comments mentioning it.",
-      "reason": "BuildRequest requires removing 100% of legacy-brand references including \"Caffeine\"/\"caffeine.ai\"; using \"caffeineAdminToken\" perpetuates that legacy branding.",
+      "description": "Added a static SPA fallback redirect mechanism in public/404.html for known routes.",
+      "reason": "Not explicitly requested (REQ-156 focuses on client-side routing and legacy aliases), though it may support routing on static hosts; it is additional behavior beyond the stated requirements.",
       "evidence": [
-        "frontend/src/hooks/useActor.ts",
-        "frontend/src/utils/urlParams.ts"
-      ]
-    },
-    {
-      "description": "Institutional page content referencing \"ScamGuardian\" remains in the project.",
-      "reason": "BuildRequest requires removing legacy brands; file summary indicates an InstitutionalPage displaying ScamGuardian content, which is not requested and conflicts with branding requirements.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/pages/InstitutionalPage.tsx mentions ScamGuardian)"
-      ]
-    },
-    {
-      "description": "Backend actor configuration targeting canister ID \"xpwaq-faaaa-aaaad-qh5pq-cai\".",
-      "reason": "BuildRequest explicitly restricts IC calls to exactly three canisters; introducing/using a different canister ID is unrequested and violates constraints.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/config.ts targets xpwaq-faaaa-aaaad-qh5pq-cai)"
-      ]
-    },
-    {
-      "description": "Added PHASE3A_READONLY_FRONTEND_NOCHANGE.md describing a new canister for a future phase.",
-      "reason": "Non-goals/constraints prohibit creating/deploying new backend canisters; this document references a new canister/phase integration not requested for the final release scope.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/PHASE3A_READONLY_FRONTEND_NOCHANGE.md)"
+        "frontend/public/404.html"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/public/service-worker.js",
+    "frontend/public/404.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/AppLayout.tsx",
-    "frontend/src/components/CollaborativeResultCard.tsx",
-    "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/components/PwaInstallAction.tsx",
-    "frontend/src/hooks/useActor.ts",
+    "frontend/src/components/DashboardQuickActions.tsx",
     "frontend/src/i18n/translations.ts",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/HowItWorksPage.tsx",
-    "frontend/src/pages/MissionPage.tsx",
+    "frontend/src/pages/InstitutionalMissionPage.tsx",
+    "frontend/src/pages/InstitutionalPage.tsx",
     "frontend/src/pages/PrivacyPage.tsx",
     "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/router/useSimpleRouter.ts",
-    "frontend/src/utils/seo.ts",
-    "frontend/src/utils/translateBackendResult.ts",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json"
   ]
 }

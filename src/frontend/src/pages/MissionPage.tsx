@@ -14,14 +14,28 @@ export function MissionPage() {
     );
   }, [t]);
 
+  // Defensive rendering helpers
+  const renderParagraphs = (paragraphs: any, fallback: string = 'Conteúdo em carregamento...') => {
+    if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
+      return <p className="text-muted-foreground leading-relaxed">{fallback}</p>;
+    }
+    return paragraphs.map((paragraph: string, index: number) => (
+      <p key={index} className="text-muted-foreground leading-relaxed">
+        {paragraph || fallback}
+      </p>
+    ));
+  };
+
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground">{t.missionPageHeading}</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
+            {t.missionPageHeading || 'Nossa Missão'}
+          </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            {t.missionPageSubheading}
+            {t.missionPageSubheading || 'Protegendo pessoas contra fraudes digitais'}
           </p>
         </div>
 
@@ -30,15 +44,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Globe className="h-6 w-6 text-primary" />
-              {t.missionVisionTitle}
+              {t.missionVisionTitle || 'Nossa Visão'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionVisionParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionVisionParagraphs)}
           </CardContent>
         </Card>
 
@@ -47,15 +57,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Target className="h-6 w-6 text-primary" />
-              {t.missionCoreTitle}
+              {t.missionCoreTitle || 'Missão Central'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionCoreParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionCoreParagraphs)}
           </CardContent>
         </Card>
 
@@ -64,15 +70,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Heart className="h-6 w-6 text-primary" />
-              {t.missionImpactTitle}
+              {t.missionImpactTitle || 'Impacto Social'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionImpactParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionImpactParagraphs)}
           </CardContent>
         </Card>
 
@@ -81,15 +83,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Users className="h-6 w-6 text-primary" />
-              {t.missionValuesTitle}
+              {t.missionValuesTitle || 'Nossos Valores'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionValuesParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionValuesParagraphs)}
           </CardContent>
         </Card>
 
@@ -98,15 +96,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl text-orange-700 dark:text-orange-400">
               <Shield className="h-6 w-6" />
-              {t.missionLimitationsTitle}
+              {t.missionLimitationsTitle || 'Limitações do Sistema'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionLimitationsParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-orange-900 dark:text-orange-200 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionLimitationsParagraphs, 'Informações sobre limitações...')}
           </CardContent>
         </Card>
 
@@ -115,15 +109,11 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl text-blue-700 dark:text-blue-400">
               <Zap className="h-6 w-6" />
-              {t.missionResponsibleUseTitle}
+              {t.missionResponsibleUseTitle || 'Uso Responsável'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {t.missionResponsibleUseParagraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-blue-900 dark:text-blue-200 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {renderParagraphs(t.missionResponsibleUseParagraphs, 'Diretrizes de uso responsável...')}
           </CardContent>
         </Card>
       </div>

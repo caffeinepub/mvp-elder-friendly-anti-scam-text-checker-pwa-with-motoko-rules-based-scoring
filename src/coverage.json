@@ -1,209 +1,97 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T23:43:22.061Z",
+  "generatedAt": "2026-02-10T11:31:52.388Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 11,
-    "implemented": 10,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-112",
-        "summary": "Add two new real institutional pages with long, professional, non-placeholder content and working navigation: route \"/mission\" (mission, global vision, social impact, and system limitations) and route \"/how-it-works\" (how verification works for email/phone/message/crypto, scoring, limitations, and responsible use). Both pages must be fully multilingual (pt/en/es/fr/zh/ar/ru) via the existing i18n system and must include basic SEO metadata (document title and meta description) consistent with the AntiFraud / by HCoragem branding.",
+        "id": "REQ-152",
+        "summary": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim (no summarizing, rewriting, substituting, or “optimizing”) into the frontend content system so it is rendered on the informational pages at exactly these routes: \"/mission\" and \"/how-it-works\". The Portuguese (pt) version must match the official text exactly as provided by the user.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/i18n/translations.ts",
           "frontend/src/pages/MissionPage.tsx",
-          "frontend/src/pages/HowItWorksPage.tsx",
-          "frontend/src/utils/seo.ts",
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/App.tsx"
+          "frontend/src/pages/HowItWorksPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/MissionPage.tsx",
-          "frontend/src/pages/HowItWorksPage.tsx",
-          "frontend/src/utils/seo.ts",
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/App.tsx"
+          "frontend/src/i18n/translations.ts"
         ]
       },
       {
-        "id": "REQ-113",
-        "summary": "Update the client-side router and top navigation so that the informational routes are exactly: \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" (and they render the correct page content). Preserve existing core flows on \"/\" (verification, reporting, authentication, history) without regressions. If legacy institutional routes exist (e.g., \"/institucional\" and \"/institucional/mission\"), keep them working by redirecting or aliasing to the new routes without duplicate content or broken links.",
+        "id": "REQ-153",
+        "summary": "Update the Message analysis UI placeholder to exactly match the required Portuguese string for pt: \"Cole aqui a mensagem recebida\" and add equivalent translations for en/es/fr/zh/ar/ru using the existing i18n system.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/router/useSimpleRouter.ts",
-          "frontend/src/components/AppLayout.tsx",
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/i18n/I18nProvider.tsx",
+          "frontend/src/pages/HomePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-154",
+        "summary": "Enforce single-language-per-session structured analysis output for the four Home analyses (Message, Email, Phone, Crypto): Risk/Explanation/Recommendation must be produced entirely in the currently selected UI language, with no mixed-language fragments, and without calling any Internet Computer canister methods.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/StructuredAnalysisResultCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-155",
+        "summary": "Implement mandatory High-risk keyword overrides for Message analysis: if the analyzed input contains any of these Portuguese keywords (case-insensitive) the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts"
+        ]
+      },
+      {
+        "id": "REQ-156",
+        "summary": "Ensure informational routing remains stable and legacy-compatible: the app must render the correct pages for \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\", and legacy institutional routes (at minimum: \"/institucional\" and \"/institucional/mission\") must continue to work via alias/redirect behavior without broken navigation.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/App.tsx",
-          "frontend/src/i18n/translations.ts"
+          "frontend/public/404.html"
         ],
         "matchedFiles": [
-          "frontend/src/router/useSimpleRouter.ts",
-          "frontend/src/components/AppLayout.tsx",
           "frontend/src/App.tsx",
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-114",
-        "summary": "Ensure the Terms page at route \"/terms\" uses exactly the official Terms text previously provided by the user (verbatim, including the date line and all numbered sections), in all supported languages (pt/en/es/fr/zh/ar/ru), while preserving the existing TermsPage rendering structure (section titles + paragraph arrays / i18n-driven rendering).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/TermsPage.tsx",
-          "frontend/src/i18n/translations.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/TermsPage.tsx",
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-115",
-        "summary": "Generate and implement a brand-new, complete, liability-minimizing Privacy Policy for route \"/privacy\" in all supported languages (pt/en/es/fr/zh/ar/ru), using the existing i18n structure that drives PrivacyPage (section titles + section content arrays). The Privacy Policy must be long, professional, and suitable for an anti-fraud informational tool (include data handling, security, retention, user rights, disclaimers, and contact guidance) and must not reference any legacy brands.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PrivacyPage.tsx",
-          "frontend/src/i18n/translations.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PrivacyPage.tsx",
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-116",
-        "summary": "Fix PWA installability so that installation completes successfully on supported platforms (Android/desktop where install prompt exists). Validate and correct the manifest (frontend/public/manifest.webmanifest), icons, start_url/scope expectations, and the service worker (frontend/public/service-worker.js) caching strategy so they do not break installability or routing. Preserve existing routes (/, /mission, /how-it-works, /terms, /privacy and any aliased legacy routes).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/public/service-worker.js",
-          "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png",
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/public/service-worker.js",
-          "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png"
-        ]
-      },
-      {
-        "id": "REQ-117",
-        "summary": "Change the visible PWA download/install CTA copy to match the required Portuguese text exactly for pt: \"Baixe a Aplicação AntiFraud gratuitamente\". Provide equivalent translations via the existing i18n system for all active languages (en/es/fr/zh/ar/ru). Ensure this CTA is what the user sees as the primary install action label (not only a hidden label).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/components/PwaInstallAction.tsx",
-          "frontend/src/components/DashboardQuickActions.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/components/PwaInstallAction.tsx"
-        ]
-      },
-      {
-        "id": "REQ-118",
-        "summary": "Enforce final global branding everywhere in the frontend: remove 100% of references to \"Caffeine\" / \"caffeine.ai\" and any other legacy brands. Branding must be uniquely: \"AntiFraud\" as the product name and \"by HCoragem\" as the subtitle. The footer must render only the plain text \"by HCoragem\" (no icons, no links, no extra words) across the entire app shell. Apply this consistently across header, footer, i18n strings, HTML metadata (frontend/index.html), and PWA manifest metadata.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/index.html",
-          "frontend/public/manifest.webmanifest",
-          "frontend/src/components/AppLayout.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/components/AppLayout.tsx"
-        ]
-      },
-      {
-        "id": "REQ-119",
-        "summary": "Guarantee the frontend connects without errors to exactly these three existing canisters (no new backend/canisters): Main = v63rh-lqaaa-aaaaa-qewvq-cai, Extra = c6sjf-tqaaa-aaaap-qsiea-cai, Reports = 7w5qg-6aaaa-aaaab-ael4a-cai. Audit and remove/replace any leftover hardcoded canister IDs or bindings so that no Internet Computer calls target old/other canisters. Ensure actor initialization succeeds and the existing readiness report logs the active canister IDs and expected methods.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/ic/canisterIds.ts",
-          "frontend/src/ic/actors.ts",
-          "frontend/src/hooks/useAntiFraudActors.ts",
-          "frontend/src/ic/readinessReport.ts"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-120",
-        "summary": "Make the Reports (denúncias) database flow fully functional with an initially empty database: users can submit reports (email, phone, message, crypto) and can query/lookup existing reports. When the database has no data for a lookup, the UI must show a clear empty state (not an error). Do not seed the database and do not add any new backend endpoints; use the existing Reports canister interface only.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/CollaborativeResultCard.tsx",
-          "frontend/src/components/ReportSubmissionDialog.tsx",
-          "frontend/src/i18n/translations.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/CollaborativeResultCard.tsx",
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-121",
-        "summary": "Remove generic technical failure messages (e.g., \"Error analyzing message\") across message analysis and collaborative database checks. Replace them with specific, helpful, localized error states that do not expose internal details. Additionally, when there is no match in the collaborative reports database, show the exact Portuguese empty-result message: \"Sem registos conhecidos — base colaborativa em crescimento.\" and provide equivalent translations for all other supported languages. Do not claim a \"complete worldwide database\" anywhere; position it as a growing global collaborative database.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/CollaborativeResultCard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/CollaborativeResultCard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-122",
-        "summary": "Resolve the runtime failure where message analyses can return generic technical errors by validating and correcting the frontend integration with the Main canister (v63rh-lqaaa-aaaaa-qewvq-cai): method name, signature, and query/update mode must match the canister’s real Candid. Ensure analyzeText calls succeed and render the Portuguese backend response exactly as returned, with the existing optional translated block shown below only when the selected UI language is not Portuguese.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/ic/idl/main.idl.ts",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/i18n/translations.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/i18n/translations.ts"
+          "frontend/public/404.html"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/authorization/MixinAuthorization.mo",
-    "backend/authorization/access-control.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/antifraud-pwa-icon.dim_192x192.png",
-    "frontend/public/assets/generated/antifraud-pwa-icon.dim_512x512.png",
-    "frontend/public/service-worker.js",
+    "frontend/public/404.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/AppLayout.tsx",
-    "frontend/src/components/CollaborativeResultCard.tsx",
-    "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/components/PwaInstallAction.tsx",
-    "frontend/src/hooks/useActor.ts",
+    "frontend/src/components/DashboardQuickActions.tsx",
     "frontend/src/i18n/translations.ts",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/HowItWorksPage.tsx",
-    "frontend/src/pages/MissionPage.tsx",
+    "frontend/src/pages/InstitutionalMissionPage.tsx",
+    "frontend/src/pages/InstitutionalPage.tsx",
     "frontend/src/pages/PrivacyPage.tsx",
     "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/router/useSimpleRouter.ts",
-    "frontend/src/utils/seo.ts",
-    "frontend/src/utils/translateBackendResult.ts",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -13,106 +13,102 @@ export function TermsPage() {
     );
   }, [t]);
 
+  // Defensive rendering helper
+  const renderParagraphs = (paragraphs: any, fallback: string = 'Conteúdo em carregamento...') => {
+    if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
+      return <p className="leading-relaxed">{fallback}</p>;
+    }
+    return paragraphs.map((paragraph: string, index: number) => (
+      <p key={index} className="leading-relaxed">{paragraph || fallback}</p>
+    ));
+  };
+
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">{t.termsTitle}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+            {t.termsPageTitle || 'Termos e Condições'}
+          </h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            {t.termsSubtitle}
+            {t.termsPageDescription || 'Leia atentamente antes de usar'}
           </p>
           <p className="text-sm text-muted-foreground italic">
-            {t.termsEffectiveDate}
+            {t.termsEffectiveDate || 'Data de vigência: 10 de fevereiro de 2026'}
           </p>
         </div>
 
         {/* Terms Content */}
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection1Title}</CardTitle>
+            <CardTitle>{t.termsSection1Title || 'Aceitação dos Termos'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection1Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection1Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection2Title}</CardTitle>
+            <CardTitle>{t.termsSection2Title || 'Uso do Serviço'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection2Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection2Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection3Title}</CardTitle>
+            <CardTitle>{t.termsSection3Title || 'Limitações de Responsabilidade'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection3Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection3Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection4Title}</CardTitle>
+            <CardTitle>{t.termsSection4Title || 'Propriedade Intelectual'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection4Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection4Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection5Title}</CardTitle>
+            <CardTitle>{t.termsSection5Title || 'Modificações'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection5Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection5Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection6Title}</CardTitle>
+            <CardTitle>{t.termsSection6Title || 'Lei Aplicável'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection6Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection6Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection7Title}</CardTitle>
+            <CardTitle>{t.termsSection7Title || 'Contato'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection7Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection7Paragraphs)}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.termsSection8Title}</CardTitle>
+            <CardTitle>{t.termsSection8Title || 'Disposições Gerais'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
-            {t.termsSection8Paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="leading-relaxed">{paragraph}</p>
-            ))}
+            {renderParagraphs(t.termsSection8Paragraphs)}
           </CardContent>
         </Card>
       </div>

@@ -7,17 +7,23 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface UserProfile {
+    name: string;
+}
+export enum UserRole {
+    admin = "admin",
+    user = "user",
+    guest = "guest"
+}
 export interface backendInterface {
-    /**
-     * / Phase 2c: Analyzes text for scam indicators and returns a risk assessment string.
-     */
-    analyzeText(text: string): Promise<string>;
-    /**
-     * / Looks up a crypto address in stable map and returns the number of reports if found (returns null if never reported).
-     */
+    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
+    getCallerUserRole(): Promise<UserRole>;
     getCryptoReports(address: string): Promise<bigint | null>;
-    /**
-     * / Phase 3a: Read-only persistent stable store. Looks up a phone number in stable map and returns the number of reports if found (returns null if never reported).
-     */
     getPhoneReports(phone: string): Promise<bigint | null>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserRole(user: Principal): Promise<UserRole>;
+    isAdmin(): Promise<boolean>;
+    isCallerAdmin(): Promise<boolean>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
 }

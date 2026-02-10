@@ -42,10 +42,18 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Logo/Brand */}
           <button
             onClick={() => handleNavigation('/')}
-            className="flex flex-col items-start hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            aria-label="AntiFraud Home"
           >
-            <span className="text-xl font-bold text-foreground">{t.appTitle}</span>
-            <span className="text-xs text-muted-foreground">{t.appSubtitle}</span>
+            <img 
+              src="/assets/generated/antifraud-logo-icon.dim_256x256.png" 
+              alt="AntiFraud Logo" 
+              className="h-10 w-10 object-contain"
+            />
+            <div className="flex flex-col items-start">
+              <span className="text-xl font-bold text-foreground">{t.appTitle}</span>
+              <span className="text-xs text-muted-foreground">{t.appSubtitle}</span>
+            </div>
           </button>
 
           {/* Desktop Navigation */}
@@ -72,7 +80,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Mobile Menu Button */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Menu">
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </SheetTrigger>

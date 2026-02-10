@@ -1,242 +1,115 @@
 {
   "kind": "build_request",
-  "title": "Final AntiFraud release: complete institutional content, installable PWA, strict branding, and reliable 3-canister integration",
-  "priority": "high",
+  "title": "Start rebuild: apply official AntiFraud content verbatim, finalize offline heuristic analysis localization, and align routing/placeholders",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-112",
-      "text": "Add two new real institutional pages with long, professional, non-placeholder content and working navigation: route \"/mission\" (mission, global vision, social impact, and system limitations) and route \"/how-it-works\" (how verification works for email/phone/message/crypto, scoring, limitations, and responsible use). Both pages must be fully multilingual (pt/en/es/fr/zh/ar/ru) via the existing i18n system and must include basic SEO metadata (document title and meta description) consistent with the AntiFraud / by HCoragem branding.",
+      "id": "REQ-152",
+      "text": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim (no summarizing, rewriting, substituting, or “optimizing”) into the frontend content system so it is rendered on the informational pages at exactly these routes: \"/mission\" and \"/how-it-works\". The Portuguese (pt) version must match the official text exactly as provided by the user.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Criar páginas reais, completas e profissionais (não placeholders):\n/mission – Missão, visão global, impacto social, limites do sistema.\n/how-it-works – Como funciona a verificação (emails, telefones, mensagens, carteiras), scoring, limites e uso responsável.",
-          "Todas as páginas devem ter texto longo, navegação funcional e SEO básico."
+          "CONTEÚDO FINAL OFICIAL DO PROJETO ANTIFRAUD / BY HCORAGEM ❗ NÃO RESUMIR ❗ NÃO SUBSTITUIR ❗ NÃO REESCREVER ❗ NÃO “OTIMIZAR”"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to \"/mission\" renders a complete page with multiple sections covering mission, global vision, social impact, and clear system limitations; no placeholder text remains.",
-        "Navigating to \"/how-it-works\" renders a complete page that explains checks for email/phone/message/crypto, explains scoring at a high level, and includes responsible-use guidance and limitations; no placeholder text remains.",
-        "Both routes work with client-side navigation and browser back/forward without blank pages or full reloads.",
-        "All user-facing strings on these pages are translated for pt/en/es/fr/zh/ar/ru using the existing i18n provider.",
-        "Each page sets an appropriate document.title and meta description for basic SEO (no legacy branding)."
+        "Navigating to /mission renders the official pt content verbatim (exact wording) in the page sections.",
+        "Navigating to /how-it-works renders the official pt content verbatim (exact wording) in the page sections.",
+        "No part of the official pt content is auto-paraphrased or replaced with newly generated text.",
+        "The content is stored/served via the existing i18n/content structure used by MissionPage and HowItWorksPage (no hardcoded inline strings beyond defensive fallbacks)."
       ]
     },
     {
-      "id": "REQ-113",
-      "text": "Update the client-side router and top navigation so that the informational routes are exactly: \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" (and they render the correct page content). Preserve existing core flows on \"/\" (verification, reporting, authentication, history) without regressions. If legacy institutional routes exist (e.g., \"/institucional\" and \"/institucional/mission\"), keep them working by redirecting or aliasing to the new routes without duplicate content or broken links.",
+      "id": "REQ-153",
+      "text": "Update the Message analysis UI placeholder to exactly match the required Portuguese string for pt: \"Cole aqui a mensagem recebida\" and add equivalent translations for en/es/fr/zh/ar/ru using the existing i18n system.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Criar páginas reais, completas e profissionais (não placeholders): /mission ... /how-it-works ... /terms ... /privacy ...",
-          "As páginas têm conteúdo real e navegam corretamente."
+          "Fix/Frontend: restaurar (ou garantir) a caixa de introdução de mensagem na página principal com placeholder “Cole aqui a mensagem recebida”"
         ]
       },
       "acceptanceCriteria": [
-        "Header navigation includes links to \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" and each link renders content immediately.",
-        "No existing verification/reporting features on \"/\" are removed or broken.",
-        "Old institutional routes (if present in the app) do not break; they either redirect to the new routes or render the same content reliably."
+        "In Portuguese (pt), the Message textarea placeholder is exactly \"Cole aqui a mensagem recebida\" (no ellipsis, no extra words).",
+        "When switching languages, the placeholder updates immediately to the correct translation for the selected language.",
+        "No other placeholders regress (Email/Phone/Crypto placeholders still render correctly)."
       ]
     },
     {
-      "id": "REQ-114",
-      "text": "Ensure the Terms page at route \"/terms\" uses exactly the official Terms text previously provided by the user (verbatim, including the date line and all numbered sections), in all supported languages (pt/en/es/fr/zh/ar/ru), while preserving the existing TermsPage rendering structure (section titles + paragraph arrays / i18n-driven rendering).",
+      "id": "REQ-154",
+      "text": "Enforce single-language-per-session structured analysis output for the four Home analyses (Message, Email, Phone, Crypto): Risk/Explanation/Recommendation must be produced entirely in the currently selected UI language, with no mixed-language fragments, and without calling any Internet Computer canister methods.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "/terms – Usar exatamente o texto oficial já fornecido anteriormente."
+          "Make heuristic analysis results fully localized and single-language: the Risk label/value, Explanation, and Recommendation shown for Message/Email/Phone/Crypto must be produced in the currently selected UI language"
         ]
       },
       "acceptanceCriteria": [
-        "The content shown on \"/terms\" matches the user-provided official Terms text exactly (no paraphrasing, no omissions).",
-        "The Terms content is available and readable for all supported languages via the language selector.",
-        "The global app-shell branding remains AntiFraud / by HCoragem and the footer remains exactly \"by HCoragem\" (plain text only)."
+        "Running any of the four analyses while the UI language is pt produces Risk/Explanation/Recommendation fully in Portuguese.",
+        "Running any of the four analyses while the UI language is en/es/fr/zh/ar/ru produces Risk/Explanation/Recommendation fully in that language.",
+        "No analysis triggers or depends on main/extra/reports canister calls (analysis remains fully frontend-only).",
+        "The Risk value remains one of exactly: Low, Medium, High (localized labels may be displayed, but the structured output is consistent and professional per language)."
       ]
     },
     {
-      "id": "REQ-115",
-      "text": "Generate and implement a brand-new, complete, liability-minimizing Privacy Policy for route \"/privacy\" in all supported languages (pt/en/es/fr/zh/ar/ru), using the existing i18n structure that drives PrivacyPage (section titles + section content arrays). The Privacy Policy must be long, professional, and suitable for an anti-fraud informational tool (include data handling, security, retention, user rights, disclaimers, and contact guidance) and must not reference any legacy brands.",
+      "id": "REQ-155",
+      "text": "Implement mandatory High-risk keyword overrides for Message analysis: if the analyzed input contains any of these Portuguese keywords (case-insensitive) the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "/privacy – Gerar Política de Privacidade nova, completa e multilíngue."
+          "Implement mandatory High-Risk keyword overrides: if the analyzed input contains any of these Portuguese keywords (case-insensitive), the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\"."
         ]
       },
       "acceptanceCriteria": [
-        "The \"/privacy\" page contains long, complete policy content in each supported language (not placeholder text).",
-        "Content is rendered through the existing i18n translation structure used by PrivacyPage (section titles + section body text).",
-        "No references to Caffeine/caffeine.ai/ScamGuardian/byHTgamers/\"Desenvolvido por HCoragem\" appear in any privacy text unless explicitly required by the policy content (do not introduce legacy branding)."
+        "For each listed keyword, a Message containing the keyword yields Risk=High regardless of other heuristic scoring.",
+        "The override check is case-insensitive and matches typical accent usage (e.g., \"grátis\").",
+        "The override only affects risk classification; Explanation/Recommendation still render coherently in the selected language."
       ]
     },
     {
-      "id": "REQ-116",
-      "text": "Fix PWA installability so that installation completes successfully on supported platforms (Android/desktop where install prompt exists). Validate and correct the manifest (frontend/public/manifest.webmanifest), icons, start_url/scope expectations, and the service worker (frontend/public/service-worker.js) caching strategy so they do not break installability or routing. Preserve existing routes (/, /mission, /how-it-works, /terms, /privacy and any aliased legacy routes).",
+      "id": "REQ-156",
+      "text": "Ensure informational routing remains stable and legacy-compatible: the app must render the correct pages for \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\", and legacy institutional routes (at minimum: \"/institucional\" and \"/institucional/mission\") must continue to work via alias/redirect behavior without broken navigation.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Corrigir manifest.json e service worker para permitir instalação real.",
-          "O PWA instala."
+          "Unify informational routing to the final routes \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" and keep legacy institutional routes working via redirects/aliases"
         ]
       },
       "acceptanceCriteria": [
-        "On a supported platform (e.g., Chrome/Edge), the install prompt can be accepted and the PWA finishes installation successfully (no failed install).",
-        "The manifest is valid and references valid icon files that exist at the specified paths.",
-        "Service worker does not cause blank pages for SPA routes when installed; navigating directly to informational routes works in standalone mode.",
-        "No regressions to existing PWA behavior (standalone display, start_url, scope) and no broken asset caching."
-      ]
-    },
-    {
-      "id": "REQ-117",
-      "text": "Change the visible PWA download/install CTA copy to match the required Portuguese text exactly for pt: \"Baixe a Aplicação AntiFraud gratuitamente\". Provide equivalent translations via the existing i18n system for all active languages (en/es/fr/zh/ar/ru). Ensure this CTA is what the user sees as the primary install action label (not only a hidden label).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "Botão com o texto: “Baixe a Aplicação AntiFraud gratuitamente”",
-          "Texto traduzido via i18n para todos os idiomas ativos."
-        ]
-      },
-      "acceptanceCriteria": [
-        "When UI language is Portuguese (pt), the primary install CTA label is exactly: \"Baixe a Aplicação AntiFraud gratuitamente\".",
-        "When switching to en/es/fr/zh/ar/ru, the install CTA label updates immediately to the correct translation.",
-        "The install CTA remains visible immediately on first load (no navigation required) and still triggers the existing install UX when supported."
-      ]
-    },
-    {
-      "id": "REQ-118",
-      "text": "Enforce final global branding everywhere in the frontend: remove 100% of references to \"Caffeine\" / \"caffeine.ai\" and any other legacy brands. Branding must be uniquely: \"AntiFraud\" as the product name and \"by HCoragem\" as the subtitle. The footer must render only the plain text \"by HCoragem\" (no icons, no links, no extra words) across the entire app shell. Apply this consistently across header, footer, i18n strings, HTML metadata (frontend/index.html), and PWA manifest metadata.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "Remover 100% de referências a Caffeine.",
-          "Branding único e final: AntiFraud / by HCoragem.",
-          "Rodapé: by HCoragem (apenas).",
-          "Aplicar em header, footer, metadados, i18n e PWA."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A repository-wide audit of user-facing UI strings and metadata shows zero occurrences of \"Caffeine\" or \"caffeine.ai\".",
-        "The header shows product name \"AntiFraud\" and subtitle exactly \"by HCoragem\" for all supported languages.",
-        "The footer displays exactly \"by HCoragem\" as plain text only across all routes.",
-        "frontend/index.html title and meta description reference AntiFraud / by HCoragem (no legacy branding).",
-        "frontend/public/manifest.webmanifest name/short_name are exactly \"AntiFraud\" and description aligns with AntiFraud / by HCoragem branding (no legacy branding)."
-      ]
-    },
-    {
-      "id": "REQ-119",
-      "text": "Guarantee the frontend connects without errors to exactly these three existing canisters (no new backend/canisters): Main = v63rh-lqaaa-aaaaa-qewvq-cai, Extra = c6sjf-tqaaa-aaaap-qsiea-cai, Reports = 7w5qg-6aaaa-aaaab-ael4a-cai. Audit and remove/replace any leftover hardcoded canister IDs or bindings so that no Internet Computer calls target old/other canisters. Ensure actor initialization succeeds and the existing readiness report logs the active canister IDs and expected methods.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "Usar exclusivamente estes canisters:\nPrincipal: v63rh-lqaaa-aaaaa-qewvq-cai\nExtra: c6sjf-tqaaa-aaaap-qsiea-cai\nDenúncias: 7w5qg-6aaaa-aaaab-ael4a-cai",
-          "O frontend conecta sem erros aos três."
-        ]
-      },
-      "acceptanceCriteria": [
-        "All IC calls (message analysis, extra lookups, reports lookups, report submission) use only the three specified canister IDs.",
-        "Actor initialization succeeds without console errors in a normal session (logged-out and logged-in).",
-        "The developer console readiness report confirms the three canister IDs and that expected methods exist on each actor."
-      ]
-    },
-    {
-      "id": "REQ-120",
-      "text": "Make the Reports (denúncias) database flow fully functional with an initially empty database: users can submit reports (email, phone, message, crypto) and can query/lookup existing reports. When the database has no data for a lookup, the UI must show a clear empty state (not an error). Do not seed the database and do not add any new backend endpoints; use the existing Reports canister interface only.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "A base de denúncias começa vazia, mas:\nPermite submeter denúncias (email, telefone, mensagem, carteira).\nPermite consultar o que já foi denunciado.\nSe não houver dados, mostrar estado vazio claro (não erro)."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Submitting a report for each type (Email/Phone/Message/Crypto) completes successfully using the Reports canister.",
-        "Looking up an item that has no reports shows an explicit empty-state UI (no generic error, no stack traces, no \"service unavailable\" messaging).",
-        "Looking up an item that has reports shows risk score, report count, and categories using the existing UI components.",
-        "No backend changes are introduced to implement this functionality."
-      ]
-    },
-    {
-      "id": "REQ-121",
-      "text": "Remove generic technical failure messages (e.g., \"Error analyzing message\") across message analysis and collaborative database checks. Replace them with specific, helpful, localized error states that do not expose internal details. Additionally, when there is no match in the collaborative reports database, show the exact Portuguese empty-result message: \"Sem registos conhecidos — base colaborativa em crescimento.\" and provide equivalent translations for all other supported languages. Do not claim a \"complete worldwide database\" anywhere; position it as a growing global collaborative database.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "Remover mensagens genéricas como “Error analyzing message”.",
-          "Se não houver correspondência na base:\nMostrar resposta clara: “Sem registos conhecidos — base colaborativa em crescimento.”\nNunca prometer “base mundial completa”.\nPosicionar como base colaborativa global em crescimento."
-        ]
-      },
-      "acceptanceCriteria": [
-        "The UI no longer displays the generic string \"Error analyzing message\" (or similar generic technical errors) to end users for analysis/lookups.",
-        "If a collaborative lookup returns no data, the UI shows exactly \"Sem registos conhecidos — base colaborativa em crescimento.\" when language=pt, and an equivalent translation in other languages.",
-        "No page or component copy claims the database is complete or \"worldwide complete\"; copy explicitly frames it as growing/collaborative.",
-        "All new/updated messages are localized via the existing i18n system."
-      ]
-    },
-    {
-      "id": "REQ-122",
-      "text": "Resolve the runtime failure where message analyses can return generic technical errors by validating and correcting the frontend integration with the Main canister (v63rh-lqaaa-aaaaa-qewvq-cai): method name, signature, and query/update mode must match the canister’s real Candid. Ensure analyzeText calls succeed and render the Portuguese backend response exactly as returned, with the existing optional translated block shown below only when the selected UI language is not Portuguese.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "As análises não falham com erro técnico."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Running a message analysis from the main dashboard successfully calls analyzeText on the Main canister and displays the returned Portuguese text exactly as received.",
-        "When UI language is not Portuguese, the app shows the existing translated block directly below the Portuguese backend text; when language is Portuguese, the translated block is hidden.",
-        "No user-facing technical failure message (like \"Error analyzing message\") appears in the normal success path; failures show specific localized guidance without internal details."
+        "Client-side navigation renders the correct page for each of: /, /mission, /how-it-works, /terms, /privacy.",
+        "Visiting /institucional or /institucional/mission results in the Mission page being shown (via existing normalization/aliasing) without blank screens.",
+        "Browser back/forward works across these routes without full page reloads.",
+        "No regressions to the existing AppLayout header/navigation/language selector/auth control visibility."
       ]
     }
   ],
   "constraints": [
-    "Do not create or deploy any new backend canisters; use only the existing canisters: Main v63rh-lqaaa-aaaaa-qewvq-cai, Extra c6sjf-tqaaa-aaaap-qsiea-cai, Reports 7w5qg-6aaaa-aaaab-ael4a-cai.",
-    "Do not modify any files under the immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, and frontend/src/main.tsx; compose changes around them.",
-    "Do not seed the reports database; it must start empty and the UI must handle the empty state gracefully.",
-    "Keep the footer content exactly \"by HCoragem\" (plain text only) across all pages.",
-    "All institutional/terms/privacy pages must be real long-form content (no placeholders) and must be multilingual via the existing i18n system.",
-    "All Internet Computer calls from the frontend must use HTTPS and must target only the specified canisters (no legacy canister IDs)."
+    "Do not modify any backend Motoko canister code.",
+    "Do not edit files under immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and any sources under frontend/src/components/ui (compose them instead).",
+    "Keep the Home analyses (Message/Email/Phone/Crypto) fully frontend-only (no canister calls for analysis results).",
+    "Use English for any user-facing text in this build request (spec wording), but do not alter the requirement that the official Portuguese content must be applied verbatim in the app’s pt locale."
   ],
   "nonGoals": [
-    "Implementing new backend logic, new backend endpoints, or any database seeding/migrations.",
-    "Adding external services (analytics, email, third-party auth, external fraud APIs).",
-    "Changing or removing existing verification tabs/flows (message/email/phone/crypto) beyond what is required to fix errors, copy, and empty states.",
-    "Real-time features (WebSockets) or push notifications."
+    "Do not introduce new canisters or new backend endpoints.",
+    "Do not change existing report submission and collaborative database flows beyond avoiding regressions.",
+    "Do not redesign the overall UI/visual theme unless required to support the content rendering changes."
   ],
   "imageRequirements": {
-    "required": [
-      "Minimalistic PWA icon with the text \"AntiFraud / by HCoragem\" on a clean solid background (antifraud-pwa-icon.dim_192x192.png)",
-      "Minimalistic PWA icon with the text \"AntiFraud / by HCoragem\" on a clean solid background (antifraud-pwa-icon.dim_512x512.png)"
-    ],
+    "required": [],
     "edits": []
   },
   "userProfileUpdate": {
