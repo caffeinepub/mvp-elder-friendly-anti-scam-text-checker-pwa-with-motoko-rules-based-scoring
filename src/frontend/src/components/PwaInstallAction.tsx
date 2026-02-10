@@ -8,25 +8,31 @@ export function PwaInstallAction() {
   const { isInstallable, isInstalled, platform, promptInstall, getInstructions } = usePwaInstall();
   const { t } = useI18n();
 
+  // Don't show anything if already installed
   if (isInstalled) {
     return null;
   }
 
+  // If installable (beforeinstallprompt captured), show primary CTA that triggers prompt
+  // This button ONLY calls promptInstall when installable is true
   if (isInstallable) {
     return (
       <Button onClick={promptInstall} variant="default" size="sm" className="gap-2">
         <Download className="h-4 w-4" />
-        <span>{t.installPrimaryButton}</span>
+        <span className="hidden sm:inline">{t.installPrimaryButton}</span>
+        <span className="sm:hidden">Instalar</span>
       </Button>
     );
   }
 
+  // Otherwise show instructions dialog (for iOS or when prompt not available yet)
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Download className="h-4 w-4" />
-          <span>{t.installPrimaryButton}</span>
+          <span className="hidden sm:inline">{t.installPrimaryButton}</span>
+          <span className="sm:hidden">Instalar</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

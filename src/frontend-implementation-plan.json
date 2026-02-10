@@ -1,123 +1,103 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "AntiFraud content + fully localized offline analyses + stable informational routing",
+  "title": "Targeted frontend fixes for PWA installability, strict consent gating, and institutional page layout polish",
   "requirements": [
     {
-      "id": "REQ-152",
-      "summary": "Store and render the user-provided official AntiFraud/HCoragem Portuguese institutional content verbatim on /mission and /how-it-works using the existing i18n/content structure.",
+      "id": "REQ-1",
+      "summary": "Ensure runtime service worker registration/activation control and make the existing install CTA reliably trigger the captured beforeinstallprompt flow when available.",
       "acceptanceCriteria": [
-        "Navigating to /mission renders the official pt content verbatim (exact wording) in the page sections.",
-        "Navigating to /how-it-works renders the official pt content verbatim (exact wording) in the page sections.",
-        "No part of the official pt content is auto-paraphrased or replaced with newly generated text.",
-        "The content is stored/served via the existing i18n/content structure used by MissionPage and HowItWorksPage (no hardcoded inline strings beyond defensive fallbacks)."
+        "On first load in a supported browser, the app registers `public/service-worker.js` and `navigator.serviceWorker.controller` becomes non-null after activation/refresh (i.e., the service worker controls the page).",
+        "When `beforeinstallprompt` is available, the existing install CTA (from `PwaInstallAction`) triggers the native install prompt via the stored deferred prompt event (no link-like fallback behavior while install is actually available).",
+        "PWA behavior remains compatible with the existing manifest at `frontend/public/manifest.webmanifest` and the existing service worker routes/caching logic in `frontend/public/service-worker.js` (no breaking changes to offline navigation fallback)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/i18n/translations.ts",
+          "path": "frontend/src/pwa/pwaRuntime.ts",
+          "operation": "create",
+          "description": "Add a small PWA runtime singleton to (1) register the service worker at runtime and track when it becomes controlling, and (2) capture/store the `beforeinstallprompt` event as early as possible for later prompting. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/usePwaInstall.ts",
           "operation": "modify",
-          "description": "Replace the current pt keys used by MissionPage and HowItWorksPage with the exact official Portuguese text from msg-1 (verbatim) in the existing paragraph arrays/strings (e.g., missionVisionParagraphs, missionCoreParagraphs, howItWorks*Paragraphs, and any related headings/descriptions). Keep defensive fallbacks in pages unchanged, but ensure the primary content comes from i18n. Verify the component's usage instructions before implementing. (Component context: use existing shadcn-ui page composition already in use by these pages.)"
+          "description": "Update the hook to read/install from the shared PWA runtime stored deferred prompt (rather than relying solely on a component-mounted listener), so `isInstallable` and `promptInstall()` stay accurate even if `beforeinstallprompt` fires before `HomePage` fully mounts. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Initialize the PWA runtime during app startup (without touching `frontend/src/main.tsx`) so service worker registration happens on first render, clients are claimed, and the global `beforeinstallprompt` capture is active regardless of current route. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PwaInstallAction.tsx",
+          "operation": "modify",
+          "description": "Ensure the install CTA always calls the prompt function when installability is available (and does not open the instructions dialog in that case), aligning UI behavior with the stored deferred prompt flow. This uses shadcn-ui Button/Dialog patterns—verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Make the consent gate modal strictly non-dismissible until all required consents are accepted, while persisting acceptance using the existing localStorage consent state.",
+      "acceptanceCriteria": [
+        "While consent is required, the modal cannot be closed by pressing ESC, clicking outside the dialog, or any overlay interaction; only the explicit accept action (enabled after all checkboxes are checked) can remove the gate.",
+        "After acceptance, consent is persisted using the existing storage key/versioning in `frontend/src/hooks/useConsentGate.ts`, and the modal does not reappear on refresh unless the consent version is bumped.",
+        "The app remains blocked from use while consent is required (no interaction with core app UI)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ConsentGateModal.tsx",
+          "operation": "modify",
+          "description": "Harden the modal against all dismiss interactions by preventing outside-click/overlay dismissal and any implicit close events in addition to the existing ESC prevention; keep acceptance only via the explicit accept action after all checkboxes are checked. This uses the shadcn-ui AlertDialog—verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Tighten the interaction-blocking wrapper while consent is required to ensure the core app UI remains non-interactive (including navigation interactions) until acceptance, while keeping /terms and /privacy viewable as currently guarded. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Apply targeted layout/styling adjustments to improve spacing rhythm, hierarchy, and readability across Home and institutional pages without changing existing content.",
+      "acceptanceCriteria": [
+        "Institutional pages using `InstitutionalPageLayout` have consistent section spacing and mobile-friendly typography (no cramped separators or uneven vertical rhythm).",
+        "The Home page layout remains centered and readable across mobile and desktop with consistent container spacing relative to the sticky header and footer.",
+        "No changes are made to antifraud analysis logic or the textual content itself; changes are limited to layout/styling/composition."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InstitutionalPageLayout.tsx",
+          "operation": "modify",
+          "description": "Refine the institutional layout wrapper spacing (container padding, vertical rhythm, and content stack spacing) to make Mission/How It Works/Terms/Privacy consistent across breakpoints without altering the rendered text. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Adjust the existing institutional typography rules to improve readability and spacing consistency (e.g., reduce cramped stacked elements and avoid constraining full-width layout containers while keeping comfortable line lengths for text). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Polish the Home page layout spacing (hero spacing, section rhythm, and responsive container padding) to better align with the sticky header/footer while keeping the existing content and antifraud analysis behavior unchanged. This page uses shadcn-ui Card/Tabs components—verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TermsPage.tsx",
+          "operation": "modify",
+          "description": "Reduce visual clutter and improve vertical rhythm by tuning separator spacing and section composition (layout-only), without changing any Terms content. Uses shadcn-ui Card/Separator—verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/PrivacyPage.tsx",
+          "operation": "modify",
+          "description": "Reduce visual clutter and improve vertical rhythm by tuning separator spacing and section composition (layout-only), without changing any Privacy content. Uses shadcn-ui Card/Separator—verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/MissionPage.tsx",
           "operation": "modify",
-          "description": "Ensure MissionPage continues to read all body text from the i18n paragraph arrays (no new inline copy beyond existing defensive fallbacks) and that the section wiring matches the updated official pt content structure. Verify the component's usage instructions before implementing. (Component context: continue composing with shadcn-ui Card components for sections.)"
+          "description": "Apply small layout-only class adjustments (e.g., card spacing and typography consistency) to align with the updated `InstitutionalPageLayout`, without editing any textual content. Uses shadcn-ui Card—verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/HowItWorksPage.tsx",
           "operation": "modify",
-          "description": "Ensure HowItWorksPage continues to read all body text from the i18n paragraph arrays (no new inline copy beyond existing defensive fallbacks) and that accordion/sections map to the updated official pt content structure. Verify the component's usage instructions before implementing. (Component context: continue composing with shadcn-ui Accordion/Card components.)"
-        }
-      ]
-    },
-    {
-      "id": "REQ-153",
-      "summary": "Update the Message analysis placeholder for pt exactly and add i18n translations for en/es/fr/zh/ar/ru.",
-      "acceptanceCriteria": [
-        "In Portuguese (pt), the Message textarea placeholder is exactly \"Cole aqui a mensagem recebida\" (no ellipsis, no extra words).",
-        "When switching languages, the placeholder updates immediately to the correct translation for the selected language.",
-        "No other placeholders regress (Email/Phone/Crypto placeholders still render correctly)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/i18n/translations.ts",
-          "operation": "modify",
-          "description": "Change pt.placeholderMessage to exactly \"Cole aqui a mensagem recebida\". Add complete translation objects for en/es/fr/zh/ar/ru including placeholderMessage and keep existing placeholderEmail/placeholderPhone/placeholderCrypto correct per locale. Ensure keys used by HomePage remain present across languages. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/i18n/I18nProvider.tsx",
-          "operation": "modify",
-          "description": "Ensure the existing i18n system can serve the new en/es/fr/zh/ar/ru dictionaries and that language switching updates consumers immediately (including the HomePage textarea placeholder). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Confirm the Message Textarea placeholder is sourced from t.placeholderMessage and that no local hardcoded placeholder overrides exist; keep other placeholders unchanged. Verify the component's usage instructions before implementing. (Component context: continue using shadcn-ui Textarea/Input.)"
-        }
-      ]
-    },
-    {
-      "id": "REQ-154",
-      "summary": "Make all four Home heuristic analyses generate single-language structured output in the currently selected UI language, fully frontend-only (no canister calls).",
-      "acceptanceCriteria": [
-        "Running any of the four analyses while the UI language is pt produces Risk/Explanation/Recommendation fully in Portuguese.",
-        "Running any of the four analyses while the UI language is en/es/fr/zh/ar/ru produces Risk/Explanation/Recommendation fully in that language.",
-        "No analysis triggers or depends on main/extra/reports canister calls (analysis remains fully frontend-only).",
-        "The Risk value remains one of exactly: Low, Medium, High (localized labels may be displayed, but the structured output is consistent and professional per language)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
-          "operation": "modify",
-          "description": "Refactor analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto to accept the current UI language (or a translation bundle) and produce explanation/recommendation strings entirely in that language. Keep StructuredAnalysisResult.risk strictly one of 'Low' | 'Medium' | 'High'. Remove any hardcoded English-only outputs and avoid mixed-language fragments by selecting complete templates per language. Ensure logic remains deterministic and offline (no network calls). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Pass the current UI language from the existing i18n context into all four analysis functions so that outputs match the selected language at run time. Ensure the analysis flow remains frontend-only and does not call any backend actors for results. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/StructuredAnalysisResultCard.tsx",
-          "operation": "modify",
-          "description": "Ensure the UI displays localized labels (Risk/Explanation/Recommendation) and localized risk label text using i18n while preserving result.risk as the canonical 'Low'|'Medium'|'High' value. Verify the component's usage instructions before implementing. (Component context: continue composing with shadcn-ui primitives already in use.)"
-        }
-      ]
-    },
-    {
-      "id": "REQ-155",
-      "summary": "Add mandatory High-risk keyword overrides for Message analysis for specific Portuguese keywords (case-insensitive, accent-tolerant).",
-      "acceptanceCriteria": [
-        "For each listed keyword, a Message containing the keyword yields Risk=High regardless of other heuristic scoring.",
-        "The override check is case-insensitive and matches typical accent usage (e.g., \"grátis\").",
-        "The override only affects risk classification; Explanation/Recommendation still render coherently in the selected language."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
-          "operation": "modify",
-          "description": "In analyzeMessage, implement a pre/post scoring override that forces risk='High' if the input contains any of: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\". Make matching case-insensitive and accent-tolerant (e.g., via diacritic stripping on both input and keywords). Ensure only the risk classification is forced; explanation/recommendation should remain coherent and fully localized per REQ-154. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-156",
-      "summary": "Keep informational SPA routing stable for final routes and ensure legacy institutional routes continue working via alias/redirect without breaking navigation.",
-      "acceptanceCriteria": [
-        "Client-side navigation renders the correct page for each of: /, /mission, /how-it-works, /terms, /privacy.",
-        "Visiting /institucional or /institucional/mission results in the Mission page being shown (via existing normalization/aliasing) without blank screens.",
-        "Browser back/forward works across these routes without full page reloads.",
-        "No regressions to the existing AppLayout header/navigation/language selector/auth control visibility."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Harden route normalization/legacy compatibility so that /institucional and /institucional/mission reliably resolve to the Mission page and (when appropriate) update the client-side route to the canonical /mission (alias/redirect behavior) while preserving SPA navigation and back/forward behavior. Keep existing AppLayout wiring and header/navigation intact. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/public/404.html",
-          "operation": "modify",
-          "description": "Update the SPA-route fallback redirect list/logic (if present) to include /mission, /how-it-works, /terms, /privacy, and legacy /institucional and /institucional/mission so deep links do not land on a blank screen in static hosting scenarios."
+          "description": "Apply small layout-only class adjustments (e.g., accordion/card spacing and typography consistency) to align with the updated `InstitutionalPageLayout`, without editing any textual content. Uses shadcn-ui Accordion/Card—verify the component's usage instructions before implementing."
         }
       ]
     }

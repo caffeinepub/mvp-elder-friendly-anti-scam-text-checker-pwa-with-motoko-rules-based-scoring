@@ -27,6 +27,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { label: t.navHowItWorks, path: '/how-it-works' },
     { label: t.navTerms, path: '/terms' },
     { label: t.navPrivacy, path: '/privacy' },
+    { label: t.navDocumentation, path: '/documentation' },
   ];
 
   const handleNavigation = (path: string) => {

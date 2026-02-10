@@ -1,112 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Start rebuild: apply official AntiFraud content verbatim, finalize offline heuristic analysis localization, and align routing/placeholders",
+  "title": "Targeted visible fixes: PWA install behavior, mandatory consent modal, and page layout polish (no full rebuild)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-152",
-      "text": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim (no summarizing, rewriting, substituting, or “optimizing”) into the frontend content system so it is rendered on the informational pages at exactly these routes: \"/mission\" and \"/how-it-works\". The Portuguese (pt) version must match the official text exactly as provided by the user.",
+      "id": "REQ-1",
+      "text": "Fix PWA behavior so the app is clearly installable as a real standalone PWA (not just a shortcut) by ensuring the service worker is registered at runtime, becomes the controlling service worker for the page, and the install CTA reliably triggers the captured `beforeinstallprompt` flow when available.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "CONTEÚDO FINAL OFICIAL DO PROJETO ANTIFRAUD / BY HCORAGEM ❗ NÃO RESUMIR ❗ NÃO SUBSTITUIR ❗ NÃO REESCREVER ❗ NÃO “OTIMIZAR”"
+          "Avançar apenas com correção visível de PWA, modal obrigatória e layout das páginas. Sem rebuild total"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to /mission renders the official pt content verbatim (exact wording) in the page sections.",
-        "Navigating to /how-it-works renders the official pt content verbatim (exact wording) in the page sections.",
-        "No part of the official pt content is auto-paraphrased or replaced with newly generated text.",
-        "The content is stored/served via the existing i18n/content structure used by MissionPage and HowItWorksPage (no hardcoded inline strings beyond defensive fallbacks)."
+        "On first load in a supported browser, the app registers `public/service-worker.js` and `navigator.serviceWorker.controller` becomes non-null after activation/refresh (i.e., the service worker controls the page).",
+        "When `beforeinstallprompt` is available, the existing install CTA (from `PwaInstallAction`) triggers the native install prompt via the stored deferred prompt event (no link-like fallback behavior while install is actually available).",
+        "PWA behavior remains compatible with the existing manifest at `frontend/public/manifest.webmanifest` and the existing service worker routes/caching logic in `frontend/public/service-worker.js` (no breaking changes to offline navigation fallback)."
       ]
     },
     {
-      "id": "REQ-153",
-      "text": "Update the Message analysis UI placeholder to exactly match the required Portuguese string for pt: \"Cole aqui a mensagem recebida\" and add equivalent translations for en/es/fr/zh/ar/ru using the existing i18n system.",
+      "id": "REQ-2",
+      "text": "Make the consent gate modal strictly non-dismissible until the user accepts all required consents (cookies + terms + privacy), including preventing dismissal via ESC, outside click, and any other dialog-close interactions; acceptance must remain persisted via the existing localStorage consent state.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Fix/Frontend: restaurar (ou garantir) a caixa de introdução de mensagem na página principal com placeholder “Cole aqui a mensagem recebida”"
+          "Avançar apenas com correção visível de PWA, modal obrigatória e layout das páginas. Sem rebuild total"
         ]
       },
       "acceptanceCriteria": [
-        "In Portuguese (pt), the Message textarea placeholder is exactly \"Cole aqui a mensagem recebida\" (no ellipsis, no extra words).",
-        "When switching languages, the placeholder updates immediately to the correct translation for the selected language.",
-        "No other placeholders regress (Email/Phone/Crypto placeholders still render correctly)."
+        "While consent is required, the modal cannot be closed by pressing ESC, clicking outside the dialog, or any overlay interaction; only the explicit accept action (enabled after all checkboxes are checked) can remove the gate.",
+        "After acceptance, consent is persisted using the existing storage key/versioning in `frontend/src/hooks/useConsentGate.ts`, and the modal does not reappear on refresh unless the consent version is bumped.",
+        "The app remains blocked from use while consent is required (no interaction with core app UI)."
       ]
     },
     {
-      "id": "REQ-154",
-      "text": "Enforce single-language-per-session structured analysis output for the four Home analyses (Message, Email, Phone, Crypto): Risk/Explanation/Recommendation must be produced entirely in the currently selected UI language, with no mixed-language fragments, and without calling any Internet Computer canister methods.",
+      "id": "REQ-3",
+      "text": "Adjust page layout styling (targeted UI/layout corrections only) to improve spacing rhythm, visual hierarchy, and readability across the main pages (Home, Mission, How It Works, Terms, Privacy) without rewriting or changing the existing content.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Make heuristic analysis results fully localized and single-language: the Risk label/value, Explanation, and Recommendation shown for Message/Email/Phone/Crypto must be produced in the currently selected UI language"
+          "Avançar apenas com correção visível de PWA, modal obrigatória e layout das páginas. Sem rebuild total"
         ]
       },
       "acceptanceCriteria": [
-        "Running any of the four analyses while the UI language is pt produces Risk/Explanation/Recommendation fully in Portuguese.",
-        "Running any of the four analyses while the UI language is en/es/fr/zh/ar/ru produces Risk/Explanation/Recommendation fully in that language.",
-        "No analysis triggers or depends on main/extra/reports canister calls (analysis remains fully frontend-only).",
-        "The Risk value remains one of exactly: Low, Medium, High (localized labels may be displayed, but the structured output is consistent and professional per language)."
-      ]
-    },
-    {
-      "id": "REQ-155",
-      "text": "Implement mandatory High-risk keyword overrides for Message analysis: if the analyzed input contains any of these Portuguese keywords (case-insensitive) the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Implement mandatory High-Risk keyword overrides: if the analyzed input contains any of these Portuguese keywords (case-insensitive), the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\"."
-        ]
-      },
-      "acceptanceCriteria": [
-        "For each listed keyword, a Message containing the keyword yields Risk=High regardless of other heuristic scoring.",
-        "The override check is case-insensitive and matches typical accent usage (e.g., \"grátis\").",
-        "The override only affects risk classification; Explanation/Recommendation still render coherently in the selected language."
-      ]
-    },
-    {
-      "id": "REQ-156",
-      "text": "Ensure informational routing remains stable and legacy-compatible: the app must render the correct pages for \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\", and legacy institutional routes (at minimum: \"/institucional\" and \"/institucional/mission\") must continue to work via alias/redirect behavior without broken navigation.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Unify informational routing to the final routes \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\" and keep legacy institutional routes working via redirects/aliases"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Client-side navigation renders the correct page for each of: /, /mission, /how-it-works, /terms, /privacy.",
-        "Visiting /institucional or /institucional/mission results in the Mission page being shown (via existing normalization/aliasing) without blank screens.",
-        "Browser back/forward works across these routes without full page reloads.",
-        "No regressions to the existing AppLayout header/navigation/language selector/auth control visibility."
+        "Institutional pages using `InstitutionalPageLayout` have consistent section spacing and mobile-friendly typography (no cramped separators or uneven vertical rhythm).",
+        "The Home page layout remains centered and readable across mobile and desktop with consistent container spacing relative to the sticky header and footer.",
+        "No changes are made to antifraud analysis logic or the textual content itself; changes are limited to layout/styling/composition."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any backend Motoko canister code.",
-    "Do not edit files under immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and any sources under frontend/src/components/ui (compose them instead).",
-    "Keep the Home analyses (Message/Email/Phone/Crypto) fully frontend-only (no canister calls for analysis results).",
-    "Use English for any user-facing text in this build request (spec wording), but do not alter the requirement that the official Portuguese content must be applied verbatim in the app’s pt locale."
+    "Do not perform a full rebuild or large refactor; implement only targeted, visible fixes for PWA behavior, mandatory consent modal gating, and page layout.",
+    "Frontend immutable paths must not be edited: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, `frontend/src/components/ui/*`.",
+    "Do not modify antifraud detection/analysis logic; this pass is UI/PWA/compliance-gate refinement only.",
+    "Backend changes are out of scope unless strictly required for these visible frontend fixes (default: no backend changes)."
   ],
   "nonGoals": [
-    "Do not introduce new canisters or new backend endpoints.",
-    "Do not change existing report submission and collaborative database flows beyond avoiding regressions.",
-    "Do not redesign the overall UI/visual theme unless required to support the content rendering changes."
+    "Adding new antifraud features or changing analysis algorithms/results.",
+    "Adding new authentication providers (Internet Identity only).",
+    "Introducing new backend services, external databases, or real-time communication.",
+    "Rewriting Terms/Privacy/Mission/How It Works content (styling/layout polish only)."
   ],
   "imageRequirements": {
     "required": [],

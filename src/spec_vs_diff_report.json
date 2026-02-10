@@ -1,58 +1,94 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T11:31:52.380Z",
-  "summary": "Diff implements client-side routing normalization with legacy aliases for /institucional(/mission) → /mission, updates pt Message placeholder to the required string in i18n, and switches Home analyses to a frontend-only structuredFraudAnalysis engine with localized templates. However, the diff summary does not provide evidence that the official AntiFraud Portuguese institutional content was applied verbatim to /mission and /how-it-works, nor that the mandatory High-risk keyword overrides for Message analysis were implemented.",
+  "generatedAt": "2026-02-10T15:37:41.786Z",
+  "summary": "Diff implements a new PWA runtime singleton and updates the install CTA behavior, plus broad layout/typography tweaks for Home and institutional pages. Consent gating is strengthened at the App container level, but the diff provides no evidence that the consent modal itself is made strictly non-dismissible (ESC/outside click). Several additional features/changes appear beyond the targeted PWA/consent/layout scope (i18n expansion, language selector, backend typing/config, translation utilities, manifest/index.html changes, etc.).",
   "missing_requirements": [
     {
-      "id": "REQ-152",
-      "requirement": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim into the existing i18n/content structure for /mission and /how-it-works (pt must match exactly).",
-      "reason": "The diff summary shows routing to MissionPage/HowItWorksPage and mentions translation keys exist, but does not show the actual official Portuguese text being inserted verbatim into the content system (MissionPage/HowItWorksPage content not included).",
+      "id": "REQ-2",
+      "requirement": "Make the consent gate modal strictly non-dismissible until the user accepts all required consents (cookies + terms + privacy), including preventing dismissal via ESC, outside click, and any other dialog-close interactions; acceptance must remain persisted via the existing localStorage consent state.",
+      "reason": "The diff shows App-level interaction blocking (pointerEvents/inert) and a navigation guard, but does not include any changes/evidence inside the consent modal component to disable ESC key, outside click, or other dialog close interactions. Without explicit modal-level controls, the modal may still be dismissible even if the underlying app UI is blocked.",
       "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/src/i18n/translations.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-155",
-      "requirement": "Implement mandatory High-risk keyword overrides for Message analysis for Portuguese keywords (case-insensitive): dinheiro, lucro, promoção, oportunidade, grátis, encontros, investimento, criptomoeda.",
-      "reason": "structuredFraudAnalysis.ts is truncated and the shown portion contains only localized templates; there is no visible implementation of the specified keyword override logic that forces Risk='High' when any listed keyword appears.",
-      "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
+        "frontend/src/App.tsx (ConsentGateModal usage + pointerEvents/inert, but no modal behavior changes shown)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Institutional pages updated/added with 'ScamGuardian' vision/values/quantum-threat preparedness content.",
-      "reason": "BuildRequest only asks for official AntiFraud content on /mission and /how-it-works and legacy route compatibility; it does not request new or different institutional narrative content about 'ScamGuardian'.",
+      "description": "Expanded i18n scope including sessionStorage-persisted language state and new translation dictionary changes beyond requested PWA/consent/layout polish.",
+      "reason": "BuildRequest did not request adding/changing language persistence mechanisms or broad translation dictionary updates; only targeted PWA, mandatory consent gating, and layout polish were requested.",
       "evidence": [
-        "frontend/src/pages/InstitutionalPage.tsx",
-        "frontend/src/pages/InstitutionalMissionPage.tsx",
-        "frontend-file-summaries.txt"
+        "frontend/src/i18n/I18nProvider.tsx",
+        "frontend/src/i18n/translations.ts"
       ]
     },
     {
-      "description": "Added a static SPA fallback redirect mechanism in public/404.html for known routes.",
-      "reason": "Not explicitly requested (REQ-156 focuses on client-side routing and legacy aliases), though it may support routing on static hosts; it is additional behavior beyond the stated requirements.",
+      "description": "Added a global LanguageSelector with 7 supported languages and flags.",
+      "reason": "BuildRequest explicitly lists non-goals unrelated to adding new user-facing feature sets; a new language selector and multi-language expansion were not requested as part of PWA/consent/layout fixes.",
       "evidence": [
-        "frontend/public/404.html"
+        "frontend/src/components/LanguageSelector.tsx"
+      ]
+    },
+    {
+      "description": "Added a frontend utility to translate backend analysis results (translateBackendResult).",
+      "reason": "This is a new feature affecting how antifraud results are presented/translated; not requested in the targeted visible fixes and risks interacting with antifraud output presentation scope.",
+      "evidence": [
+        "frontend/src/utils/translateBackendResult.ts"
+      ]
+    },
+    {
+      "description": "Backend actor configuration / Candid interface / TS type definition changes on the frontend side.",
+      "reason": "BuildRequest states backend changes are out of scope unless strictly required for visible frontend fixes; no evidence ties these changes to PWA install behavior, consent modal dismissibility, or layout spacing.",
+      "evidence": [
+        "frontend/src/config.ts",
+        "frontend/src/backend.idl.ts",
+        "frontend/src/backend.d.ts"
+      ]
+    },
+    {
+      "description": "Added a phase documentation file about a read-only database canister integration (Phase 3a).",
+      "reason": "Not requested by the BuildRequest; introduces unrelated project documentation and phase planning.",
+      "evidence": [
+        "frontend/PHASE3A_READONLY_FRONTEND_NOCHANGE.md"
+      ]
+    },
+    {
+      "description": "Modified/added PWA manifest and index.html references (base-path safe icon/manifest handling).",
+      "reason": "REQ-1 requires runtime SW registration and prompt handling while remaining compatible with existing manifest/service worker; changing manifest/index.html behavior is not explicitly requested in the diff summary and may exceed the targeted runtime fix scope.",
+      "evidence": [
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest"
+      ]
+    },
+    {
+      "description": "Router behavior additions for legacy alias handling (/institucional → /mission) and route normalization.",
+      "reason": "Not requested by PWA/consent/layout requirements; introduces new navigation behavior beyond stated scope.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Tailwind configuration changes expanding the design system (font sizes, OKLCH tokens).",
+      "reason": "While some styling tweaks are requested, the diff summary indicates broad Tailwind config customization which may exceed 'targeted' layout corrections.",
+      "evidence": [
+        "frontend/tailwind.config.js"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/public/404.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/DashboardQuickActions.tsx",
-    "frontend/src/i18n/translations.ts",
+    "frontend/src/components/InstitutionalPageLayout.tsx",
+    "frontend/src/components/PwaInstallAction.tsx",
+    "frontend/src/hooks/usePwaInstall.ts",
+    "frontend/src/index.css",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/InstitutionalMissionPage.tsx",
-    "frontend/src/pages/InstitutionalPage.tsx",
+    "frontend/src/pages/HowItWorksPage.tsx",
+    "frontend/src/pages/MissionPage.tsx",
     "frontend/src/pages/PrivacyPage.tsx",
     "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/utils/structuredFraudAnalysis.ts",
+    "frontend/src/pwa/pwaRuntime.ts",
     "project_state.json"
   ]
 }

@@ -1,78 +1,65 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T11:31:52.388Z",
+  "generatedAt": "2026-02-10T15:37:41.789Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-152",
-        "summary": "Apply the user-provided official AntiFraud / by HCoragem institutional/legal/functional content verbatim (no summarizing, rewriting, substituting, or “optimizing”) into the frontend content system so it is rendered on the informational pages at exactly these routes: \"/mission\" and \"/how-it-works\". The Portuguese (pt) version must match the official text exactly as provided by the user.",
+        "id": "REQ-1",
+        "summary": "Fix PWA behavior so the app is clearly installable as a real standalone PWA (not just a shortcut) by ensuring the service worker is registered at runtime, becomes the controlling service worker for the page, and the install CTA reliably triggers the captured `beforeinstallprompt` flow when available.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
+          "frontend/src/pwa/pwaRuntime.ts",
+          "frontend/src/hooks/usePwaInstall.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/PwaInstallAction.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pwa/pwaRuntime.ts",
+          "frontend/src/hooks/usePwaInstall.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/PwaInstallAction.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Make the consent gate modal strictly non-dismissible until the user accepts all required consents (cookies + terms + privacy), including preventing dismissal via ESC, outside click, and any other dialog-close interactions; acceptance must remain persisted via the existing localStorage consent state.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ConsentGateModal.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Adjust page layout styling (targeted UI/layout corrections only) to improve spacing rhythm, visual hierarchy, and readability across the main pages (Home, Mission, How It Works, Terms, Privacy) without rewriting or changing the existing content.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/InstitutionalPageLayout.tsx",
+          "frontend/src/index.css",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/pages/TermsPage.tsx",
+          "frontend/src/pages/PrivacyPage.tsx",
           "frontend/src/pages/MissionPage.tsx",
           "frontend/src/pages/HowItWorksPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-153",
-        "summary": "Update the Message analysis UI placeholder to exactly match the required Portuguese string for pt: \"Cole aqui a mensagem recebida\" and add equivalent translations for en/es/fr/zh/ar/ru using the existing i18n system.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/i18n/I18nProvider.tsx",
-          "frontend/src/pages/HomePage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/pages/HomePage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-154",
-        "summary": "Enforce single-language-per-session structured analysis output for the four Home analyses (Message, Email, Phone, Crypto): Risk/Explanation/Recommendation must be produced entirely in the currently selected UI language, with no mixed-language fragments, and without calling any Internet Computer canister methods.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/components/InstitutionalPageLayout.tsx",
+          "frontend/src/index.css",
           "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/StructuredAnalysisResultCard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
-          "frontend/src/pages/HomePage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-155",
-        "summary": "Implement mandatory High-risk keyword overrides for Message analysis: if the analyzed input contains any of these Portuguese keywords (case-insensitive) the structured result Risk must be High: \"dinheiro\", \"lucro\", \"promoção\", \"oportunidade\", \"grátis\", \"encontros\", \"investimento\", \"criptomoeda\".",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
-        ]
-      },
-      {
-        "id": "REQ-156",
-        "summary": "Ensure informational routing remains stable and legacy-compatible: the app must render the correct pages for \"/\", \"/mission\", \"/how-it-works\", \"/terms\", and \"/privacy\", and legacy institutional routes (at minimum: \"/institucional\" and \"/institucional/mission\") must continue to work via alias/redirect behavior without broken navigation.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/public/404.html"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/public/404.html"
+          "frontend/src/pages/TermsPage.tsx",
+          "frontend/src/pages/PrivacyPage.tsx",
+          "frontend/src/pages/MissionPage.tsx",
+          "frontend/src/pages/HowItWorksPage.tsx"
         ]
       }
     ]
@@ -82,16 +69,17 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/404.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/DashboardQuickActions.tsx",
-    "frontend/src/i18n/translations.ts",
+    "frontend/src/components/InstitutionalPageLayout.tsx",
+    "frontend/src/components/PwaInstallAction.tsx",
+    "frontend/src/hooks/usePwaInstall.ts",
+    "frontend/src/index.css",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/InstitutionalMissionPage.tsx",
-    "frontend/src/pages/InstitutionalPage.tsx",
+    "frontend/src/pages/HowItWorksPage.tsx",
+    "frontend/src/pages/MissionPage.tsx",
     "frontend/src/pages/PrivacyPage.tsx",
     "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/utils/structuredFraudAnalysis.ts",
+    "frontend/src/pwa/pwaRuntime.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

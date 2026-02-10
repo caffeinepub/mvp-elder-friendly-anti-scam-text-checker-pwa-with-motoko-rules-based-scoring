@@ -1,19 +1,18 @@
-const CACHE_NAME = 'antifraud-v2';
-const APP_SHELL_ROUTES = ['/', '/mission', '/how-it-works', '/terms', '/privacy', '/institucional', '/institucional/mission'];
+const CACHE_NAME = 'antifraud-v3';
+const APP_SHELL_ROUTES = ['/', '/mission', '/how-it-works', '/terms', '/privacy', '/institucional', '/institucional/mission', '/documentation'];
 
 // Install event - cache app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
-        '/',
-        '/manifest.webmanifest',
-        '/assets/generated/antifraud-logo-icon.dim_256x256.png',
-        '/assets/generated/antifraud-pwa-icon.dim_192x192.png',
-        '/assets/generated/antifraud-pwa-icon.dim_512x512.png',
+        './',
+        './manifest.webmanifest',
+        './assets/generated/antifraud-logo-icon.dim_256x256.png',
+        './assets/generated/antifraud-pwa-icon.dim_192x192.png',
+        './assets/generated/antifraud-pwa-icon.dim_512x512.png',
       ]).catch((err) => {
         console.warn('Service worker cache preload failed:', err);
-        // Continue installation even if some assets fail
         return Promise.resolve();
       });
     })
@@ -21,7 +20,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate event - clean old caches and claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -30,9 +29,10 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
+    }).then(() => {
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
 // Fetch event - network first, fallback to cache for navigation
@@ -54,7 +54,6 @@ self.addEventListener('fetch', (event) => {
           if (response.ok && response.status === 200) {
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('text/html')) {
-              // Clone and verify response has content before caching
               return response.clone().text().then((text) => {
                 if (text && text.trim().length > 0 && text.includes('<div id="root">')) {
                   const responseClone = new Response(text, {
@@ -77,14 +76,11 @@ self.addEventListener('fetch', (event) => {
           // Network failed - serve app shell from cache for known routes
           const pathname = url.pathname.replace(/\/$/, '') || '/';
           if (APP_SHELL_ROUTES.includes(pathname)) {
-            return caches.match('/').then((cachedResponse) => {
+            return caches.match('./').then((cachedResponse) => {
               if (cachedResponse) {
                 return cachedResponse;
               }
-              // Fallback to 404 page if no cache available
-              return caches.match('/404.html').then((fallback) => {
-                return fallback || new Response('Offline', { status: 503 });
-              });
+              return new Response('Offline', { status: 503 });
             });
           }
           return new Response('Offline', { status: 503 });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useI18n } from '@/i18n/I18nProvider';
+import { pwaRuntime } from '@/pwa/pwaRuntime';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,7 +17,6 @@ interface PwaInstallState {
 
 export function usePwaInstall(): PwaInstallState {
   const { t } = useI18n();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [platform, setPlatform] = useState<'android' | 'ios' | 'desktop' | 'unknown'>('unknown');
@@ -35,38 +35,50 @@ export function usePwaInstall(): PwaInstallState {
       setPlatform('desktop');
     }
 
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Check if already installed (display-mode standalone or iOS standalone)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    
+    if (isStandalone || isIOSStandalone) {
       setIsInstalled(true);
       setIsInstallable(false);
       return;
     }
 
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      const promptEvent = e as BeforeInstallPromptEvent;
-      setDeferredPrompt(promptEvent);
-      setIsInstallable(true);
+    // Check if deferred prompt is already available from runtime
+    const checkPromptAvailability = () => {
+      const prompt = pwaRuntime.getDeferredPrompt();
+      if (prompt) {
+        setIsInstallable(true);
+      }
     };
+
+    // Initial check
+    checkPromptAvailability();
+
+    // Poll for prompt availability (in case it arrives after mount)
+    const pollInterval = setInterval(checkPromptAvailability, 500);
 
     const handleAppInstalled = () => {
       console.log('PWA installed successfully');
       setIsInstalled(true);
       setIsInstallable(false);
-      setDeferredPrompt(null);
+      clearInterval(pollInterval);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      clearInterval(pollInterval);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const promptInstall = async () => {
+    const deferredPrompt = pwaRuntime.getDeferredPrompt();
+    
     if (!deferredPrompt) {
+      console.warn('No deferred prompt available');
       return;
     }
 
@@ -74,12 +86,14 @@ export function usePwaInstall(): PwaInstallState {
       await deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
       
-      // Only mark as installed when user accepts AND appinstalled event fires
-      // The appinstalled event handler will set isInstalled to true
-      if (choiceResult.outcome === 'dismissed') {
-        setDeferredPrompt(null);
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
         setIsInstallable(false);
       }
+      
+      pwaRuntime.clearDeferredPrompt();
     } catch (error) {
       console.error('Error prompting install:', error);
     }

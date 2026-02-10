@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Update AntiFraud informational content, localization, and routing so official Portuguese text is displayed verbatim, analysis outputs are fully localized, and legacy routes remain compatible.
+**Goal:** Apply targeted, visible frontend fixes to improve PWA installability, enforce a non-dismissible mandatory consent gate, and polish page layout styling without rebuilding or changing content/analysis logic.
 
 **Planned changes:**
-- Insert the user-provided official AntiFraud / by HCoragem Portuguese (pt) content verbatim into the existing i18n/content system and render it on `/mission` and `/how-it-works`.
-- Update the Message analysis textarea placeholder to exactly `Cole aqui a mensagem recebida` for pt, and add translations for en/es/fr/zh/ar/ru via the existing i18n system.
-- Ensure the Home heuristic analyses (Message/Email/Phone/Crypto) produce Risk/Explanation/Recommendation entirely in the currently selected UI language with no mixed-language output, remaining frontend-only (no canister calls).
-- Add mandatory High-risk keyword overrides for Message analysis when the input contains (case-insensitive) any of: `dinheiro`, `lucro`, `promoção`, `oportunidade`, `grátis`, `encontros`, `investimento`, `criptomoeda`.
-- Align informational routing so `/`, `/mission`, `/how-it-works`, `/terms`, and `/privacy` render correctly, while legacy routes (including `/institucional` and `/institucional/mission`) continue to work via alias/redirect behavior.
+- Ensure the existing service worker (`public/service-worker.js`) is registered at runtime and becomes the controlling service worker for the page (with activation/refresh behavior working as expected).
+- Fix the PWA install CTA behavior so `PwaInstallAction` reliably uses the captured `beforeinstallprompt` deferred prompt when available (triggering the native install prompt instead of fallback behavior).
+- Make the consent gate modal strictly non-dismissible until all required consents (cookies + terms + privacy) are accepted; prevent closing via ESC, outside click, or overlay interactions; keep persistence via the existing localStorage consent version/state.
+- Apply targeted layout/styling adjustments to `InstitutionalPageLayout` and main pages (Home, Mission, How It Works, Terms, Privacy) to improve spacing rhythm, readability, and consistent container behavior across mobile/desktop—without changing text content.
 
-**User-visible outcome:** Users can navigate to the finalized Mission and How It Works pages at the new routes with the official Portuguese text exactly as provided, see a corrected localized Message placeholder, run fully localized offline heuristic analyses, and access both current and legacy informational routes without broken navigation.
+**User-visible outcome:** The app installs as a proper standalone PWA via a reliable install prompt when supported, users must accept required consents before using the app, and key pages feel more consistent and readable across devices.
