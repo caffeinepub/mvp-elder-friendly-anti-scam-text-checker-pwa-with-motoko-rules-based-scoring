@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 13,
-  "summary": "Expandir o escopo do rebuild do AntiFraud (by HCoragem) para além de PWA/CTA instalável, incluindo app móvel nativa para Android e iOS e preparação para publicação na Google Play e App Store, mantendo conteúdo PT oficial, traduções multilíngues, antifraude 100% frontend, modal obrigatório de cookies/termos e validação de rotas/navegação.",
+  "projectStateVersion": 15,
+  "summary": "Adotar execução faseada e controlada do AntiFraud / by HCoragem: Fase 1 (LIVE) como web app institucional + antifraude 100% frontend, legal e transparente (UI sólida sem transparências, páginas PT verbatim + i18n, modal obrigatório, PWA honesta sem promessas de app nativa/WebAPK); Fase 2 (Pro) como apps nativas Android/iOS com detecção em tempo real (SMS/WhatsApp/chamadas), push, processamento local, conformidade e subscrição; Fase 3 roadmap técnico e integração (app + backend colaborativo) com testes.",
   "architectural_notes": [
     "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
     "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
@@ -17,7 +17,8 @@
   "known_issues": [
     "Falha/erro no processo de rebuild final (AI hiccup); necessário tentar novamente em etapas.",
     "Fluxo atual de instalação PWA/CTA pode não disparar beforeinstallprompt corretamente e/ou não resultar em WebAPK real (apenas atalho), com ausência do app em Configurações > Apps e no app drawer.",
-    "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida."
+    "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida.",
+    "WebAPK/instalação PWA pode falhar por limitação do ambiente de deploy (domínio draft/test), não por código: exige HTTPS estável, start_url/scope acessíveis e SW/rotas com resposta 200 para o Chrome disparar prompt nativo."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -180,6 +181,30 @@
         "REQ-27"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-complete-a-100-frontend-antifraud-analysis-engine-for-all-home-page-verification-tabs-message-email-phone-crypto-using-deterministic-heuristics-only-returning-a-structured-result-object-with-risk-low-medium-high-explanation-recommendation-and-without-calling-any-backend-canister-methods-for-these-analyses",
+      "title": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-mandatory-high-risk-override-for-critical-scam-keywords-for-message-analysis-in-all-supported-ui-languages-pt-en-es-fr-zh-ar-ru-if-any-critical-keyword-is-detected-case-insensitive-accent-insensitive-where-applicable-the-risk-must-be-forced-to-high-regardless-of-other-heuristic-scores-and-the-explanation-must-clearly-state-that-the-high-risk-was-triggered-by-critical-keywords",
+      "title": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-antifraud-engine-outputs-are-fully-localized-for-pt-en-es-fr-zh-ar-ru-including-indicator-labels-e-g-urgency-language-credential-requests-links-detected-so-that-explanations-read-naturally-in-the-selected-language-and-do-not-mix-languages",
+      "title": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -296,6 +321,36 @@
     {
       "id": "AR-17",
       "summary": "Criar checklist visível e auditável (passo a passo) para validar objetivamente no dispositivo cada funcionalidade (PWA/instalação, modal, páginas institucionais, branding, idiomas, motor antifraude) antes de novos builds/rebuilds.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "PASSO 2 (Fase 1): Corrigir UI básica removendo transparências/blur/efeito vidro em menus, janelas e modais; garantir fundos sólidos, alto contraste, CTAs consistentes e footer/header legíveis, sem alterar lógica PWA/antifraude/consentimento/i18n.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-19",
+      "summary": "PASSO 7 (Fase 1): PWA honesta — ajustar copy/CTA para “Adicionar ao ecrã inicial” e explicitar “Versão web instalada no dispositivo”, removendo/evitando promessas de app nativa e referências a WebAPK na comunicação ao utilizador.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "PASSO 5 (Fase 1): Garantir que todas as análises do motor antifraude citam fontes públicas legais e exibem uma base colaborativa visível com referências (transparência e credibilidade).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Fase 2 (Pro): Implementar apps nativas Android/iOS com detecção de risco em mensagens e chamadas (SMS/WhatsApp/telefonia), alertas (push), processamento local, conformidade (GDPR/lei nacional) e modelo de subscrição (histórico/relatórios).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "PASSO 8 (Fase 1): Checklist final auditável para validação antes de publicar LIVE (UI sólida, conteúdos completos, idiomas corretos, antifraude funcional e explicado, modal obrigatório, branding limpo, zero referências antigas e zero promessas falsas).",
       "reqIds": [],
       "status": "pending"
     }

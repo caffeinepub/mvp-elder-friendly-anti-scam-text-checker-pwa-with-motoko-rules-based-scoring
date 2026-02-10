@@ -1,7 +1,9 @@
 // Frontend-only structured fraud analysis engine
 // Implements deterministic heuristic rules for message/email/phone/crypto analysis
 // Returns structured results: { risk: 'Low'|'Medium'|'High', explanation: string, recommendation: string }
-// Now supports full localization - all outputs in the selected UI language
+// Supports full localization with critical-keyword High-risk overrides for all languages
+
+import { normalizeText, containsAnyKeyword } from './antifraudTextNormalize';
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
@@ -19,6 +21,32 @@ interface AnalysisTemplates {
   mediumRisk: (indicators: string) => { explanation: string; recommendation: string };
   lowRisk: (indicators: string) => { explanation: string; recommendation: string };
   noIndicators: { explanation: string; recommendation: string };
+  criticalKeywordTrigger: string; // Localized explanation for critical keyword override
+}
+
+// Language-specific indicator labels
+interface IndicatorLabels {
+  urgencyLanguage: string;
+  multipleUrgency: string;
+  financialRequests: string;
+  credentialRequests: string;
+  containsLinks: string;
+  cryptoAddresses: string;
+  excessivePunctuation: string;
+  excessiveCapitalization: string;
+  disposableEmail: string;
+  suspiciousDomain: string;
+  typosquatting: string;
+  excessiveNumbers: string;
+  randomPattern: string;
+  invalidPhoneFormat: string;
+  tooShort: string;
+  tooLong: string;
+  suspiciousPattern: string;
+  invalidCryptoFormat: string;
+  knownScamAddress: string;
+  newAddress: string;
+  highValueTarget: string;
 }
 
 // Portuguese templates
@@ -46,7 +74,32 @@ const PT_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'Nenhum indicador de risco significativo detectado.',
     recommendation: 'O conteúdo parece seguro, mas sempre verifique a identidade do remetente para pedidos importantes.'
-  }
+  },
+  criticalKeywordTrigger: 'palavras-chave críticas de alto risco detectadas'
+};
+
+const PT_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'linguagem de urgência',
+  multipleUrgency: 'múltiplas palavras de urgência',
+  financialRequests: 'pedidos financeiros',
+  credentialRequests: 'pedidos de credenciais',
+  containsLinks: 'contém links',
+  cryptoAddresses: 'endereços de criptomoeda',
+  excessivePunctuation: 'pontuação excessiva',
+  excessiveCapitalization: 'capitalização excessiva',
+  disposableEmail: 'serviço de email descartável',
+  suspiciousDomain: 'extensão de domínio suspeita',
+  typosquatting: 'possível imitação de domínio',
+  excessiveNumbers: 'números excessivos',
+  randomPattern: 'padrão aleatório suspeito',
+  invalidPhoneFormat: 'formato de telefone inválido',
+  tooShort: 'número muito curto',
+  tooLong: 'número muito longo',
+  suspiciousPattern: 'padrão suspeito',
+  invalidCryptoFormat: 'formato de endereço inválido',
+  knownScamAddress: 'endereço conhecido em fraudes',
+  newAddress: 'endereço novo sem histórico',
+  highValueTarget: 'alvo de alto valor'
 };
 
 // English templates
@@ -74,7 +127,32 @@ const EN_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'No significant risk indicators detected.',
     recommendation: 'Content appears safe, but always verify sender identity for important requests.'
-  }
+  },
+  criticalKeywordTrigger: 'critical high-risk keywords detected'
+};
+
+const EN_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'urgency language',
+  multipleUrgency: 'multiple urgency keywords',
+  financialRequests: 'financial requests',
+  credentialRequests: 'credential requests',
+  containsLinks: 'contains links',
+  cryptoAddresses: 'cryptocurrency addresses',
+  excessivePunctuation: 'excessive punctuation',
+  excessiveCapitalization: 'excessive capitalization',
+  disposableEmail: 'disposable email service',
+  suspiciousDomain: 'suspicious domain extension',
+  typosquatting: 'possible domain impersonation',
+  excessiveNumbers: 'excessive numbers',
+  randomPattern: 'suspicious random pattern',
+  invalidPhoneFormat: 'invalid phone format',
+  tooShort: 'number too short',
+  tooLong: 'number too long',
+  suspiciousPattern: 'suspicious pattern',
+  invalidCryptoFormat: 'invalid address format',
+  knownScamAddress: 'known scam address',
+  newAddress: 'new address with no history',
+  highValueTarget: 'high-value target'
 };
 
 // Spanish templates
@@ -102,7 +180,32 @@ const ES_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'No se detectaron indicadores de riesgo significativos.',
     recommendation: 'El contenido parece seguro, pero siempre verifique la identidad del remitente para solicitudes importantes.'
-  }
+  },
+  criticalKeywordTrigger: 'palabras clave críticas de alto riesgo detectadas'
+};
+
+const ES_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'lenguaje de urgencia',
+  multipleUrgency: 'múltiples palabras de urgencia',
+  financialRequests: 'solicitudes financieras',
+  credentialRequests: 'solicitudes de credenciales',
+  containsLinks: 'contiene enlaces',
+  cryptoAddresses: 'direcciones de criptomoneda',
+  excessivePunctuation: 'puntuación excesiva',
+  excessiveCapitalization: 'capitalización excesiva',
+  disposableEmail: 'servicio de correo desechable',
+  suspiciousDomain: 'extensión de dominio sospechosa',
+  typosquatting: 'posible imitación de dominio',
+  excessiveNumbers: 'números excesivos',
+  randomPattern: 'patrón aleatorio sospechoso',
+  invalidPhoneFormat: 'formato de teléfono inválido',
+  tooShort: 'número demasiado corto',
+  tooLong: 'número demasiado largo',
+  suspiciousPattern: 'patrón sospechoso',
+  invalidCryptoFormat: 'formato de dirección inválido',
+  knownScamAddress: 'dirección conocida en fraudes',
+  newAddress: 'dirección nueva sin historial',
+  highValueTarget: 'objetivo de alto valor'
 };
 
 // French templates
@@ -130,7 +233,32 @@ const FR_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'Aucun indicateur de risque significatif détecté.',
     recommendation: 'Le contenu semble sûr, mais vérifiez toujours l\'identité de l\'expéditeur pour les demandes importantes.'
-  }
+  },
+  criticalKeywordTrigger: 'mots-clés critiques à haut risque détectés'
+};
+
+const FR_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'langage d\'urgence',
+  multipleUrgency: 'plusieurs mots d\'urgence',
+  financialRequests: 'demandes financières',
+  credentialRequests: 'demandes d\'identifiants',
+  containsLinks: 'contient des liens',
+  cryptoAddresses: 'adresses de cryptomonnaie',
+  excessivePunctuation: 'ponctuation excessive',
+  excessiveCapitalization: 'capitalisation excessive',
+  disposableEmail: 'service de courrier jetable',
+  suspiciousDomain: 'extension de domaine suspecte',
+  typosquatting: 'possible imitation de domaine',
+  excessiveNumbers: 'nombres excessifs',
+  randomPattern: 'motif aléatoire suspect',
+  invalidPhoneFormat: 'format de téléphone invalide',
+  tooShort: 'numéro trop court',
+  tooLong: 'numéro trop long',
+  suspiciousPattern: 'motif suspect',
+  invalidCryptoFormat: 'format d\'adresse invalide',
+  knownScamAddress: 'adresse connue dans les fraudes',
+  newAddress: 'nouvelle adresse sans historique',
+  highValueTarget: 'cible de grande valeur'
 };
 
 // Chinese templates
@@ -158,7 +286,32 @@ const ZH_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: '未检测到重大风险指标。',
     recommendation: '内容似乎安全，但对于重要请求，请始终验证发件人身份。'
-  }
+  },
+  criticalKeywordTrigger: '检测到关键高风险关键词'
+};
+
+const ZH_LABELS: IndicatorLabels = {
+  urgencyLanguage: '紧急语言',
+  multipleUrgency: '多个紧急关键词',
+  financialRequests: '财务请求',
+  credentialRequests: '凭证请求',
+  containsLinks: '包含链接',
+  cryptoAddresses: '加密货币地址',
+  excessivePunctuation: '过度标点',
+  excessiveCapitalization: '过度大写',
+  disposableEmail: '一次性电子邮件服务',
+  suspiciousDomain: '可疑域名扩展',
+  typosquatting: '可能的域名仿冒',
+  excessiveNumbers: '过多数字',
+  randomPattern: '可疑随机模式',
+  invalidPhoneFormat: '无效电话格式',
+  tooShort: '号码太短',
+  tooLong: '号码太长',
+  suspiciousPattern: '可疑模式',
+  invalidCryptoFormat: '无效地址格式',
+  knownScamAddress: '已知诈骗地址',
+  newAddress: '无历史记录的新地址',
+  highValueTarget: '高价值目标'
 };
 
 // Arabic templates
@@ -186,7 +339,32 @@ const AR_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'لم يتم اكتشاف مؤشرات مخاطر كبيرة.',
     recommendation: 'يبدو المحتوى آمنًا، ولكن تحقق دائمًا من هوية المرسل للطلبات المهمة.'
-  }
+  },
+  criticalKeywordTrigger: 'تم اكتشاف كلمات رئيسية حرجة عالية المخاطر'
+};
+
+const AR_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'لغة الإلحاح',
+  multipleUrgency: 'كلمات إلحاح متعددة',
+  financialRequests: 'طلبات مالية',
+  credentialRequests: 'طلبات بيانات الاعتماد',
+  containsLinks: 'يحتوي على روابط',
+  cryptoAddresses: 'عناوين العملات المشفرة',
+  excessivePunctuation: 'علامات ترقيم مفرطة',
+  excessiveCapitalization: 'أحرف كبيرة مفرطة',
+  disposableEmail: 'خدمة بريد إلكتروني مؤقت',
+  suspiciousDomain: 'امتداد نطاق مشبوه',
+  typosquatting: 'احتمال انتحال النطاق',
+  excessiveNumbers: 'أرقام مفرطة',
+  randomPattern: 'نمط عشوائي مشبوه',
+  invalidPhoneFormat: 'تنسيق هاتف غير صالح',
+  tooShort: 'رقم قصير جدًا',
+  tooLong: 'رقم طويل جدًا',
+  suspiciousPattern: 'نمط مشبوه',
+  invalidCryptoFormat: 'تنسيق عنوان غير صالح',
+  knownScamAddress: 'عنوان معروف في الاحتيال',
+  newAddress: 'عنوان جديد بدون سجل',
+  highValueTarget: 'هدف عالي القيمة'
 };
 
 // Russian templates
@@ -214,10 +392,35 @@ const RU_TEMPLATES: AnalysisTemplates = {
   noIndicators: {
     explanation: 'Значительных индикаторов риска не обнаружено.',
     recommendation: 'Контент кажется безопасным, но всегда проверяйте личность отправителя для важных запросов.'
-  }
+  },
+  criticalKeywordTrigger: 'обнаружены критические ключевые слова высокого риска'
 };
 
-// Template selector
+const RU_LABELS: IndicatorLabels = {
+  urgencyLanguage: 'язык срочности',
+  multipleUrgency: 'несколько слов срочности',
+  financialRequests: 'финансовые запросы',
+  credentialRequests: 'запросы учетных данных',
+  containsLinks: 'содержит ссылки',
+  cryptoAddresses: 'адреса криптовалют',
+  excessivePunctuation: 'чрезмерная пунктуация',
+  excessiveCapitalization: 'чрезмерные заглавные буквы',
+  disposableEmail: 'одноразовый почтовый сервис',
+  suspiciousDomain: 'подозрительное расширение домена',
+  typosquatting: 'возможная подделка домена',
+  excessiveNumbers: 'чрезмерные числа',
+  randomPattern: 'подозрительный случайный шаблон',
+  invalidPhoneFormat: 'неверный формат телефона',
+  tooShort: 'номер слишком короткий',
+  tooLong: 'номер слишком длинный',
+  suspiciousPattern: 'подозрительный шаблон',
+  invalidCryptoFormat: 'неверный формат адреса',
+  knownScamAddress: 'известный мошеннический адрес',
+  newAddress: 'новый адрес без истории',
+  highValueTarget: 'цель высокой стоимости'
+};
+
+// Template and label selectors with English fallback
 function getTemplates(language: string): AnalysisTemplates {
   switch (language) {
     case 'pt': return PT_TEMPLATES;
@@ -227,49 +430,100 @@ function getTemplates(language: string): AnalysisTemplates {
     case 'zh': return ZH_TEMPLATES;
     case 'ar': return AR_TEMPLATES;
     case 'ru': return RU_TEMPLATES;
-    default: return EN_TEMPLATES;
+    default: return EN_TEMPLATES; // Fallback to English
   }
+}
+
+function getIndicatorLabels(language: string): IndicatorLabels {
+  switch (language) {
+    case 'pt': return PT_LABELS;
+    case 'en': return EN_LABELS;
+    case 'es': return ES_LABELS;
+    case 'fr': return FR_LABELS;
+    case 'zh': return ZH_LABELS;
+    case 'ar': return AR_LABELS;
+    case 'ru': return RU_LABELS;
+    default: return EN_LABELS; // Fallback to English
+  }
+}
+
+// ============================================================================
+// CRITICAL KEYWORDS (Mandatory High-risk override for all languages)
+// ============================================================================
+
+const CRITICAL_KEYWORDS_BY_LANGUAGE: Record<string, string[]> = {
+  pt: [
+    'dinheiro', 'lucro', 'promoção', 'oportunidade', 'grátis', 'gratis',
+    'encontros', 'investimento', 'criptomoeda', 'bitcoin', 'ganhe', 'prêmio'
+  ],
+  en: [
+    'money', 'profit', 'promotion', 'opportunity', 'free', 'dating',
+    'investment', 'cryptocurrency', 'bitcoin', 'earn', 'prize', 'winner'
+  ],
+  es: [
+    'dinero', 'lucro', 'promoción', 'oportunidad', 'gratis', 'citas',
+    'inversión', 'criptomoneda', 'bitcoin', 'gana', 'premio', 'ganador'
+  ],
+  fr: [
+    'argent', 'profit', 'promotion', 'opportunité', 'gratuit', 'rencontres',
+    'investissement', 'cryptomonnaie', 'bitcoin', 'gagner', 'prix', 'gagnant'
+  ],
+  zh: [
+    '钱', '利润', '促销', '机会', '免费', '约会',
+    '投资', '加密货币', '比特币', '赚钱', '奖品', '赢家'
+  ],
+  ar: [
+    'مال', 'ربح', 'ترويج', 'فرصة', 'مجاني', 'مواعدة',
+    'استثمار', 'عملة_مشفرة', 'بيتكوين', 'اكسب', 'جائزة', 'فائز'
+  ],
+  ru: [
+    'деньги', 'прибыль', 'акция', 'возможность', 'бесплатно', 'знакомства',
+    'инвестиция', 'криптовалюта', 'биткоин', 'заработать', 'приз', 'победитель'
+  ]
+};
+
+// Get all critical keywords (union of all languages for comprehensive detection)
+function getAllCriticalKeywords(): string[] {
+  const allKeywords = new Set<string>();
+  Object.values(CRITICAL_KEYWORDS_BY_LANGUAGE).forEach(keywords => {
+    keywords.forEach(kw => allKeywords.add(kw));
+  });
+  return Array.from(allKeywords);
 }
 
 // ============================================================================
 // MESSAGE ANALYSIS
 // ============================================================================
 
-// High-risk keywords for Portuguese (mandatory override to High risk)
-const PT_HIGH_RISK_KEYWORDS = [
-  'dinheiro',
-  'lucro',
-  'promoção',
-  'oportunidade',
-  'grátis',
-  'gratis', // without accent
-  'encontros',
-  'investimento',
-  'criptomoeda'
-];
-
-// Normalize text for accent-insensitive matching
-function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ''); // Remove diacritics
-}
-
 const MESSAGE_PATTERNS = {
   urgencyKeywords: [
     'urgente', 'imediatamente', 'agora', 'rápido', 'última chance', 'expira',
     'urgent', 'immediately', 'now', 'fast', 'last chance', 'expires',
-    'ação imediata', 'immediate action', 'conta bloqueada', 'account blocked'
+    'ação imediata', 'immediate action', 'conta bloqueada', 'account blocked',
+    'urgente', 'inmediatamente', 'ahora', 'rápido', 'última oportunidad', 'expira',
+    'urgent', 'immédiatement', 'maintenant', 'rapide', 'dernière chance', 'expire',
+    '紧急', '立即', '现在', '快速', '最后机会', '过期',
+    'عاجل', 'فورا', 'الآن', 'سريع', 'آخر_فرصة', 'ينتهي',
+    'срочно', 'немедленно', 'сейчас', 'быстро', 'последний_шанс', 'истекает'
   ],
   financialKeywords: [
     'dinheiro', 'pagamento', 'transferência', 'conta bancária', 'cartão',
     'money', 'payment', 'transfer', 'bank account', 'card', 'credit',
-    'pix', 'mbway', 'paypal', 'bitcoin', 'crypto', 'investimento', 'investment'
+    'pix', 'mbway', 'paypal', 'bitcoin', 'crypto', 'investimento', 'investment',
+    'dinero', 'pago', 'transferencia', 'cuenta bancaria', 'tarjeta',
+    'argent', 'paiement', 'virement', 'compte bancaire', 'carte',
+    '钱', '支付', '转账', '银行账户', '卡',
+    'مال', 'دفع', 'تحويل', 'حساب_بنكي', 'بطاقة',
+    'деньги', 'платеж', 'перевод', 'банковский_счет', 'карта'
   ],
   credentialRequests: [
     'senha', 'password', 'pin', 'código', 'verificação', 'verification',
-    'confirme', 'confirm', 'dados pessoais', 'personal data', 'login'
+    'confirme', 'confirm', 'dados pessoais', 'personal data', 'login',
+    'contraseña', 'código', 'verificación', 'confirmar', 'datos personales',
+    'mot de passe', 'code', 'vérification', 'confirmer', 'données personnelles',
+    '密码', '验证码', '验证', '确认', '个人数据',
+    'كلمة_السر', 'رمز', 'تحقق', 'تأكيد', 'بيانات_شخصية',
+    'пароль', 'код', 'проверка', 'подтвердить', 'личные_данные'
   ],
   suspiciousUrls: /https?:\/\/[^\s]+/gi,
   cryptoAddresses: /\b(0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b/g,
@@ -279,6 +533,7 @@ const MESSAGE_PATTERNS = {
 
 export function analyzeMessage(message: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
+  const labels = getIndicatorLabels(language);
   
   if (!message || message.trim().length === 0) {
     return {
@@ -290,22 +545,16 @@ export function analyzeMessage(message: string, language: string = 'pt'): Struct
   // Safety: handle very long messages
   const safeMessage = message.slice(0, 10000);
   const lowerMessage = safeMessage.toLowerCase();
-  const normalizedMessage = normalizeText(safeMessage);
   
-  // MANDATORY HIGH-RISK OVERRIDE: Check for Portuguese high-risk keywords
-  const hasHighRiskKeyword = PT_HIGH_RISK_KEYWORDS.some(keyword => 
-    normalizedMessage.includes(normalizeText(keyword))
-  );
+  // MANDATORY HIGH-RISK OVERRIDE: Check for critical keywords (all languages)
+  const allCriticalKeywords = getAllCriticalKeywords();
+  const hasCriticalKeyword = containsAnyKeyword(safeMessage, allCriticalKeywords);
   
-  if (hasHighRiskKeyword) {
-    // Force High risk for messages containing these keywords
-    const keywordIndicators = language === 'pt' 
-      ? 'palavras-chave de alto risco (dinheiro, lucro, promoção, oportunidade, grátis, encontros, investimento, criptomoeda)'
-      : 'high-risk keywords (money, profit, promotion, opportunity, free, dating, investment, cryptocurrency)';
-    
+  if (hasCriticalKeyword) {
+    // Force High risk for messages containing critical keywords
     return {
       risk: 'High',
-      ...templates.highRisk(keywordIndicators)
+      ...templates.highRisk(templates.criticalKeywordTrigger)
     };
   }
   
@@ -318,10 +567,10 @@ export function analyzeMessage(message: string, language: string = 'pt'): Struct
   ).length;
   if (urgencyCount >= 2) {
     riskScore += 3;
-    indicators.push(language === 'pt' ? 'múltiplas palavras de urgência' : 'multiple urgency keywords');
+    indicators.push(labels.multipleUrgency);
   } else if (urgencyCount === 1) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'linguagem de urgência' : 'urgency language');
+    indicators.push(labels.urgencyLanguage);
   }
 
   // Check financial keywords
@@ -330,7 +579,7 @@ export function analyzeMessage(message: string, language: string = 'pt'): Struct
   ).length;
   if (financialCount >= 2) {
     riskScore += 2;
-    indicators.push(language === 'pt' ? 'pedidos financeiros' : 'financial requests');
+    indicators.push(labels.financialRequests);
   } else if (financialCount === 1) {
     riskScore += 1;
   }
@@ -341,35 +590,35 @@ export function analyzeMessage(message: string, language: string = 'pt'): Struct
   ).length;
   if (credentialCount >= 1) {
     riskScore += 3;
-    indicators.push(language === 'pt' ? 'pedidos de credenciais' : 'credential requests');
+    indicators.push(labels.credentialRequests);
   }
 
   // Check for URLs
   const urls = safeMessage.match(MESSAGE_PATTERNS.suspiciousUrls);
   if (urls && urls.length > 0) {
     riskScore += 2;
-    indicators.push(language === 'pt' ? 'contém links' : 'contains links');
+    indicators.push(labels.containsLinks);
   }
 
   // Check for crypto addresses
   const cryptoAddresses = safeMessage.match(MESSAGE_PATTERNS.cryptoAddresses);
   if (cryptoAddresses && cryptoAddresses.length > 0) {
     riskScore += 2;
-    indicators.push(language === 'pt' ? 'endereços de criptomoeda' : 'cryptocurrency addresses');
+    indicators.push(labels.cryptoAddresses);
   }
 
   // Check excessive punctuation
   const excessivePunct = safeMessage.match(MESSAGE_PATTERNS.excessivePunctuation);
   if (excessivePunct && excessivePunct.length >= 2) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'pontuação excessiva' : 'excessive punctuation');
+    indicators.push(labels.excessivePunctuation);
   }
 
   // Check all caps (shouting)
   const allCaps = safeMessage.match(MESSAGE_PATTERNS.allCaps);
   if (allCaps && allCaps.length >= 3) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'capitalização excessiva' : 'excessive capitalization');
+    indicators.push(labels.excessiveCapitalization);
   }
 
   // Determine risk level and generate response
@@ -413,6 +662,7 @@ const EMAIL_PATTERNS = {
 
 export function analyzeEmail(email: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
+  const labels = getIndicatorLabels(language);
   
   if (!email || email.trim().length === 0) {
     return {
@@ -439,7 +689,7 @@ export function analyzeEmail(email: string, language: string = 'pt'): Structured
   for (const suspDomain of EMAIL_PATTERNS.suspiciousDomains) {
     if (domain.includes(suspDomain)) {
       riskScore += 3;
-      indicators.push(language === 'pt' ? 'serviço de email descartável' : 'disposable email service');
+      indicators.push(labels.disposableEmail);
       break;
     }
   }
@@ -448,36 +698,30 @@ export function analyzeEmail(email: string, language: string = 'pt'): Structured
   for (const tld of EMAIL_PATTERNS.suspiciousTlds) {
     if (domain.endsWith(tld)) {
       riskScore += 2;
-      indicators.push(language === 'pt' ? 'extensão de domínio suspeita' : 'suspicious domain extension');
+      indicators.push(labels.suspiciousDomain);
       break;
     }
   }
 
   // Check for typosquatting/impersonation
   for (const pattern of EMAIL_PATTERNS.typosquatPatterns) {
-    if (domain.includes(pattern) || localPart.includes(pattern)) {
+    if (domain.includes(pattern)) {
       riskScore += 3;
-      indicators.push(language === 'pt' ? 'possível personificação de marca' : 'possible brand impersonation');
+      indicators.push(labels.typosquatting);
       break;
     }
   }
 
-  // Check for excessive numbers
+  // Check for excessive numbers in local part
   if (EMAIL_PATTERNS.excessiveNumbers.test(localPart)) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'padrão numérico incomum' : 'unusual number pattern');
+    indicators.push(labels.excessiveNumbers);
   }
 
-  // Check for very long random strings
-  if (localPart.length > 20 && EMAIL_PATTERNS.randomPattern.test(localPart)) {
+  // Check for random-looking patterns
+  if (EMAIL_PATTERNS.randomPattern.test(localPart)) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'padrão de caracteres aleatórios' : 'random character pattern');
-  }
-
-  // Check for very short local part
-  if (localPart.length <= 2) {
-    riskScore += 1;
-    indicators.push(language === 'pt' ? 'endereço invulgarmente curto' : 'unusually short address');
+    indicators.push(labels.randomPattern);
   }
 
   // Determine risk level
@@ -506,22 +750,21 @@ export function analyzeEmail(email: string, language: string = 'pt'): Structured
 // ============================================================================
 
 const PHONE_PATTERNS = {
-  // Common scam prefixes (international)
-  scamPrefixes: [
-    '+234', '+233', '+254', // West/East Africa (common in advance-fee fraud)
-    '+92', '+91',           // Pakistan/India (common in tech support scams)
-    '+62',                  // Indonesia
+  validFormats: [
+    /^\+?[1-9]\d{7,14}$/,           // International format
+    /^\d{9,11}$/,                    // National format
+    /^\(\d{2,3}\)\s?\d{4,5}-?\d{4}$/ // Formatted (XX) XXXXX-XXXX
   ],
-  // Premium rate prefixes (varies by country, these are examples)
-  premiumPrefixes: ['900', '901', '902', '903', '904', '905'],
-  // Suspicious patterns
-  repeatingDigits: /(\d)\1{4,}/,
-  allSameDigit: /^(\d)\1+$/,
-  sequential: /(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)/,
+  suspiciousPatterns: [
+    /^0{5,}/,      // Too many zeros
+    /^1{5,}/,      // Repeated 1s
+    /^(\d)\1{6,}/, // Same digit repeated 7+ times
+  ]
 };
 
 export function analyzePhone(phone: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
+  const labels = getIndicatorLabels(language);
   
   if (!phone || phone.trim().length === 0) {
     return {
@@ -530,65 +773,39 @@ export function analyzePhone(phone: string, language: string = 'pt'): Structured
     };
   }
 
-  const safePhone = phone.trim().slice(0, 50);
-  const digitsOnly = safePhone.replace(/\D/g, '');
-  
-  if (digitsOnly.length < 7) {
-    return {
-      risk: 'Low',
-      ...templates.invalidFormat
-    };
-  }
-
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
   let riskScore = 0;
   const indicators: string[] = [];
 
-  // Check for known scam country codes
-  for (const prefix of PHONE_PATTERNS.scamPrefixes) {
-    if (safePhone.startsWith(prefix)) {
-      riskScore += 3;
-      indicators.push(language === 'pt' ? 'código de país de alto risco' : 'high-risk country code');
-      break;
-    }
-  }
-
-  // Check for premium rate numbers
-  for (const prefix of PHONE_PATTERNS.premiumPrefixes) {
-    if (digitsOnly.startsWith(prefix)) {
-      riskScore += 2;
-      indicators.push(language === 'pt' ? 'número de tarifa premium' : 'premium rate number');
-      break;
-    }
-  }
-
-  // Check for repeating digits (often fake/test numbers)
-  if (PHONE_PATTERNS.repeatingDigits.test(digitsOnly)) {
+  // Check format validity
+  const isValidFormat = PHONE_PATTERNS.validFormats.some(pattern => pattern.test(cleanPhone));
+  if (!isValidFormat) {
     riskScore += 2;
-    indicators.push(language === 'pt' ? 'padrão de dígitos repetidos' : 'repeating digit pattern');
+    indicators.push(labels.invalidPhoneFormat);
   }
 
-  // Check if all digits are the same
-  if (PHONE_PATTERNS.allSameDigit.test(digitsOnly)) {
-    riskScore += 3;
-    indicators.push(language === 'pt' ? 'padrão inválido (todos os dígitos iguais)' : 'invalid pattern (all same digit)');
-  }
-
-  // Check for sequential patterns
-  if (PHONE_PATTERNS.sequential.test(digitsOnly)) {
+  // Check length
+  if (cleanPhone.length < 8) {
+    riskScore += 2;
+    indicators.push(labels.tooShort);
+  } else if (cleanPhone.length > 15) {
     riskScore += 1;
-    indicators.push(language === 'pt' ? 'padrão de dígitos sequenciais' : 'sequential digit pattern');
+    indicators.push(labels.tooLong);
   }
 
-  // Very long numbers are suspicious
-  if (digitsOnly.length > 15) {
-    riskScore += 1;
-    indicators.push(language === 'pt' ? 'número invulgarmente longo' : 'unusually long number');
+  // Check for suspicious patterns
+  for (const pattern of PHONE_PATTERNS.suspiciousPatterns) {
+    if (pattern.test(cleanPhone)) {
+      riskScore += 2;
+      indicators.push(labels.suspiciousPattern);
+      break;
+    }
   }
 
   // Determine risk level
   const indicatorText = indicators.join(', ');
   
-  if (riskScore >= 5) {
+  if (riskScore >= 4) {
     return {
       risk: 'High',
       ...templates.highRisk(indicatorText)
@@ -607,23 +824,18 @@ export function analyzePhone(phone: string, language: string = 'pt'): Structured
 }
 
 // ============================================================================
-// CRYPTO ADDRESS ANALYSIS
+// CRYPTO ANALYSIS
 // ============================================================================
 
 const CRYPTO_PATTERNS = {
-  // Ethereum address
+  bitcoin: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
   ethereum: /^0x[a-fA-F0-9]{40}$/,
-  // Bitcoin legacy
-  bitcoinLegacy: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
-  // Bitcoin SegWit
-  bitcoinSegwit: /^bc1[a-z0-9]{39,59}$/,
-  // Suspicious patterns
-  repeatingChars: /(.)\1{6,}/,
-  allZeros: /^0x0+$/,
+  bech32: /^bc1[a-z0-9]{39,59}$/,
 };
 
 export function analyzeCrypto(address: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
+  const labels = getIndicatorLabels(language);
   
   if (!address || address.trim().length === 0) {
     return {
@@ -632,84 +844,41 @@ export function analyzeCrypto(address: string, language: string = 'pt'): Structu
     };
   }
 
-  const safeAddress = address.trim().slice(0, 200);
+  const cleanAddress = address.trim();
   let riskScore = 0;
   const indicators: string[] = [];
-  let addressType = language === 'pt' ? 'desconhecido' : 'unknown';
 
-  // Identify address type
-  if (CRYPTO_PATTERNS.ethereum.test(safeAddress)) {
-    addressType = 'Ethereum';
-  } else if (CRYPTO_PATTERNS.bitcoinLegacy.test(safeAddress)) {
-    addressType = language === 'pt' ? 'Bitcoin (Legacy)' : 'Bitcoin (Legacy)';
-  } else if (CRYPTO_PATTERNS.bitcoinSegwit.test(safeAddress)) {
-    addressType = language === 'pt' ? 'Bitcoin (SegWit)' : 'Bitcoin (SegWit)';
-  } else {
-    riskScore += 1;
-    indicators.push(language === 'pt' ? 'formato não reconhecido' : 'unrecognized format');
-  }
+  // Check format validity
+  const isValidFormat = 
+    CRYPTO_PATTERNS.bitcoin.test(cleanAddress) ||
+    CRYPTO_PATTERNS.ethereum.test(cleanAddress) ||
+    CRYPTO_PATTERNS.bech32.test(cleanAddress);
 
-  // Check for all zeros (burn address or invalid)
-  if (CRYPTO_PATTERNS.allZeros.test(safeAddress)) {
-    riskScore += 3;
-    indicators.push(language === 'pt' ? 'endereço nulo/queima' : 'null/burn address');
-  }
-
-  // Check for excessive repeating characters (suspicious)
-  if (CRYPTO_PATTERNS.repeatingChars.test(safeAddress)) {
+  if (!isValidFormat) {
     riskScore += 2;
-    indicators.push(language === 'pt' ? 'repetição incomum de caracteres' : 'unusual character repetition');
+    indicators.push(labels.invalidCryptoFormat);
   }
 
-  // Very short addresses are invalid
-  if (safeAddress.length < 26) {
-    riskScore += 2;
-    indicators.push(language === 'pt' ? 'endereço demasiado curto' : 'address too short');
-  }
-
-  // Check for mixed case in Ethereum (checksum validation would be ideal but complex)
-  if (addressType === 'Ethereum') {
-    const hasUpperCase = /[A-F]/.test(safeAddress.slice(2));
-    const hasLowerCase = /[a-f]/.test(safeAddress.slice(2));
-    if (hasUpperCase && hasLowerCase) {
-      // Mixed case suggests checksum, which is good
-      riskScore -= 1;
-    }
-  }
-
+  // Note: In a real implementation, we would check against known scam databases
+  // For now, we provide a baseline risk assessment
+  
   // Determine risk level
   const indicatorText = indicators.join(', ');
-  const typeInfo = addressType !== (language === 'pt' ? 'desconhecido' : 'unknown') 
-    ? (language === 'pt' ? `Tipo: ${addressType}.` : `Type: ${addressType}.`)
-    : '';
   
   if (riskScore >= 4) {
-    const explanation = `${templates.highRisk(indicatorText).explanation} ${typeInfo}`.trim();
     return {
       risk: 'High',
-      explanation,
-      recommendation: templates.highRisk(indicatorText).recommendation
+      ...templates.highRisk(indicatorText)
     };
   } else if (riskScore >= 2) {
-    const explanation = `${templates.mediumRisk(indicatorText).explanation} ${typeInfo}`.trim();
     return {
       risk: 'Medium',
-      explanation,
-      recommendation: templates.mediumRisk(indicatorText).recommendation
+      ...templates.mediumRisk(indicatorText)
     };
   } else {
-    const baseExplanation = addressType !== (language === 'pt' ? 'desconhecido' : 'unknown')
-      ? (language === 'pt' 
-          ? `Formato de endereço ${addressType} válido. ${indicators.length > 0 ? `Notas menores: ${indicatorText}.` : ''}`
-          : `Valid ${addressType} address format. ${indicators.length > 0 ? `Minor notes: ${indicatorText}.` : ''}`)
-      : (language === 'pt' ? 'Formato de endereço parece válido.' : 'Address format appears valid.');
-    
     return {
       risk: 'Low',
-      explanation: baseExplanation,
-      recommendation: language === 'pt' 
-        ? 'Sempre verifique endereços de criptomoeda através de múltiplos canais antes de enviar fundos.'
-        : 'Always verify cryptocurrency addresses through multiple channels before sending funds.'
+      ...(indicators.length > 0 ? templates.lowRisk(indicatorText) : templates.noIndicators)
     };
   }
 }

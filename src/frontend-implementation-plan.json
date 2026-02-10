@@ -1,92 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Temporary minimal WebAPK install test (manifest + SW + install capture + install button)",
+  "title": "Step 4: Frontend-only deterministic antifraud engine with localized critical-keyword High-risk overrides",
   "requirements": [
     {
-      "id": "REQ-23",
-      "summary": "Replace the PWA manifest with the exact user-provided minimal test manifest while keeping the existing generated icon paths.",
+      "id": "REQ-28",
+      "summary": "Complete the frontend-only deterministic antifraud engine for Message/Email/Phone/Crypto tabs, returning a consistent StructuredAnalysisResult without any backend/canister calls.",
       "acceptanceCriteria": [
-        "`frontend/public/manifest.webmanifest` matches the user-provided JSON content exactly (field names/values preserved).",
-        "Manifest continues to reference `/assets/generated/antifraud-pwa-icon.dim_192x192.png` and `/assets/generated/antifraud-pwa-icon.dim_512x512.png`.",
-        "No other manifest fields are added beyond what the user specified."
+        "On the Home page, running analyses for Message/Email/Phone/Crypto uses only frontend utility functions and does not perform any backend actor calls.",
+        "Each analysis returns a consistent StructuredAnalysisResult with risk in {'Low','Medium','High'} and non-empty explanation/recommendation strings.",
+        "The UI continues to render results via the existing StructuredAnalysisResultCard component with no regressions to navigation, consent gating, PWA install flow, or institutional pages."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/manifest.webmanifest",
+          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
           "operation": "modify",
-          "description": "Replace the entire file contents with the exact minimal manifest JSON provided by the user in msg-20 (including description \"Teste PWA WebAPK AntiFraud\", id/start_url/scope \"/\", display \"standalone\", prefer_related_applications false, and the existing generated icon paths). Ensure the final file matches exactly with no extra fields."
-        }
-      ]
-    },
-    {
-      "id": "REQ-24",
-      "summary": "Replace the service worker with the exact user-provided minimal test service worker (antifraud-test cache, app shell caching, activation cleanup, network-first fetch with cache fallback).",
-      "acceptanceCriteria": [
-        "`frontend/public/service-worker.js` matches the user-provided JavaScript content exactly, including `CACHE_NAME = 'antifraud-test'`.",
-        "On first load in production, the service worker installs and caches `APP_SHELL` without errors.",
-        "On activation, old caches are removed (all caches except `antifraud-test`)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/service-worker.js",
-          "operation": "modify",
-          "description": "Replace the entire file contents with the exact minimal test service worker JavaScript provided by the user in msg-20 (must include `const CACHE_NAME = 'antifraud-test';`, the required `APP_SHELL` array, install/activate handlers, and the required network-first fetch with cache fallback logic). Ensure the final file matches exactly."
-        }
-      ]
-    },
-    {
-      "id": "REQ-25",
-      "summary": "Replace the PWA install capture module with the exact minimal beforeinstallprompt capture/trigger implementation (including window.PWA_CAN_INSTALL) and ensure TypeScript compiles.",
-      "acceptanceCriteria": [
-        "`setupPWAInstall()` prevents default on `beforeinstallprompt` and stores the event in a module-level `deferredPrompt`.",
-        "`setupPWAInstall()` sets `window.PWA_CAN_INSTALL = true` when `beforeinstallprompt` fires and sets it to `false` on `appinstalled`.",
-        "`triggerPWAInstall()` returns `false` when `deferredPrompt` is null; otherwise calls `prompt()`, awaits `userChoice`, clears `deferredPrompt`, and returns `true` only when outcome is `'accepted'`.",
-        "The frontend TypeScript build succeeds without `window.PWA_CAN_INSTALL` type errors."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pwa/install.ts",
-          "operation": "modify",
-          "description": "Replace the entire module with the exact minimal implementation provided by the user in msg-20: module-level `deferredPrompt`, `setupPWAInstall()` that captures `beforeinstallprompt` (preventDefault + store), sets `window.PWA_CAN_INSTALL = true/false`, includes the specified logging statements, and `triggerPWAInstall()` behavior per requirements. Add a local `declare global` augmentation in this same file to type `window.PWA_CAN_INSTALL` so TypeScript compiles."
-        }
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "summary": "Create a minimal InstallButton component using triggerPWAInstall() with an alert fallback, and swap Home page install CTA to use it instead of PwaInstallAction without changing any other behavior/content.",
-      "acceptanceCriteria": [
-        "A new file `frontend/src/components/InstallButton.tsx` exists and imports `triggerPWAInstall` from `../pwa/install` (or an equivalent correct relative path).",
-        "Home page no longer renders `PwaInstallAction` and instead renders `InstallButton` in the same general location in the component tree.",
-        "No other Home page functionality (tabs, analysis flows) is modified.",
-        "No consent modal logic, routing, or institutional pages are modified as part of this change."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/InstallButton.tsx",
-          "operation": "create",
-          "description": "Create the minimal install CTA component exactly as requested: on click call `triggerPWAInstall()`; if it returns false, show a simple alert stating the app is not yet eligible for installation. Keep styling consistent with the existing CTA by using the existing shadcn/ui Button component (do not modify any files under `frontend/src/components/ui`). Verify the component's usage instructions before implementing."
+          "description": "Refactor/complete analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto to be fully deterministic and frontend-only, ensure all code paths return { risk: 'Low'|'Medium'|'High', explanation: non-empty, recommendation: non-empty }, and remove/avoid any accidental backend/canister integrations (keep this module pure utility logic)."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Replace the Home page install CTA rendering by removing `PwaInstallAction` usage and rendering the new `InstallButton` in the same location in the component tree. Do not change any other Home page content, analysis logic, consent flow, navigation, or translations."
+          "description": "Audit HomePage handlers to ensure they only call local analyze* utilities and never call backend actors for message/email/phone/crypto analysis; keep existing rendering via StructuredAnalysisResultCard and do not alter consent gating or PWA install behavior."
         }
       ]
     },
     {
-      "id": "REQ-27",
-      "summary": "Add a developer-facing Android Chrome WebAPK validation checklist markdown file with the exact required steps and only the two allowed final outcome statements.",
+      "id": "REQ-29",
+      "summary": "Add mandatory High-risk override for critical scam keywords in message analysis for PT/EN/ES/FR/ZH/AR/RU with case-insensitive and accent-insensitive matching, with localized explanation noting the override trigger.",
       "acceptanceCriteria": [
-        "A markdown file exists in the repo containing the full step-by-step checklist in a clean, auditable format.",
-        "The checklist includes the final verification step: Android Settings > Apps contains AntiFraud (not only a shortcut).",
-        "The document contains the two exact final outcome phrases, with no additional outcome variants."
+        "For each supported language, there is a defined set of critical keywords used for mandatory High-risk detection (not only Portuguese).",
+        "If a message contains any critical keyword (including accented/unaccented variants where relevant), analyzeMessage returns risk === 'High' even if no other indicators are present.",
+        "The returned explanation/recommendation are localized to the selected UI language, and the explanation mentions that the High risk was triggered by critical keywords (localized wording)."
       ],
       "file_operations": [
         {
-          "path": "frontend/PWA_WEBAPK_ANDROID_TEST.md",
+          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "operation": "modify",
+          "description": "Implement a language-keyed critical keyword dictionary for PT/EN/ES/FR/ZH/AR/RU; apply a mandatory High-risk override in analyzeMessage using case-insensitive + accent-insensitive normalization, and return a localized explanation/recommendation that explicitly states the High risk was triggered by critical keywords (with consistent fallback to English when language is unsupported)."
+        },
+        {
+          "path": "frontend/src/utils/antifraudTextNormalize.ts",
           "operation": "create",
-          "description": "Create a markdown checklist mirroring the user's required manual Android Chrome steps: uninstall existing app via Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open site in Chrome, navigate 1–2 pages, press the install button, confirm native install prompt appears, and confirm AntiFraud appears in Android Settings > Apps and in the app drawer. End the document with only these two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\"."
+          "description": "Add a small shared text normalization helper (lowercasing + unicode diacritic stripping) for accent-insensitive matching used by the message critical-keyword override and other heuristics."
+        }
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "summary": "Localize all antifraud engine outputs (including embedded indicator labels) for PT/EN/ES/FR/ZH/AR/RU with a consistent English fallback for unsupported language codes.",
+      "acceptanceCriteria": [
+        "Switching the language selector changes the language of explanation and recommendation strings returned by all analyze* functions.",
+        "Indicator phrases embedded inside explanations are localized (no Portuguese-only indicator strings when language is not PT).",
+        "If an unsupported language code is encountered, outputs fall back to English consistently."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "operation": "modify",
+          "description": "Introduce a centralized per-language indicator-label map (e.g., urgency language, credential requests, links detected, financial requests, crypto addresses, suspicious domain extension, etc.) and ensure analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto build indicator lists using these localized labels so explanations read naturally in PT/EN/ES/FR/ZH/AR/RU and never mix languages; ensure getTemplates/getIndicatorLabels apply an English fallback for unknown language codes."
+        },
+        {
+          "path": "frontend/src/components/StructuredAnalysisResultCard.tsx",
+          "operation": "modify",
+          "description": "Verify the result card continues to display the structured antifraud outputs as-provided (localized explanation/recommendation), without introducing any new translations inside the card that could cause mixed-language output; keep existing UI behavior intact."
         }
       ]
     }

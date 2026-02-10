@@ -1,70 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T21:34:57.799Z",
+  "generatedAt": "2026-02-10T22:37:28.940Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-23",
-        "summary": "Temporarily replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest provided by the user (including `description: \"Teste PWA WebAPK AntiFraud\"`, `id: \"/\"`, `start_url: \"/\"`, `scope: \"/\"`, `display: \"standalone\"`, `prefer_related_applications: false`, and the existing generated 192/512 icon paths).",
+        "id": "REQ-28",
+        "summary": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/manifest.webmanifest"
-        ],
-        "matchedFiles": [
-          "frontend/public/manifest.webmanifest"
-        ]
-      },
-      {
-        "id": "REQ-24",
-        "summary": "Temporarily replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `const CACHE_NAME = 'antifraud-test';`, the `APP_SHELL` array, install/activate handlers, and the network-first fetch with cache fallback implementation).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/service-worker.js"
-        ],
-        "matchedFiles": [
-          "frontend/public/service-worker.js"
-        ]
-      },
-      {
-        "id": "REQ-25",
-        "summary": "Temporarily replace `frontend/src/pwa/install.ts` with the exact minimal `beforeinstallprompt` capture implementation provided by the user, including a module-level `deferredPrompt`, setting `window.PWA_CAN_INSTALL = true/false`, and logging statements. Ensure TypeScript compiles by declaring the `window.PWA_CAN_INSTALL` property (via a local `declare global` augmentation in the same file).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pwa/install.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pwa/install.ts"
-        ]
-      },
-      {
-        "id": "REQ-26",
-        "summary": "Create `frontend/src/components/InstallButton.tsx` implementing the user-provided minimal install button behavior: on click, call `triggerPWAInstall()`; if it returns false, show a simple alert indicating the app is not yet eligible for installation. Wire this button into the existing UI by replacing the Home page install CTA rendering so the Home page uses `InstallButton` instead of `PwaInstallAction`, without changing any other page content, navigation, consent flow, or translations.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/InstallButton.tsx",
+          "frontend/src/utils/structuredFraudAnalysis.ts",
           "frontend/src/pages/HomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/InstallButton.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
-        "id": "REQ-27",
-        "summary": "Add a developer-facing, repeatable Android Chrome validation checklist (in a new markdown file, e.g. `frontend/PWA_WEBAPK_ANDROID_TEST.md`) that mirrors the user’s exact required steps: uninstall existing app from Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open the site in Chrome, navigate 1–2 pages, press the install button, confirm the native install prompt appears, and finally confirm AntiFraud appears in Android Settings > Apps and in the app drawer. The checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\".",
+        "id": "REQ-29",
+        "summary": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/PWA_WEBAPK_ANDROID_TEST.md"
+          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/utils/antifraudTextNormalize.ts"
         ],
         "matchedFiles": [
-          "frontend/PWA_WEBAPK_ANDROID_TEST.md"
+          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/utils/antifraudTextNormalize.ts"
+        ]
+      },
+      {
+        "id": "REQ-30",
+        "summary": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts",
+          "frontend/src/components/StructuredAnalysisResultCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       }
     ]
@@ -74,12 +54,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/PWA_WEBAPK_ANDROID_TEST.md",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/service-worker.js",
-    "frontend/src/components/InstallButton.tsx",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pwa/install.ts",
+    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

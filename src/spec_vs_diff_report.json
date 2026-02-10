@@ -1,58 +1,41 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T21:34:57.795Z",
-  "summary": "Most of the requested temporary WebAPK/PWA install test flow is implemented (new InstallButton, Home page wiring, minimal install capture, service worker added, and Android checklist added). However, the manifest is not the exact minimal JSON (extra fields were added), and the Android checklist does not end with only the two allowed outcome statements (extra content appears after them).",
+  "generatedAt": "2026-02-10T22:37:28.936Z",
+  "summary": "Diff adds a text normalization utility (accent/case-insensitive matching) and begins updating the frontend structured antifraud engine with localized templates/labels, but the provided diff is truncated and does not show the full implementation of analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto or the mandatory multi-language critical-keyword High-risk override end-to-end.",
   "missing_requirements": [
     {
-      "id": "REQ-23",
-      "requirement": "Replace frontend/public/manifest.webmanifest with the exact minimal test manifest provided by the user, with no additional fields beyond what the user specified.",
-      "reason": "The manifest shown includes additional fields beyond the specified minimal set, so it cannot match the user-provided JSON exactly.",
+      "id": "REQ-28",
+      "requirement": "Complete a 100% frontend antifraud analysis engine for Message/Email/Phone/Crypto tabs using deterministic heuristics only, returning StructuredAnalysisResult and performing no backend/canister calls.",
+      "reason": "While structuredFraudAnalysis.ts is described as a frontend-only engine, the diff excerpt does not show the actual analyze* functions for message/email/phone/crypto, their deterministic heuristics, or evidence that no backend actor calls occur in these paths.",
       "evidence": [
-        "frontend/public/manifest.webmanifest"
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
       ]
     },
     {
-      "id": "REQ-27",
-      "requirement": "The Android Chrome validation checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\" (with no additional outcome variants, and the checklist must end with them).",
-      "reason": "The document includes additional sections/content after the two outcome phrases (e.g., \"Notas Técnicas\"), so it does not end with only those statements.",
+      "id": "REQ-29",
+      "requirement": "Mandatory High-risk override for critical scam keywords for message analysis across PT/EN/ES/FR/ZH/AR/RU (case-insensitive, accent-insensitive) with localized explanation stating High risk was triggered by critical keywords.",
+      "reason": "The diff shows a normalization utility and a PT template field (criticalKeywordTrigger), but does not show: (1) the per-language critical keyword sets for all supported languages, (2) the actual message-analysis override logic forcing risk === 'High', or (3) localized wording in each language explicitly stating the High risk was triggered by critical keywords.",
       "evidence": [
-        "frontend/PWA_WEBAPK_ANDROID_TEST.md"
+        "frontend/src/utils/antifraudTextNormalize.ts",
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "requirement": "All antifraud outputs fully localized for PT/EN/ES/FR/ZH/AR/RU (including indicator labels), with English fallback for unsupported language codes.",
+      "reason": "The diff shows Portuguese templates/labels interfaces and partial PT content, but does not provide evidence of complete templates/labels for EN/ES/FR/ZH/AR/RU, nor the fallback-to-English behavior when an unsupported language code is encountered.",
+      "evidence": [
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Added extra manifest fields not requested for the minimal test manifest (e.g., background_color, theme_color, orientation, and icon type/purpose).",
-      "reason": "REQ-23 requires the manifest to match the user-provided minimal JSON exactly with no additional fields.",
-      "evidence": [
-        "frontend/public/manifest.webmanifest"
-      ]
-    },
-    {
-      "description": "InstallButton includes additional UI elements (lucide Download icon) beyond the explicitly requested minimal behavior.",
-      "reason": "REQ-26 asked for minimal behavior (click triggers triggerPWAInstall and alert if not eligible) and cautioned against visual design changes beyond swapping the CTA component.",
-      "evidence": [
-        "frontend/src/components/InstallButton.tsx"
-      ]
-    },
-    {
-      "description": "Android WebAPK checklist includes extra explanatory/technical notes after the required final outcome statements.",
-      "reason": "REQ-27 requires the checklist to end with only the two allowed outcome statements.",
-      "evidence": [
-        "frontend/PWA_WEBAPK_ANDROID_TEST.md"
-      ]
-    }
-  ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.56,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/PWA_WEBAPK_ANDROID_TEST.md",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/service-worker.js",
-    "frontend/src/components/InstallButton.tsx",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pwa/install.ts",
+    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json"
   ]
 }

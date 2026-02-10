@@ -1,117 +1,86 @@
 {
   "kind": "build_request",
-  "title": "Temporary minimal WebAPK install test: replace manifest, service worker, install capture, and install button",
-  "priority": "high",
+  "title": "Step 4: Implement 100% frontend antifraud engine (deterministic heuristics + mandatory High-risk overrides)",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-23",
-      "text": "Temporarily replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest provided by the user (including `description: \"Teste PWA WebAPK AntiFraud\"`, `id: \"/\"`, `start_url: \"/\"`, `scope: \"/\"`, `display: \"standalone\"`, `prefer_related_applications: false`, and the existing generated 192/512 icon paths).",
+      "id": "REQ-28",
+      "text": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-apply-step-4"
         ],
         "quotes": [
-          "Substituir temporariamente os ficheiros atuais por estes mínimos: manifest.webmanifest, service-worker.js, install.ts e InstallButton.tsx."
+          "Aplicar Passo 4"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/public/manifest.webmanifest` matches the user-provided JSON content exactly (field names/values preserved).",
-        "Manifest continues to reference `/assets/generated/antifraud-pwa-icon.dim_192x192.png` and `/assets/generated/antifraud-pwa-icon.dim_512x512.png`.",
-        "No other manifest fields are added beyond what the user specified."
+        "On the Home page, running analyses for Message/Email/Phone/Crypto uses only frontend utility functions and does not perform any backend actor calls.",
+        "Each analysis returns a consistent StructuredAnalysisResult with risk in {'Low','Medium','High'} and non-empty explanation/recommendation strings.",
+        "The UI continues to render results via the existing StructuredAnalysisResultCard component with no regressions to navigation, consent gating, PWA install flow, or institutional pages."
       ]
     },
     {
-      "id": "REQ-24",
-      "text": "Temporarily replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `const CACHE_NAME = 'antifraud-test';`, the `APP_SHELL` array, install/activate handlers, and the network-first fetch with cache fallback implementation).",
+      "id": "REQ-29",
+      "text": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-apply-step-4"
         ],
         "quotes": [
-          "Service Worker mínimo de teste (frontend/public/service-worker.js)"
+          "Aplicar Passo 4"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/public/service-worker.js` matches the user-provided JavaScript content exactly, including `CACHE_NAME = 'antifraud-test'`.",
-        "On first load in production, the service worker installs and caches `APP_SHELL` without errors.",
-        "On activation, old caches are removed (all caches except `antifraud-test`)."
+        "For each supported language, there is a defined set of critical keywords used for mandatory High-risk detection (not only Portuguese).",
+        "If a message contains any critical keyword (including accented/unaccented variants where relevant), analyzeMessage returns risk === 'High' even if no other indicators are present.",
+        "The returned explanation/recommendation are localized to the selected UI language, and the explanation mentions that the High risk was triggered by critical keywords (localized wording)."
       ]
     },
     {
-      "id": "REQ-25",
-      "text": "Temporarily replace `frontend/src/pwa/install.ts` with the exact minimal `beforeinstallprompt` capture implementation provided by the user, including a module-level `deferredPrompt`, setting `window.PWA_CAN_INSTALL = true/false`, and logging statements. Ensure TypeScript compiles by declaring the `window.PWA_CAN_INSTALL` property (via a local `declare global` augmentation in the same file).",
+      "id": "REQ-30",
+      "text": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-apply-step-4"
         ],
         "quotes": [
-          "Captura beforeinstallprompt mínima (src/pwa/install.ts)"
+          "Aplicar Passo 4"
         ]
       },
       "acceptanceCriteria": [
-        "`setupPWAInstall()` prevents default on `beforeinstallprompt` and stores the event in a module-level `deferredPrompt`.",
-        "`setupPWAInstall()` sets `window.PWA_CAN_INSTALL = true` when `beforeinstallprompt` fires and sets it to `false` on `appinstalled`.",
-        "`triggerPWAInstall()` returns `false` when `deferredPrompt` is null; otherwise calls `prompt()`, awaits `userChoice`, clears `deferredPrompt`, and returns `true` only when outcome is `'accepted'`.",
-        "The frontend TypeScript build succeeds without `window.PWA_CAN_INSTALL` type errors."
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "text": "Create `frontend/src/components/InstallButton.tsx` implementing the user-provided minimal install button behavior: on click, call `triggerPWAInstall()`; if it returns false, show a simple alert indicating the app is not yet eligible for installation. Wire this button into the existing UI by replacing the Home page install CTA rendering so the Home page uses `InstallButton` instead of `PwaInstallAction`, without changing any other page content, navigation, consent flow, or translations.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-20",
-          "msg-18"
-        ],
-        "quotes": [
-          "Botão mínimo (src/components/InstallButton.tsx)",
-          "Manter UI, páginas institucionais, consentimento, traduções intactas."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new file `frontend/src/components/InstallButton.tsx` exists and imports `triggerPWAInstall` from `../pwa/install` (or an equivalent correct relative path).",
-        "Home page no longer renders `PwaInstallAction` and instead renders `InstallButton` in the same general location in the component tree.",
-        "No other Home page functionality (tabs, analysis flows) is modified.",
-        "No consent modal logic, routing, or institutional pages are modified as part of this change."
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "text": "Add a developer-facing, repeatable Android Chrome validation checklist (in a new markdown file, e.g. `frontend/PWA_WEBAPK_ANDROID_TEST.md`) that mirrors the user’s exact required steps: uninstall existing app from Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open the site in Chrome, navigate 1–2 pages, press the install button, confirm the native install prompt appears, and finally confirm AntiFraud appears in Android Settings > Apps and in the app drawer. The checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\".",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-20"
-        ],
-        "quotes": [
-          "Faz isto e diz-me apenas uma frase depois: “Apareceu como app em Definições > Apps” ou “Ainda é só atalho”",
-          "Depois disso, faz o teste direto no Chrome Android para validar se o WebAPK é gerado e aparece em Definições > Apps."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A markdown file exists in the repo containing the full step-by-step checklist in a clean, auditable format.",
-        "The checklist includes the final verification step: Android Settings > Apps contains AntiFraud (not only a shortcut).",
-        "The document contains the two exact final outcome phrases, with no additional outcome variants."
+        "Switching the language selector changes the language of explanation and recommendation strings returned by all analyze* functions.",
+        "Indicator phrases embedded inside explanations are localized (no Portuguese-only indicator strings when language is not PT).",
+        "If an unsupported language code is encountered, outputs fall back to English consistently."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be modified: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Do not change visual design, institutional pages content, consent flow, routing behavior, or translations beyond what is strictly necessary to swap the install CTA component to the new minimal `InstallButton`.",
-    "Ignore/remove any existing install fallback/cooldown/instructions behaviors for this temporary test flow; the install CTA must only call `triggerPWAInstall()`."
+    "Do not modify any immutable frontend paths listed in SYSTEM_CONTEXT (e.g., frontend/src/main.tsx, Internet Identity hooks, frontend/src/components/ui).",
+    "Keep the antifraud engine deterministic and fully frontend-only (no external APIs, no LLM calls, no WebSockets).",
+    "Do not change the PWA install flow behavior, manifest, or service worker as part of Step 4.",
+    "Do not change the consent gate flow or institutional/legal page content as part of Step 4."
   ],
   "nonGoals": [
-    "Performing the real device test inside the build system (the Android Chrome WebAPK verification must be executed manually on a device by the developer/user).",
-    "Publishing native apps to Google Play or Apple App Store.",
-    "Adding iOS install instructions, fallback dialogs, cooldowns, or auto-prompts as part of this temporary minimal test."
+    "Building native Android/iOS apps or preparing App Store / Google Play submissions.",
+    "Adding real-time message/call monitoring, push notifications, or device integrations.",
+    "Introducing new backend persistence, databases, or additional canisters/services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-temporarily-replace-frontend-public-manifest-webmanifest-with-the-exact-minimal-test-manifest-provided-by-the-user-including-description-teste-pwa-webapk-antifraud-id-start-url-scope-display-standalone-prefer-related-applications-false-and-the-existing-generated-192-512-icon-paths",
-      "featureTitle": "Temporarily replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest provided by the user (including `description: \"Teste PWA WebAPK AntiFraud\"`, `id: \"/\"`, `start_url: \"/\"`, `scope: \"/\"`, `display: \"standalone\"`, `prefer_related_applications: false`, and the existing generated 192/512 icon paths).",
+      "featureId": "feature-implement-complete-a-100-frontend-antifraud-analysis-engine-for-all-home-page-verification-tabs-message-email-phone-crypto-using-deterministic-heuristics-only-returning-a-structured-result-object-with-risk-low-medium-high-explanation-recommendation-and-without-calling-any-backend-canister-methods-for-these-analyses",
+      "featureTitle": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
       "files": [
-        "frontend/public/manifest.webmanifest"
+        "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,15 +16,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-23"
+        "REQ-28"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-temporarily-replace-frontend-public-service-worker-js-with-the-exact-minimal-test-service-worker-provided-by-the-user-including-const-cache-name-antifraud-test-the-app-shell-array-install-activate-handlers-and-the-network-first-fetch-with-cache-fallback-implementation",
-      "featureTitle": "Temporarily replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `const CACHE_NAME = 'antifraud-test';`, the `APP_SHELL` array, install/activate handlers, and the network-first fetch with cache fallback implementation).",
+      "featureId": "feature-add-a-mandatory-high-risk-override-for-critical-scam-keywords-for-message-analysis-in-all-supported-ui-languages-pt-en-es-fr-zh-ar-ru-if-any-critical-keyword-is-detected-case-insensitive-accent-insensitive-where-applicable-the-risk-must-be-forced-to-high-regardless-of-other-heuristic-scores-and-the-explanation-must-clearly-state-that-the-high-risk-was-triggered-by-critical-keywords",
+      "featureTitle": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
       "files": [
-        "frontend/public/service-worker.js"
+        "frontend/src/utils/antifraudTextNormalize.ts",
+        "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -35,15 +36,15 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-24"
+        "REQ-29"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-temporarily-replace-frontend-src-pwa-install-ts-with-the-exact-minimal-beforeinstallprompt-capture-implementation-provided-by-the-user-including-a-module-level-deferredprompt-setting-window-pwa-can-install-true-false-and-logging-statements-ensure-typescript-compiles-by-declaring-the-window-pwa-can-install-property-via-a-local-declare-global-augmentation-in-the-same-file",
-      "featureTitle": "Temporarily replace `frontend/src/pwa/install.ts` with the exact minimal `beforeinstallprompt` capture implementation provided by the user, including a module-level `deferredPrompt`, setting `window.PWA_CAN_INSTALL = true/false`, and logging statements. Ensure TypeScript compiles by declaring the `window.PWA_CAN_INSTALL` property (via a local `declare global` augmentation in the same file).",
+      "featureId": "feature-ensure-all-antifraud-engine-outputs-are-fully-localized-for-pt-en-es-fr-zh-ar-ru-including-indicator-labels-e-g-urgency-language-credential-requests-links-detected-so-that-explanations-read-naturally-in-the-selected-language-and-do-not-mix-languages",
+      "featureTitle": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
       "files": [
-        "frontend/src/pwa/install.ts"
+        "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -54,46 +55,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-25"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-frontend-src-components-installbutton-tsx-implementing-the-user-provided-minimal-install-button-behavior-on-click-call-triggerpwainstall-if-it-returns-false-show-a-simple-alert-indicating-the-app-is-not-yet-eligible-for-installation-wire-this-button-into-the-existing-ui-by-replacing-the-home-page-install-cta-rendering-so-the-home-page-uses-installbutton-instead-of-pwainstallaction-without-changing-any-other-page-content-navigation-consent-flow-or-translations",
-      "featureTitle": "Create `frontend/src/components/InstallButton.tsx` implementing the user-provided minimal install button behavior: on click, call `triggerPWAInstall()`; if it returns false, show a simple alert indicating the app is not yet eligible for installation. Wire this button into the existing UI by replacing the Home page install CTA rendering so the Home page uses `InstallButton` instead of `PwaInstallAction`, without changing any other page content, navigation, consent flow, or translations.",
-      "files": [
-        "frontend/src/components/InstallButton.tsx",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-26"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-developer-facing-repeatable-android-chrome-validation-checklist-in-a-new-markdown-file-e-g-frontend-pwa-webapk-android-test-md-that-mirrors-the-user-s-exact-required-steps-uninstall-existing-app-from-android-settings-apps-remove-homescreen-shortcut-clear-chrome-data-open-the-site-in-chrome-navigate-1-2-pages-press-the-install-button-confirm-the-native-install-prompt-appears-and-finally-confirm-antifraud-appears-in-android-settings-apps-and-in-the-app-drawer-the-checklist-must-end-with-the-only-two-allowed-outcome-statements-apareceu-como-app-em-defini-es-apps-and-ainda-s-atalho",
-      "featureTitle": "Add a developer-facing, repeatable Android Chrome validation checklist (in a new markdown file, e.g. `frontend/PWA_WEBAPK_ANDROID_TEST.md`) that mirrors the user’s exact required steps: uninstall existing app from Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open the site in Chrome, navigate 1–2 pages, press the install button, confirm the native install prompt appears, and finally confirm AntiFraud appears in Android Settings > Apps and in the app drawer. The checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\".",
-      "files": [
-        "frontend/PWA_WEBAPK_ANDROID_TEST.md"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-27"
+        "REQ-30"
       ],
       "confidence": "high"
     }
