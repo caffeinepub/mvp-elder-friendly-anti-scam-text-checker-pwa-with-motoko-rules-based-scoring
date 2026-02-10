@@ -2,7 +2,7 @@
   "name": "AntiFraud",
   "short_name": "AntiFraud",
   "id": "/",
-  "description": "Teste PWA WebAPK AntiFraud",
+  "description": "Plataforma de verificação antifraude para mensagens, emails, telefones e criptomoedas",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

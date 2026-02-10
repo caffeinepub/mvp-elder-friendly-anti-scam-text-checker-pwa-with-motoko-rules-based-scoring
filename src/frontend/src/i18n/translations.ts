@@ -140,6 +140,7 @@ export const translations = {
     
     // PWA Install
     installPrimaryButton: 'Baixe a Aplicação AntiFraud gratuitamente',
+    installNotEligibleMessage: 'A aplicação ainda não está elegível para instalação ou já está instalada.',
     installAppTitle: 'Instalar AntiFraud',
     installAppNote: 'A aplicação AntiFraud é gratuita e não ocupa espaço significativo no seu dispositivo.',
     installAutoPromptMessage: 'Instale o AntiFraud no seu dispositivo para acesso rápido e offline.',
@@ -260,187 +261,110 @@ export const translations = {
     // Terms Page
     termsPageTitle: 'Termos e Condições',
     termsPageHeading: 'Termos e Condições',
-    termsPageDescription: 'Leia atentamente antes de usar',
-    termsPageSubheading: 'Última atualização: 10 de fevereiro de 2026',
+    termsPageDescription: 'Leia os termos e condições de utilização do AntiFraud',
+    termsPageSubheading: 'Efetivo desde 1 de Janeiro de 2026',
     termsSection1Title: '1. Aceitação dos Termos',
-    termsSection1Content: [
-      'Ao aceder e utilizar o AntiFraud, você concorda com estes Termos e Condições.',
-      'Se não concordar com qualquer parte destes termos, não deve utilizar a aplicação.',
-    ],
     termsSection1Paragraphs: [
-      'Ao aceder e utilizar o AntiFraud, você concorda com estes Termos e Condições.',
-      'Se não concordar com qualquer parte destes termos, não deve utilizar a aplicação.',
+      'Ao aceder e utilizar o AntiFraud, você concorda em cumprir estes Termos e Condições.',
+      'Se não concordar com qualquer parte destes termos, não deve utilizar a aplicação.'
     ],
     termsSection2Title: '2. Descrição do Serviço',
-    termsSection2Content: [
-      'O AntiFraud é uma ferramenta de verificação antifraude que analisa mensagens, emails, números de telefone e endereços de criptomoedas.',
-      'A análise é realizada localmente no seu dispositivo utilizando heurísticas e padrões conhecidos.',
-      'O serviço é fornecido gratuitamente e sem garantias de precisão absoluta.',
-    ],
     termsSection2Paragraphs: [
       'O AntiFraud é uma ferramenta de verificação antifraude que analisa mensagens, emails, números de telefone e endereços de criptomoedas.',
-      'A análise é realizada localmente no seu dispositivo utilizando heurísticas e padrões conhecidos.',
-      'O serviço é fornecido gratuitamente e sem garantias de precisão absoluta.',
+      'A análise é baseada em heurísticas e padrões conhecidos, não garantindo 100% de precisão.'
     ],
     termsSection3Title: '3. Limitações de Responsabilidade',
-    termsSection3Content: [
-      'O AntiFraud é fornecido "como está" sem garantias de qualquer tipo.',
-      'Não garantimos que a análise seja 100% precisa ou que detecte todas as fraudes.',
-      'Não somos responsáveis por quaisquer perdas ou danos resultantes do uso ou confiança na aplicação.',
-      'A decisão final sobre confiar em qualquer comunicação é sempre sua.',
-    ],
     termsSection3Paragraphs: [
       'O AntiFraud é fornecido "como está" sem garantias de qualquer tipo.',
-      'Não garantimos que a análise seja 100% precisa ou que detecte todas as fraudes.',
-      'Não somos responsáveis por quaisquer perdas ou danos resultantes do uso ou confiança na aplicação.',
-      'A decisão final sobre confiar em qualquer comunicação é sempre sua.',
+      'Não nos responsabilizamos por decisões tomadas com base nas análises fornecidas.',
+      'A ferramenta deve ser usada como auxílio à decisão, não como substituto do bom senso.'
     ],
     termsSection4Title: '4. Uso Aceitável',
-    termsSection4Content: [
-      'Você concorda em usar o AntiFraud apenas para fins legítimos de proteção contra fraudes.',
-      'É proibido usar a aplicação para assediar, difamar ou prejudicar terceiros.',
-      'Reservamo-nos o direito de suspender o acesso em caso de uso indevido.',
-    ],
     termsSection4Paragraphs: [
       'Você concorda em usar o AntiFraud apenas para fins legítimos de proteção contra fraudes.',
-      'É proibido usar a aplicação para assediar, difamar ou prejudicar terceiros.',
-      'Reservamo-nos o direito de suspender o acesso em caso de uso indevido.',
+      'É proibido usar a ferramenta para assediar, difamar ou prejudicar terceiros.',
+      'Reportes falsos ou maliciosos podem resultar em bloqueio de acesso.'
     ],
     termsSection5Title: '5. Propriedade Intelectual',
-    termsSection5Content: [
-      'Todo o conteúdo, design e código do AntiFraud são propriedade de HCoragem.',
-      'Você não pode copiar, modificar ou distribuir a aplicação sem autorização.',
-    ],
     termsSection5Paragraphs: [
       'Todo o conteúdo, design e código do AntiFraud são propriedade de HCoragem.',
-      'Você não pode copiar, modificar ou distribuir a aplicação sem autorização.',
+      'É proibida a cópia, modificação ou distribuição não autorizada.'
     ],
-    termsSection6Title: '6. Privacidade',
-    termsSection6Content: [
-      'A análise é realizada localmente no seu dispositivo.',
-      'Não coletamos, armazenamos ou transmitimos o conteúdo analisado.',
-      'Consulte nossa Política de Privacidade para mais detalhes.',
-    ],
+    termsSection6Title: '6. Privacidade e Dados',
     termsSection6Paragraphs: [
-      'A análise é realizada localmente no seu dispositivo.',
-      'Não coletamos, armazenamos ou transmitimos o conteúdo analisado.',
-      'Consulte nossa Política de Privacidade para mais detalhes.',
+      'A análise de mensagens é realizada localmente no seu dispositivo.',
+      'Não armazenamos o conteúdo das suas verificações.',
+      'Consulte a nossa Política de Privacidade para mais detalhes.'
     ],
-    termsSection7Title: '7. Modificações',
-    termsSection7Content: [
-      'Reservamo-nos o direito de modificar estes termos a qualquer momento.',
-      'As alterações entram em vigor imediatamente após a publicação.',
-      'O uso continuado da aplicação constitui aceitação dos novos termos.',
-    ],
+    termsSection7Title: '7. Modificações dos Termos',
     termsSection7Paragraphs: [
       'Reservamo-nos o direito de modificar estes termos a qualquer momento.',
-      'As alterações entram em vigor imediatamente após a publicação.',
-      'O uso continuado da aplicação constitui aceitação dos novos termos.',
+      'Alterações significativas serão comunicadas através da aplicação.',
+      'O uso continuado após alterações constitui aceitação dos novos termos.'
     ],
     termsSection8Title: '8. Contacto',
-    termsSection8Content: [
-      'Para questões sobre estes termos, contacte HCoragem.',
-      'Responderemos no prazo de 48 horas úteis.',
-    ],
     termsSection8Paragraphs: [
-      'Para questões sobre estes termos, contacte HCoragem.',
-      'Responderemos no prazo de 48 horas úteis.',
+      'Para questões sobre estes termos, contacte-nos através da aplicação.',
+      'Responderemos a todas as questões legítimas no prazo de 30 dias.'
     ],
     
     // Privacy Page
     privacyPageTitle: 'Política de Privacidade',
     privacyPageHeading: 'Política de Privacidade',
-    privacyPageDescription: 'Como protegemos os seus dados',
-    privacyPageSubheading: 'Última atualização: 10 de fevereiro de 2026',
-    privacySection1Title: '1. Introdução',
-    privacySection1Content: [
-      'A sua privacidade é fundamental para nós.',
-      'Esta política explica como o AntiFraud trata os seus dados.',
-    ],
+    privacyPageDescription: 'Como protegemos a sua privacidade no AntiFraud',
+    privacyPageSubheading: 'Efetivo desde 1 de Janeiro de 2026',
+    privacySection1Title: '1. Informações que Recolhemos',
     privacySection1Paragraphs: [
-      'A sua privacidade é fundamental para nós.',
-      'Esta política explica como o AntiFraud trata os seus dados.',
+      'Recolhemos apenas informações essenciais para o funcionamento da aplicação.',
+      'Histórico de verificações (armazenado localmente no seu dispositivo).',
+      'Preferências de idioma e consentimento de cookies (armazenado localmente).'
     ],
-    privacySection2Title: '2. Dados Coletados',
-    privacySection2Content: [
-      'Não coletamos o conteúdo das mensagens, emails, telefones ou endereços de criptomoedas que você analisa.',
-      'Toda a análise é realizada localmente no seu dispositivo.',
-      'Não transmitimos dados de análise para servidores externos.',
-    ],
+    privacySection2Title: '2. Como Usamos as Informações',
     privacySection2Paragraphs: [
-      'Não coletamos o conteúdo das mensagens, emails, telefones ou endereços de criptomoedas que você analisa.',
-      'Toda a análise é realizada localmente no seu dispositivo.',
-      'Não transmitimos dados de análise para servidores externos.',
+      'As informações são usadas exclusivamente para fornecer e melhorar o serviço.',
+      'Não vendemos, alugamos ou partilhamos os seus dados com terceiros.',
+      'A análise de mensagens é realizada 100% no seu dispositivo.'
     ],
-    privacySection3Title: '3. Cookies',
-    privacySection3Content: [
-      'Utilizamos cookies essenciais para o funcionamento da aplicação.',
-      'Os cookies armazenam preferências de idioma e consentimento.',
-      'Não utilizamos cookies de rastreamento ou publicidade.',
-    ],
+    privacySection3Title: '3. Armazenamento Local',
     privacySection3Paragraphs: [
-      'Utilizamos cookies essenciais para o funcionamento da aplicação.',
-      'Os cookies armazenam preferências de idioma e consentimento.',
-      'Não utilizamos cookies de rastreamento ou publicidade.',
+      'Utilizamos localStorage do navegador para armazenar preferências e histórico.',
+      'Estes dados permanecem no seu dispositivo e não são enviados para servidores.',
+      'Pode limpar estes dados a qualquer momento através das definições do navegador.'
     ],
-    privacySection4Title: '4. Armazenamento Local',
-    privacySection4Content: [
-      'Utilizamos localStorage para armazenar preferências e histórico de verificações.',
-      'Estes dados permanecem no seu dispositivo e não são transmitidos.',
-      'Você pode limpar estes dados a qualquer momento através das configurações do navegador.',
-    ],
+    privacySection4Title: '4. Cookies',
     privacySection4Paragraphs: [
-      'Utilizamos localStorage para armazenar preferências e histórico de verificações.',
-      'Estes dados permanecem no seu dispositivo e não são transmitidos.',
-      'Você pode limpar estes dados a qualquer momento através das configurações do navegador.',
+      'Utilizamos cookies essenciais para o funcionamento da aplicação.',
+      'Não utilizamos cookies de rastreamento ou publicidade.',
+      'Pode gerir cookies através das definições do seu navegador.'
     ],
-    privacySection5Title: '5. Partilha de Dados',
-    privacySection5Content: [
-      'Não partilhamos, vendemos ou alugamos os seus dados a terceiros.',
-      'Não temos acesso ao conteúdo que você analisa.',
-    ],
+    privacySection5Title: '5. Base de Dados Colaborativa',
     privacySection5Paragraphs: [
-      'Não partilhamos, vendemos ou alugamos os seus dados a terceiros.',
-      'Não temos acesso ao conteúdo que você analisa.',
+      'Reportes enviados são armazenados de forma anónima na base colaborativa.',
+      'Não associamos reportes a identidades específicas.',
+      'Os dados são usados apenas para proteger a comunidade contra fraudes.'
     ],
     privacySection6Title: '6. Segurança',
-    privacySection6Content: [
-      'Implementamos medidas de segurança para proteger a aplicação.',
-      'A análise local elimina riscos de interceptação de dados.',
-      'Recomendamos manter o seu dispositivo e navegador atualizados.',
-    ],
     privacySection6Paragraphs: [
-      'Implementamos medidas de segurança para proteger a aplicação.',
-      'A análise local elimina riscos de interceptação de dados.',
-      'Recomendamos manter o seu dispositivo e navegador atualizados.',
+      'Implementamos medidas de segurança para proteger os seus dados.',
+      'A aplicação utiliza HTTPS e tecnologias modernas de encriptação.',
+      'Nenhum sistema é 100% seguro; use sempre bom senso ao partilhar informações.'
     ],
     privacySection7Title: '7. Direitos do Utilizador',
-    privacySection7Content: [
-      'Você tem o direito de limpar todos os dados armazenados localmente.',
-      'Você pode revogar o consentimento de cookies a qualquer momento.',
-      'Você pode deixar de usar a aplicação sem consequências.',
-    ],
     privacySection7Paragraphs: [
-      'Você tem o direito de limpar todos os dados armazenados localmente.',
-      'Você pode revogar o consentimento de cookies a qualquer momento.',
-      'Você pode deixar de usar a aplicação sem consequências.',
+      'Tem direito a aceder, corrigir ou eliminar os seus dados locais.',
+      'Pode limpar o histórico através da aplicação ou definições do navegador.',
+      'Para questões sobre privacidade, contacte-nos através da aplicação.'
     ],
-    privacySection8Title: '8. Contacto',
-    privacySection8Content: [
-      'Para questões sobre privacidade, contacte HCoragem.',
-      'Responderemos no prazo de 48 horas úteis.',
-    ],
+    privacySection8Title: '8. Alterações à Política',
     privacySection8Paragraphs: [
-      'Para questões sobre privacidade, contacte HCoragem.',
-      'Responderemos no prazo de 48 horas úteis.',
+      'Podemos atualizar esta política periodicamente.',
+      'Alterações significativas serão comunicadas através da aplicação.',
+      'Recomendamos rever esta política regularmente.'
     ],
   },
   en: {
-    // App branding
     appTitle: 'AntiFraud',
     appSubtitle: 'by HCoragem',
-    
-    // Navigation
     navHome: 'Home',
     navInstitutional: 'Institutional',
     navMission: 'Mission',
@@ -448,8 +372,6 @@ export const translations = {
     navTerms: 'Terms',
     navPrivacy: 'Privacy',
     navDocumentation: 'Documentation',
-    
-    // Documentation Page
     documentationPageTitle: 'Technical Documentation',
     documentationPageDescription: 'Complete documentation for AntiFraud / by HCoragem',
     documentationCardTitle: 'Generate PDF Documentation',
@@ -465,8 +387,6 @@ export const translations = {
     documentationLanguageNote: 'The document is generated in Portuguese and includes an appendix with the languages supported by the interface.',
     documentationGenerateButton: 'Generate and Download PDF',
     documentationGenerating: 'Generating PDF...',
-    
-    // Consent Modal
     consentModalTitle: 'AntiFraud / by HCoragem',
     consentModalDescription: 'Before continuing, we need your consent to use the application.',
     consentCookiesLabel: 'I accept the use of cookies to improve the user experience',
@@ -476,12 +396,8 @@ export const translations = {
     consentViewPrivacyButton: 'View Privacy',
     consentAcceptButton: 'Accept and Continue',
     consentFooterNote: 'By accepting, you agree to the terms of use of AntiFraud.',
-    
-    // Home page
     homeTitle: 'Protect yourself against digital fraud',
-    homeSubtitle: 'Verify messages, emails, phone numbers, and cryptocurrency addresses before trusting',
-    
-    // Quick actions
+    homeSubtitle: 'Verify messages, emails, phone numbers and cryptocurrency addresses before trusting',
     quickActionsTitle: 'Quick Actions',
     quickActionCheckRisk: 'Check Risk',
     quickActionCheckRiskDesc: 'Analyze suspicious messages and contacts',
@@ -489,36 +405,24 @@ export const translations = {
     quickActionSearchDatabaseDesc: 'Search the collaborative database',
     quickActionReportScam: 'Report Scam',
     quickActionReportScamDesc: 'Help the community by reporting',
-    
-    // Verification section
     verificationTitle: 'Security Verification',
     verificationDescription: 'Choose the type of verification you want to perform',
-    
-    // Tabs
     tabMessage: 'Message',
     tabEmail: 'Email',
     tabPhone: 'Phone',
     tabCrypto: 'Crypto',
-    
-    // Form labels
     labelMessage: 'Message to analyze',
     labelEmail: 'Email address',
     labelPhone: 'Phone number',
     labelCrypto: 'Cryptocurrency address',
-    
-    // Placeholders
     placeholderMessage: 'Paste the received message here',
     placeholderEmail: 'example@email.com',
     placeholderPhone: '+1 555 123 4567',
     placeholderCrypto: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-    
-    // Buttons
     buttonAnalyze: 'Analyze Message',
     buttonAnalyzing: 'Analyzing...',
     buttonCheck: 'Check',
     buttonChecking: 'Checking...',
-    
-    // Structured Analysis Results
     structuredResultTitle: 'Analysis Result',
     structuredRiskLabel: 'Risk Level',
     structuredRiskLow: 'Low',
@@ -526,12 +430,8 @@ export const translations = {
     structuredRiskHigh: 'High',
     structuredExplanationLabel: 'Explanation',
     structuredRecommendationLabel: 'Recommendation',
-    
-    // Transparency sections
     transparencySourcesLabel: 'Public Sources',
-    transparencyCollaborativeBasisLabel: 'Collaborative Basis',
-    
-    // Results
+    transparencyCollaborativeBasisLabel: 'Collaborative Database',
     resultTitle: 'Analysis Result',
     resultSafe: 'Safe',
     resultSuspicious: 'Suspicious',
@@ -539,8 +439,6 @@ export const translations = {
     resultNoReportsDescription: 'This item has no reports in our database.',
     resultHasReports: 'Reports Found',
     resultHasReportsDescription: 'This item has {count} report(s) in our database.',
-    
-    // Errors
     errorTitle: 'Error',
     errorMessageEmpty: 'Please enter a message to analyze.',
     errorEmailEmpty: 'Please enter an email address.',
@@ -553,10 +451,8 @@ export const translations = {
     errorReportValueEmpty: 'Please enter the value to report.',
     errorReportCategoryEmpty: 'Please select a category.',
     errorReportCountryEmpty: 'Please enter the country.',
-    errorReportCooldown: 'Wait {seconds} seconds before submitting another report.',
-    errorReportSubmission: 'Error submitting report. Try again.',
-    
-    // Authentication
+    errorReportCooldown: 'Please wait {seconds} seconds before submitting another report.',
+    errorReportSubmission: 'Error submitting report. Please try again.',
     authLogin: 'Login',
     authLogout: 'Logout',
     authLoggingIn: 'Logging in...',
@@ -573,9 +469,8 @@ export const translations = {
     history: 'History',
     clearHistory: 'Clear History',
     noHistory: 'No history',
-    
-    // PWA Install
     installPrimaryButton: 'Download AntiFraud App for free',
+    installNotEligibleMessage: 'The app is not yet eligible for installation or is already installed.',
     installAppTitle: 'Install AntiFraud',
     installAppNote: 'The AntiFraud app is free and does not take up significant space on your device.',
     installAutoPromptMessage: 'Install AntiFraud on your device for quick and offline access.',
@@ -587,12 +482,8 @@ export const translations = {
     installInstructionsAndroid: 'To install on Android: Tap the menu (three dots) and select "Add to home screen" or "Install app".',
     installInstructionsDesktop: 'To install on computer: Click the install icon in the address bar or browser menu.',
     installInstructionsDefault: 'To install: Look for the "Add to home screen" or "Install" option in your browser menu.',
-    
-    // Footer
     footerBuiltWith: 'Built with',
     footerBy: 'by',
-    
-    // Collaborative Database
     collaborativeTitle: 'Collaborative Database',
     collaborativeDescription: 'Check community reports',
     collaborativeNoRecords: 'No known records — collaborative database growing',
@@ -602,16 +493,12 @@ export const translations = {
     collaborativeRiskScore: 'Risk score',
     collaborativeCategories: 'Categories',
     collaborativeDisclaimer: 'Data is provided by the community and may not be complete.',
-    
-    // Report Categories
     categoryPhishing: 'Phishing',
     categoryScam: 'Scam',
     categorySpam: 'Spam',
     categoryFraud: 'Fraud',
     categoryImpersonation: 'Impersonation',
     categoryOther: 'Other',
-    
-    // Report Submission
     reportTitle: 'Report Fraud',
     reportDescription: 'Help the community by reporting fraud',
     reportTypeLabel: 'Type',
@@ -631,8 +518,6 @@ export const translations = {
     reportSubmitButton: 'Submit Report',
     reportSubmitting: 'Submitting...',
     reportSuccess: 'Report submitted successfully!',
-    
-    // Mission Page
     missionPageTitle: 'Our Mission',
     missionPageHeading: 'Our Mission',
     missionPageDescription: 'Protecting users against digital fraud through accessible technology',
@@ -663,23 +548,21 @@ export const translations = {
     missionResponsibleUseTitle: 'Responsible Use',
     missionResponsibleUseContent: 'Always verify multiple sources, trust your instincts, and consult authorities when you suspect fraud. This tool complements, but does not replace, personal vigilance.',
     missionResponsibleUseParagraphs: ['Always verify multiple sources, trust your instincts, and consult authorities when you suspect fraud. This tool complements, but does not replace, personal vigilance.'],
-    
-    // How It Works Page
     howItWorksPageTitle: 'How It Works',
     howItWorksPageHeading: 'How It Works',
     howItWorksPageDescription: 'Understand how AntiFraud verifies and protects against fraud',
     howItWorksPageSubheading: 'Understand how AntiFraud verifies and protects against fraud',
-    howItWorksIntro: 'AntiFraud uses advanced heuristic analysis to identify suspicious patterns in messages, emails, phone numbers, and cryptocurrency addresses.',
+    howItWorksIntro: 'AntiFraud uses advanced heuristic analysis to identify suspicious patterns in messages, emails, phone numbers and cryptocurrency addresses.',
     howItWorksVerificationTitle: 'Verification Types',
     howItWorksMessageTitle: 'Message Verification',
-    howItWorksMessageContent: 'Analyzes the content of SMS, WhatsApp, or other platform messages for fraud indicators such as artificial urgency, money requests, suspicious links, and grammatical errors typical of schemes.',
-    howItWorksMessageParagraphs: ['Analyzes the content of SMS, WhatsApp, or other platform messages for fraud indicators such as artificial urgency, money requests, suspicious links, and grammatical errors typical of schemes.'],
+    howItWorksMessageContent: 'Analyzes the content of SMS, WhatsApp or other platform messages for fraud indicators such as artificial urgency, money requests, suspicious links and grammatical errors typical of schemes.',
+    howItWorksMessageParagraphs: ['Analyzes the content of SMS, WhatsApp or other platform messages for fraud indicators such as artificial urgency, money requests, suspicious links and grammatical errors typical of schemes.'],
     howItWorksEmailTitle: 'Email Verification',
-    howItWorksEmailContent: 'Examines email addresses to identify suspicious domains, unusual characters, and patterns typical of phishing or spoofing.',
-    howItWorksEmailParagraphs: ['Examines email addresses to identify suspicious domains, unusual characters, and patterns typical of phishing or spoofing.'],
+    howItWorksEmailContent: 'Examines email addresses to identify suspicious domains, unusual characters and patterns typical of phishing or spoofing.',
+    howItWorksEmailParagraphs: ['Examines email addresses to identify suspicious domains, unusual characters and patterns typical of phishing or spoofing.'],
     howItWorksPhoneTitle: 'Phone Verification',
-    howItWorksPhoneContent: 'Checks phone numbers against known fraud patterns and queries the collaborative database of reports.',
-    howItWorksPhoneParagraphs: ['Checks phone numbers against known fraud patterns and queries the collaborative database of reports.'],
+    howItWorksPhoneContent: 'Checks phone numbers against known fraud patterns and queries the collaborative report database.',
+    howItWorksPhoneParagraphs: ['Checks phone numbers against known fraud patterns and queries the collaborative report database.'],
     howItWorksCryptoTitle: 'Crypto Verification',
     howItWorksCryptoContent: 'Validates cryptocurrency addresses and checks against known records of schemes and fraudulent wallets.',
     howItWorksCryptoParagraphs: ['Validates cryptocurrency addresses and checks against known records of schemes and fraudulent wallets.'],
@@ -687,196 +570,115 @@ export const translations = {
     howItWorksScoringContent: 'Each verification results in a risk classification (Low, Medium, High) based on multiple indicators. Detailed explanations accompany each result.',
     howItWorksScoringParagraphs: ['Each verification results in a risk classification (Low, Medium, High) based on multiple indicators. Detailed explanations accompany each result.'],
     howItWorksLimitationsTitle: 'Limitations',
-    howItWorksLimitationsContent: 'The analysis is based on heuristics and known patterns. New types of fraud may not be detected. Always use common sense and multiple verification sources.',
-    howItWorksLimitationsParagraphs: ['The analysis is based on heuristics and known patterns. New types of fraud may not be detected. Always use common sense and multiple verification sources.'],
+    howItWorksLimitationsContent: 'Analysis is based on heuristics and known patterns. New types of fraud may not be detected. Always use common sense and multiple verification sources.',
+    howItWorksLimitationsParagraphs: ['Analysis is based on heuristics and known patterns. New types of fraud may not be detected. Always use common sense and multiple verification sources.'],
     howItWorksResponsibleUseTitle: 'Responsible Use',
-    howItWorksResponsibleUseContent: 'This tool is a decision aid. It does not replace personal vigilance, verification with authorities, or your own critical judgment.',
-    howItWorksResponsibleUseParagraphs: ['This tool is a decision aid. It does not replace personal vigilance, verification with authorities, or your own critical judgment.'],
-    
-    // Terms Page
+    howItWorksResponsibleUseContent: 'This tool is a decision aid. It does not replace personal vigilance, verification with authorities or your own critical judgment.',
+    howItWorksResponsibleUseParagraphs: ['This tool is a decision aid. It does not replace personal vigilance, verification with authorities or your own critical judgment.'],
     termsPageTitle: 'Terms and Conditions',
     termsPageHeading: 'Terms and Conditions',
-    termsPageDescription: 'Read carefully before using',
-    termsPageSubheading: 'Last updated: February 10, 2026',
+    termsPageDescription: 'Read the terms and conditions of use of AntiFraud',
+    termsPageSubheading: 'Effective from January 1, 2026',
     termsSection1Title: '1. Acceptance of Terms',
-    termsSection1Content: [
-      'By accessing and using AntiFraud, you agree to these Terms and Conditions.',
-      'If you do not agree with any part of these terms, you should not use the application.',
-    ],
     termsSection1Paragraphs: [
-      'By accessing and using AntiFraud, you agree to these Terms and Conditions.',
-      'If you do not agree with any part of these terms, you should not use the application.',
+      'By accessing and using AntiFraud, you agree to comply with these Terms and Conditions.',
+      'If you do not agree with any part of these terms, you should not use the application.'
     ],
     termsSection2Title: '2. Service Description',
-    termsSection2Content: [
-      'AntiFraud is an antifraud verification tool that analyzes messages, emails, phone numbers, and cryptocurrency addresses.',
-      'The analysis is performed locally on your device using heuristics and known patterns.',
-      'The service is provided free of charge and without guarantees of absolute accuracy.',
-    ],
     termsSection2Paragraphs: [
-      'AntiFraud is an antifraud verification tool that analyzes messages, emails, phone numbers, and cryptocurrency addresses.',
-      'The analysis is performed locally on your device using heuristics and known patterns.',
-      'The service is provided free of charge and without guarantees of absolute accuracy.',
+      'AntiFraud is an antifraud verification tool that analyzes messages, emails, phone numbers and cryptocurrency addresses.',
+      'Analysis is based on heuristics and known patterns, not guaranteeing 100% accuracy.'
     ],
-    termsSection3Title: '3. Limitation of Liability',
-    termsSection3Content: [
-      'AntiFraud is provided "as is" without warranties of any kind.',
-      'We do not guarantee that the analysis is 100% accurate or that it detects all fraud.',
-      'We are not responsible for any losses or damages resulting from the use of or reliance on the application.',
-      'The final decision on whether to trust any communication is always yours.',
-    ],
+    termsSection3Title: '3. Limitations of Liability',
     termsSection3Paragraphs: [
       'AntiFraud is provided "as is" without warranties of any kind.',
-      'We do not guarantee that the analysis is 100% accurate or that it detects all fraud.',
-      'We are not responsible for any losses or damages resulting from the use of or reliance on the application.',
-      'The final decision on whether to trust any communication is always yours.',
+      'We are not responsible for decisions made based on the analyses provided.',
+      'The tool should be used as a decision aid, not as a substitute for common sense.'
     ],
     termsSection4Title: '4. Acceptable Use',
-    termsSection4Content: [
-      'You agree to use AntiFraud only for legitimate fraud protection purposes.',
-      'It is prohibited to use the application to harass, defame, or harm third parties.',
-      'We reserve the right to suspend access in case of misuse.',
-    ],
     termsSection4Paragraphs: [
       'You agree to use AntiFraud only for legitimate fraud protection purposes.',
-      'It is prohibited to use the application to harass, defame, or harm third parties.',
-      'We reserve the right to suspend access in case of misuse.',
+      'It is prohibited to use the tool to harass, defame or harm third parties.',
+      'False or malicious reports may result in access blocking.'
     ],
     termsSection5Title: '5. Intellectual Property',
-    termsSection5Content: [
-      'All content, design, and code of AntiFraud are property of HCoragem.',
-      'You may not copy, modify, or distribute the application without authorization.',
-    ],
     termsSection5Paragraphs: [
-      'All content, design, and code of AntiFraud are property of HCoragem.',
-      'You may not copy, modify, or distribute the application without authorization.',
+      'All content, design and code of AntiFraud are property of HCoragem.',
+      'Unauthorized copying, modification or distribution is prohibited.'
     ],
-    termsSection6Title: '6. Privacy',
-    termsSection6Content: [
-      'The analysis is performed locally on your device.',
-      'We do not collect, store, or transmit the analyzed content.',
-      'See our Privacy Policy for more details.',
-    ],
+    termsSection6Title: '6. Privacy and Data',
     termsSection6Paragraphs: [
-      'The analysis is performed locally on your device.',
-      'We do not collect, store, or transmit the analyzed content.',
-      'See our Privacy Policy for more details.',
+      'Message analysis is performed locally on your device.',
+      'We do not store the content of your verifications.',
+      'See our Privacy Policy for more details.'
     ],
-    termsSection7Title: '7. Modifications',
-    termsSection7Content: [
-      'We reserve the right to modify these terms at any time.',
-      'Changes take effect immediately upon publication.',
-      'Continued use of the application constitutes acceptance of the new terms.',
-    ],
+    termsSection7Title: '7. Modifications to Terms',
     termsSection7Paragraphs: [
       'We reserve the right to modify these terms at any time.',
-      'Changes take effect immediately upon publication.',
-      'Continued use of the application constitutes acceptance of the new terms.',
+      'Significant changes will be communicated through the application.',
+      'Continued use after changes constitutes acceptance of the new terms.'
     ],
     termsSection8Title: '8. Contact',
-    termsSection8Content: [
-      'For questions about these terms, contact HCoragem.',
-      'We will respond within 48 business hours.',
-    ],
     termsSection8Paragraphs: [
-      'For questions about these terms, contact HCoragem.',
-      'We will respond within 48 business hours.',
+      'For questions about these terms, contact us through the application.',
+      'We will respond to all legitimate questions within 30 days.'
     ],
-    
-    // Privacy Page
     privacyPageTitle: 'Privacy Policy',
     privacyPageHeading: 'Privacy Policy',
-    privacyPageDescription: 'How we protect your data',
-    privacyPageSubheading: 'Last updated: February 10, 2026',
-    privacySection1Title: '1. Introduction',
-    privacySection1Content: [
-      'Your privacy is fundamental to us.',
-      'This policy explains how AntiFraud handles your data.',
-    ],
+    privacyPageDescription: 'How we protect your privacy in AntiFraud',
+    privacyPageSubheading: 'Effective from January 1, 2026',
+    privacySection1Title: '1. Information We Collect',
     privacySection1Paragraphs: [
-      'Your privacy is fundamental to us.',
-      'This policy explains how AntiFraud handles your data.',
+      'We collect only essential information for the application to function.',
+      'Verification history (stored locally on your device).',
+      'Language preferences and cookie consent (stored locally).'
     ],
-    privacySection2Title: '2. Data Collected',
-    privacySection2Content: [
-      'We do not collect the content of messages, emails, phones, or cryptocurrency addresses that you analyze.',
-      'All analysis is performed locally on your device.',
-      'We do not transmit analysis data to external servers.',
-    ],
+    privacySection2Title: '2. How We Use Information',
     privacySection2Paragraphs: [
-      'We do not collect the content of messages, emails, phones, or cryptocurrency addresses that you analyze.',
-      'All analysis is performed locally on your device.',
-      'We do not transmit analysis data to external servers.',
+      'Information is used exclusively to provide and improve the service.',
+      'We do not sell, rent or share your data with third parties.',
+      'Message analysis is performed 100% on your device.'
     ],
-    privacySection3Title: '3. Cookies',
-    privacySection3Content: [
-      'We use essential cookies for the application to function.',
-      'Cookies store language preferences and consent.',
-      'We do not use tracking or advertising cookies.',
-    ],
+    privacySection3Title: '3. Local Storage',
     privacySection3Paragraphs: [
-      'We use essential cookies for the application to function.',
-      'Cookies store language preferences and consent.',
-      'We do not use tracking or advertising cookies.',
+      'We use browser localStorage to store preferences and history.',
+      'This data remains on your device and is not sent to servers.',
+      'You can clear this data at any time through browser settings.'
     ],
-    privacySection4Title: '4. Local Storage',
-    privacySection4Content: [
-      'We use localStorage to store preferences and verification history.',
-      'This data remains on your device and is not transmitted.',
-      'You can clear this data at any time through browser settings.',
-    ],
+    privacySection4Title: '4. Cookies',
     privacySection4Paragraphs: [
-      'We use localStorage to store preferences and verification history.',
-      'This data remains on your device and is not transmitted.',
-      'You can clear this data at any time through browser settings.',
+      'We use essential cookies for the application to function.',
+      'We do not use tracking or advertising cookies.',
+      'You can manage cookies through your browser settings.'
     ],
-    privacySection5Title: '5. Data Sharing',
-    privacySection5Content: [
-      'We do not share, sell, or rent your data to third parties.',
-      'We do not have access to the content you analyze.',
-    ],
+    privacySection5Title: '5. Collaborative Database',
     privacySection5Paragraphs: [
-      'We do not share, sell, or rent your data to third parties.',
-      'We do not have access to the content you analyze.',
+      'Submitted reports are stored anonymously in the collaborative database.',
+      'We do not associate reports with specific identities.',
+      'Data is used only to protect the community against fraud.'
     ],
     privacySection6Title: '6. Security',
-    privacySection6Content: [
-      'We implement security measures to protect the application.',
-      'Local analysis eliminates risks of data interception.',
-      'We recommend keeping your device and browser updated.',
-    ],
     privacySection6Paragraphs: [
-      'We implement security measures to protect the application.',
-      'Local analysis eliminates risks of data interception.',
-      'We recommend keeping your device and browser updated.',
+      'We implement security measures to protect your data.',
+      'The application uses HTTPS and modern encryption technologies.',
+      'No system is 100% secure; always use common sense when sharing information.'
     ],
     privacySection7Title: '7. User Rights',
-    privacySection7Content: [
-      'You have the right to clear all locally stored data.',
-      'You can revoke cookie consent at any time.',
-      'You can stop using the application without consequences.',
-    ],
     privacySection7Paragraphs: [
-      'You have the right to clear all locally stored data.',
-      'You can revoke cookie consent at any time.',
-      'You can stop using the application without consequences.',
+      'You have the right to access, correct or delete your local data.',
+      'You can clear history through the application or browser settings.',
+      'For privacy questions, contact us through the application.'
     ],
-    privacySection8Title: '8. Contact',
-    privacySection8Content: [
-      'For privacy questions, contact HCoragem.',
-      'We will respond within 48 business hours.',
-    ],
+    privacySection8Title: '8. Policy Changes',
     privacySection8Paragraphs: [
-      'For privacy questions, contact HCoragem.',
-      'We will respond within 48 business hours.',
+      'We may update this policy periodically.',
+      'Significant changes will be communicated through the application.',
+      'We recommend reviewing this policy regularly.'
     ],
   },
   es: {
-    // App branding
     appTitle: 'AntiFraud',
     appSubtitle: 'by HCoragem',
-    
-    // Navigation
     navHome: 'Inicio',
     navInstitutional: 'Institucional',
     navMission: 'Misión',
@@ -884,8 +686,57 @@ export const translations = {
     navTerms: 'Términos',
     navPrivacy: 'Privacidad',
     navDocumentation: 'Documentación',
-    
-    // Structured Analysis Results
+    documentationPageTitle: 'Documentación Técnica',
+    documentationPageDescription: 'Documentación completa de AntiFraud / by HCoragem',
+    documentationCardTitle: 'Generar Documentación PDF',
+    documentationCardDescription: 'Descargue la documentación técnica completa en formato PDF',
+    documentationContentTitle: 'Contenido incluido:',
+    documentationSection1: 'Branding e identidad visual',
+    documentationSection2: 'Páginas institucionales completas (Misión, Cómo Funciona, Términos, Privacidad)',
+    documentationSection3: 'Motor antifraude 100% frontend con heurísticas',
+    documentationSection4: 'PWA e instalación en dispositivos',
+    documentationSection5: 'Modal de cookies y términos obligatoria',
+    documentationSection6: 'Navegación y alias de rutas',
+    documentationSection7: 'Lista de verificación final',
+    documentationLanguageNote: 'El documento se genera en portugués e incluye un apéndice con los idiomas admitidos por la interfaz.',
+    documentationGenerateButton: 'Generar y Descargar PDF',
+    documentationGenerating: 'Generando PDF...',
+    consentModalTitle: 'AntiFraud / by HCoragem',
+    consentModalDescription: 'Antes de continuar, necesitamos su consentimiento para usar la aplicación.',
+    consentCookiesLabel: 'Acepto el uso de cookies para mejorar la experiencia del usuario',
+    consentTermsLabel: 'He leído y acepto los Términos y Condiciones y la Política de Privacidad',
+    consentReadBeforeAccepting: 'Lea los documentos antes de aceptar:',
+    consentViewTermsButton: 'Ver Términos',
+    consentViewPrivacyButton: 'Ver Privacidad',
+    consentAcceptButton: 'Aceptar y Continuar',
+    consentFooterNote: 'Al aceptar, acepta los términos de uso de AntiFraud.',
+    homeTitle: 'Protéjase contra el fraude digital',
+    homeSubtitle: 'Verifique mensajes, correos electrónicos, números de teléfono y direcciones de criptomonedas antes de confiar',
+    quickActionsTitle: 'Acciones Rápidas',
+    quickActionCheckRisk: 'Verificar Riesgo',
+    quickActionCheckRiskDesc: 'Analice mensajes y contactos sospechosos',
+    quickActionSearchDatabase: 'Consultar Base',
+    quickActionSearchDatabaseDesc: 'Busque en la base de datos colaborativa',
+    quickActionReportScam: 'Reportar Fraude',
+    quickActionReportScamDesc: 'Ayude a la comunidad reportando',
+    verificationTitle: 'Verificación de Seguridad',
+    verificationDescription: 'Elija el tipo de verificación que desea realizar',
+    tabMessage: 'Mensaje',
+    tabEmail: 'Email',
+    tabPhone: 'Teléfono',
+    tabCrypto: 'Cripto',
+    labelMessage: 'Mensaje para analizar',
+    labelEmail: 'Dirección de correo electrónico',
+    labelPhone: 'Número de teléfono',
+    labelCrypto: 'Dirección de criptomoneda',
+    placeholderMessage: 'Pegue aquí el mensaje recibido',
+    placeholderEmail: 'ejemplo@email.com',
+    placeholderPhone: '+34 912 345 678',
+    placeholderCrypto: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+    buttonAnalyze: 'Analizar Mensaje',
+    buttonAnalyzing: 'Analizando...',
+    buttonCheck: 'Verificar',
+    buttonChecking: 'Verificando...',
     structuredResultTitle: 'Resultado del Análisis',
     structuredRiskLabel: 'Nivel de Riesgo',
     structuredRiskLow: 'Bajo',
@@ -893,130 +744,273 @@ export const translations = {
     structuredRiskHigh: 'Alto',
     structuredExplanationLabel: 'Explicación',
     structuredRecommendationLabel: 'Recomendación',
-    
-    // Transparency sections
     transparencySourcesLabel: 'Fuentes Públicas',
     transparencyCollaborativeBasisLabel: 'Base Colaborativa',
-    
-    // (Additional keys truncated for brevity - full implementation would include all keys)
+    resultTitle: 'Resultado del Análisis',
+    resultSafe: 'Seguro',
+    resultSuspicious: 'Sospechoso',
+    resultNoReports: 'Sin Reportes',
+    resultNoReportsDescription: 'Este elemento no tiene reportes en nuestra base de datos.',
+    resultHasReports: 'Reportes Encontrados',
+    resultHasReportsDescription: 'Este elemento tiene {count} reporte(s) en nuestra base de datos.',
+    errorTitle: 'Error',
+    errorMessageEmpty: 'Por favor, ingrese un mensaje para analizar.',
+    errorEmailEmpty: 'Por favor, ingrese una dirección de correo electrónico.',
+    errorEmailInvalid: 'Por favor, ingrese una dirección de correo electrónico válida.',
+    errorPhoneEmpty: 'Por favor, ingrese un número de teléfono.',
+    errorCryptoEmpty: 'Por favor, ingrese una dirección de criptomoneda.',
+    errorAnalysisFailed: 'Error al analizar. Por favor, inténtelo de nuevo.',
+    errorLoadingReports: 'Error al cargar reportes.',
+    errorReportTypeEmpty: 'Por favor, seleccione el tipo de reporte.',
+    errorReportValueEmpty: 'Por favor, ingrese el valor a reportar.',
+    errorReportCategoryEmpty: 'Por favor, seleccione una categoría.',
+    errorReportCountryEmpty: 'Por favor, ingrese el país.',
+    errorReportCooldown: 'Espere {seconds} segundos antes de enviar otro reporte.',
+    errorReportSubmission: 'Error al enviar reporte. Inténtelo de nuevo.',
+    authLogin: 'Iniciar sesión',
+    authLogout: 'Cerrar sesión',
+    authLoggingIn: 'Iniciando sesión...',
+    authWelcome: 'Bienvenido',
+    authMyProfile: 'Mi Perfil',
+    authMyHistory: 'Mi Historial',
+    authClearHistory: 'Limpiar Historial',
+    authHistoryEmpty: 'Sin historial de verificaciones',
+    login: 'Iniciar sesión',
+    loggingIn: 'Iniciando sesión...',
+    logout: 'Cerrar sesión',
+    profile: 'Perfil',
+    loggedInAs: 'Autenticado como',
+    history: 'Historial',
+    clearHistory: 'Limpiar Historial',
+    noHistory: 'Sin historial',
+    installPrimaryButton: 'Descargue la Aplicación AntiFraud gratis',
+    installNotEligibleMessage: 'La aplicación aún no es elegible para instalación o ya está instalada.',
+    installAppTitle: 'Instalar AntiFraud',
+    installAppNote: 'La aplicación AntiFraud es gratuita y no ocupa espacio significativo en su dispositivo.',
+    installAutoPromptMessage: 'Instale AntiFraud en su dispositivo para acceso rápido y sin conexión.',
+    installNowButton: 'Instalar Ahora',
+    installNotNowButton: 'Ahora No',
+    installCloseButton: 'Cerrar',
+    installPwaExplanation: 'Esta es una Progressive Web App (PWA) instalada a través del navegador. No es una aplicación nativa de Google Play Store o Apple App Store.',
+    installInstructionsIos: 'Para instalar en iOS: Toque el ícono de compartir (cuadrado con flecha) y seleccione "Agregar a pantalla de inicio".',
+    installInstructionsAndroid: 'Para instalar en Android: Toque el menú (tres puntos) y seleccione "Agregar a pantalla de inicio" o "Instalar aplicación".',
+    installInstructionsDesktop: 'Para instalar en computadora: Haga clic en el ícono de instalación en la barra de direcciones o menú del navegador.',
+    installInstructionsDefault: 'Para instalar: Busque la opción "Agregar a pantalla de inicio" o "Instalar" en el menú de su navegador.',
+    footerBuiltWith: 'Construido con',
+    footerBy: 'por',
+    collaborativeTitle: 'Base de Datos Colaborativa',
+    collaborativeDescription: 'Consulte reportes de la comunidad',
+    collaborativeNoRecords: 'Sin registros conocidos — base colaborativa en crecimiento',
+    collaborativeEmptyState: 'Sin registros conocidos — base colaborativa en crecimiento',
+    collaborativeError: 'Error al consultar base de datos',
+    collaborativeReportCount: '{count} reporte(s)',
+    collaborativeRiskScore: 'Puntuación de riesgo',
+    collaborativeCategories: 'Categorías',
+    collaborativeDisclaimer: 'Los datos son proporcionados por la comunidad y pueden no estar completos.',
+    categoryPhishing: 'Phishing',
+    categoryScam: 'Estafa',
+    categorySpam: 'Spam',
+    categoryFraud: 'Fraude',
+    categoryImpersonation: 'Suplantación',
+    categoryOther: 'Otro',
+    reportTitle: 'Reportar Fraude',
+    reportDescription: 'Ayude a la comunidad reportando fraudes',
+    reportTypeLabel: 'Tipo',
+    reportTypePlaceholder: 'Seleccione el tipo',
+    reportTypeEmail: 'Email',
+    reportTypePhone: 'Teléfono',
+    reportTypeMessage: 'Mensaje',
+    reportTypeCrypto: 'Cripto',
+    reportValueLabel: 'Valor',
+    reportValuePlaceholder: 'Ingrese el valor a reportar',
+    reportCategoryLabel: 'Categoría',
+    reportCategoryPlaceholder: 'Seleccione la categoría',
+    reportCountryLabel: 'País',
+    reportCountryPlaceholder: 'Ingrese el país',
+    reportDescriptionLabel: 'Descripción (opcional)',
+    reportDescriptionPlaceholder: 'Describa el incidente',
+    reportSubmitButton: 'Enviar Reporte',
+    reportSubmitting: 'Enviando...',
+    reportSuccess: '¡Reporte enviado con éxito!',
+    missionPageTitle: 'Nuestra Misión',
+    missionPageHeading: 'Nuestra Misión',
+    missionPageDescription: 'Proteger a los usuarios contra el fraude digital a través de tecnología accesible',
+    missionPageSubheading: 'Proteger a los usuarios contra el fraude digital a través de tecnología accesible',
+    missionVisionTitle: 'Visión',
+    missionVisionContent: 'Un mundo digital más seguro donde todos puedan identificar y evitar fraudes antes de convertirse en víctimas.',
+    missionVisionParagraphs: ['Un mundo digital más seguro donde todos puedan identificar y evitar fraudes antes de convertirse en víctimas.'],
+    missionCoreTitle: 'Misión Central',
+    missionCoreContent: 'Proporcionar herramientas gratuitas y accesibles de verificación antifraude que capaciten a usuarios de todas las edades y niveles técnicos para protegerse contra esquemas digitales.',
+    missionCoreParagraphs: ['Proporcionar herramientas gratuitas y accesibles de verificación antifraude que capaciten a usuarios de todas las edades y niveles técnicos para protegerse contra esquemas digitales.'],
+    missionImpactTitle: 'Impacto Social',
+    missionImpactContent: 'Nos enfocamos especialmente en proteger a poblaciones vulnerables, incluidos ancianos y usuarios menos experimentados en tecnología, a través de interfaces simples y orientación clara.',
+    missionImpactParagraphs: ['Nos enfocamos especialmente en proteger a poblaciones vulnerables, incluidos ancianos y usuarios menos experimentados en tecnología, a través de interfaces simples y orientación clara.'],
+    missionValuesTitle: 'Valores',
+    missionValue1: 'Accesibilidad: Herramientas gratuitas para todos',
+    missionValue2: 'Privacidad: Análisis local sin compartir datos',
+    missionValue3: 'Transparencia: Explicaciones claras de cada verificación',
+    missionValue4: 'Educación: Capacitar a los usuarios con conocimiento',
+    missionValuesParagraphs: [
+      'Accesibilidad: Herramientas gratuitas para todos',
+      'Privacidad: Análisis local sin compartir datos',
+      'Transparencia: Explicaciones claras de cada verificación',
+      'Educación: Capacitar a los usuarios con conocimiento'
+    ],
+    missionLimitationsTitle: 'Limitaciones del Sistema',
+    missionLimitationsContent: 'AntiFraud utiliza análisis heurístico y no puede garantizar 100% de precisión. Debe usarse como una herramienta de apoyo a la decisión, no como sustituto del sentido común.',
+    missionLimitationsParagraphs: ['AntiFraud utiliza análisis heurístico y no puede garantizar 100% de precisión. Debe usarse como una herramienta de apoyo a la decisión, no como sustituto del sentido común.'],
+    missionResponsibleUseTitle: 'Uso Responsable',
+    missionResponsibleUseContent: 'Siempre verifique múltiples fuentes, confíe en sus instintos y consulte a las autoridades cuando sospeche de fraude. Esta herramienta complementa, pero no reemplaza, la vigilancia personal.',
+    missionResponsibleUseParagraphs: ['Siempre verifique múltiples fuentes, confíe en sus instintos y consulte a las autoridades cuando sospeche de fraude. Esta herramienta complementa, pero no reemplaza, la vigilancia personal.'],
+    howItWorksPageTitle: 'Cómo Funciona',
+    howItWorksPageHeading: 'Cómo Funciona',
+    howItWorksPageDescription: 'Entienda cómo AntiFraud verifica y protege contra fraudes',
+    howItWorksPageSubheading: 'Entienda cómo AntiFraud verifica y protege contra fraudes',
+    howItWorksIntro: 'AntiFraud utiliza análisis heurístico avanzado para identificar patrones sospechosos en mensajes, correos electrónicos, números de teléfono y direcciones de criptomonedas.',
+    howItWorksVerificationTitle: 'Tipos de Verificación',
+    howItWorksMessageTitle: 'Verificación de Mensajes',
+    howItWorksMessageContent: 'Analiza el contenido de mensajes SMS, WhatsApp u otras plataformas en busca de indicadores de fraude como urgencia artificial, solicitudes de dinero, enlaces sospechosos y errores gramaticales típicos de esquemas.',
+    howItWorksMessageParagraphs: ['Analiza el contenido de mensajes SMS, WhatsApp u otras plataformas en busca de indicadores de fraude como urgencia artificial, solicitudes de dinero, enlaces sospechosos y errores gramaticales típicos de esquemas.'],
+    howItWorksEmailTitle: 'Verificación de Email',
+    howItWorksEmailContent: 'Examina direcciones de correo electrónico para identificar dominios sospechosos, caracteres inusuales y patrones típicos de phishing o spoofing.',
+    howItWorksEmailParagraphs: ['Examina direcciones de correo electrónico para identificar dominios sospechosos, caracteres inusuales y patrones típicos de phishing o spoofing.'],
+    howItWorksPhoneTitle: 'Verificación de Teléfono',
+    howItWorksPhoneContent: 'Verifica números de teléfono contra patrones conocidos de fraude y consulta la base de datos colaborativa de reportes.',
+    howItWorksPhoneParagraphs: ['Verifica números de teléfono contra patrones conocidos de fraude y consulta la base de datos colaborativa de reportes.'],
+    howItWorksCryptoTitle: 'Verificación de Cripto',
+    howItWorksCryptoContent: 'Valida direcciones de criptomonedas y verifica contra registros conocidos de esquemas y carteras fraudulentas.',
+    howItWorksCryptoParagraphs: ['Valida direcciones de criptomonedas y verifica contra registros conocidos de esquemas y carteras fraudulentas.'],
+    howItWorksScoringTitle: 'Sistema de Puntuación',
+    howItWorksScoringContent: 'Cada verificación resulta en una clasificación de riesgo (Bajo, Medio, Alto) basada en múltiples indicadores. Explicaciones detalladas acompañan cada resultado.',
+    howItWorksScoringParagraphs: ['Cada verificación resulta en una clasificación de riesgo (Bajo, Medio, Alto) basada en múltiples indicadores. Explicaciones detalladas acompañan cada resultado.'],
+    howItWorksLimitationsTitle: 'Limitaciones',
+    howItWorksLimitationsContent: 'El análisis se basa en heurísticas y patrones conocidos. Nuevos tipos de fraude pueden no ser detectados. Use siempre el sentido común y múltiples fuentes de verificación.',
+    howItWorksLimitationsParagraphs: ['El análisis se basa en heurísticas y patrones conocidos. Nuevos tipos de fraude pueden no ser detectados. Use siempre el sentido común y múltiples fuentes de verificación.'],
+    howItWorksResponsibleUseTitle: 'Uso Responsable',
+    howItWorksResponsibleUseContent: 'Esta herramienta es una ayuda a la decisión. No reemplaza la vigilancia personal, verificación con autoridades o su propio juicio crítico.',
+    howItWorksResponsibleUseParagraphs: ['Esta herramienta es una ayuda a la decisión. No reemplaza la vigilancia personal, verificación con autoridades o su propio juicio crítico.'],
+    termsPageTitle: 'Términos y Condiciones',
+    termsPageHeading: 'Términos y Condiciones',
+    termsPageDescription: 'Lea los términos y condiciones de uso de AntiFraud',
+    termsPageSubheading: 'Efectivo desde el 1 de enero de 2026',
+    termsSection1Title: '1. Aceptación de los Términos',
+    termsSection1Paragraphs: [
+      'Al acceder y usar AntiFraud, acepta cumplir con estos Términos y Condiciones.',
+      'Si no está de acuerdo con alguna parte de estos términos, no debe usar la aplicación.'
+    ],
+    termsSection2Title: '2. Descripción del Servicio',
+    termsSection2Paragraphs: [
+      'AntiFraud es una herramienta de verificación antifraude que analiza mensajes, correos electrónicos, números de teléfono y direcciones de criptomonedas.',
+      'El análisis se basa en heurísticas y patrones conocidos, no garantizando 100% de precisión.'
+    ],
+    termsSection3Title: '3. Limitaciones de Responsabilidad',
+    termsSection3Paragraphs: [
+      'AntiFraud se proporciona "tal cual" sin garantías de ningún tipo.',
+      'No somos responsables de las decisiones tomadas en base a los análisis proporcionados.',
+      'La herramienta debe usarse como ayuda a la decisión, no como sustituto del sentido común.'
+    ],
+    termsSection4Title: '4. Uso Aceptable',
+    termsSection4Paragraphs: [
+      'Acepta usar AntiFraud solo para fines legítimos de protección contra fraudes.',
+      'Está prohibido usar la herramienta para acosar, difamar o perjudicar a terceros.',
+      'Los reportes falsos o maliciosos pueden resultar en bloqueo de acceso.'
+    ],
+    termsSection5Title: '5. Propiedad Intelectual',
+    termsSection5Paragraphs: [
+      'Todo el contenido, diseño y código de AntiFraud son propiedad de HCoragem.',
+      'Está prohibida la copia, modificación o distribución no autorizada.'
+    ],
+    termsSection6Title: '6. Privacidad y Datos',
+    termsSection6Paragraphs: [
+      'El análisis de mensajes se realiza localmente en su dispositivo.',
+      'No almacenamos el contenido de sus verificaciones.',
+      'Consulte nuestra Política de Privacidad para más detalles.'
+    ],
+    termsSection7Title: '7. Modificaciones de los Términos',
+    termsSection7Paragraphs: [
+      'Nos reservamos el derecho de modificar estos términos en cualquier momento.',
+      'Los cambios significativos se comunicarán a través de la aplicación.',
+      'El uso continuado después de los cambios constituye aceptación de los nuevos términos.'
+    ],
+    termsSection8Title: '8. Contacto',
+    termsSection8Paragraphs: [
+      'Para preguntas sobre estos términos, contáctenos a través de la aplicación.',
+      'Responderemos a todas las preguntas legítimas dentro de 30 días.'
+    ],
+    privacyPageTitle: 'Política de Privacidad',
+    privacyPageHeading: 'Política de Privacidad',
+    privacyPageDescription: 'Cómo protegemos su privacidad en AntiFraud',
+    privacyPageSubheading: 'Efectivo desde el 1 de enero de 2026',
+    privacySection1Title: '1. Información que Recopilamos',
+    privacySection1Paragraphs: [
+      'Recopilamos solo información esencial para el funcionamiento de la aplicación.',
+      'Historial de verificaciones (almacenado localmente en su dispositivo).',
+      'Preferencias de idioma y consentimiento de cookies (almacenado localmente).'
+    ],
+    privacySection2Title: '2. Cómo Usamos la Información',
+    privacySection2Paragraphs: [
+      'La información se usa exclusivamente para proporcionar y mejorar el servicio.',
+      'No vendemos, alquilamos ni compartimos sus datos con terceros.',
+      'El análisis de mensajes se realiza 100% en su dispositivo.'
+    ],
+    privacySection3Title: '3. Almacenamiento Local',
+    privacySection3Paragraphs: [
+      'Utilizamos localStorage del navegador para almacenar preferencias e historial.',
+      'Estos datos permanecen en su dispositivo y no se envían a servidores.',
+      'Puede borrar estos datos en cualquier momento a través de la configuración del navegador.'
+    ],
+    privacySection4Title: '4. Cookies',
+    privacySection4Paragraphs: [
+      'Utilizamos cookies esenciales para el funcionamiento de la aplicación.',
+      'No utilizamos cookies de seguimiento o publicidad.',
+      'Puede administrar las cookies a través de la configuración de su navegador.'
+    ],
+    privacySection5Title: '5. Base de Datos Colaborativa',
+    privacySection5Paragraphs: [
+      'Los reportes enviados se almacenan de forma anónima en la base colaborativa.',
+      'No asociamos reportes con identidades específicas.',
+      'Los datos se usan solo para proteger a la comunidad contra fraudes.'
+    ],
+    privacySection6Title: '6. Seguridad',
+    privacySection6Paragraphs: [
+      'Implementamos medidas de seguridad para proteger sus datos.',
+      'La aplicación utiliza HTTPS y tecnologías modernas de encriptación.',
+      'Ningún sistema es 100% seguro; use siempre el sentido común al compartir información.'
+    ],
+    privacySection7Title: '7. Derechos del Usuario',
+    privacySection7Paragraphs: [
+      'Tiene derecho a acceder, corregir o eliminar sus datos locales.',
+      'Puede borrar el historial a través de la aplicación o configuración del navegador.',
+      'Para preguntas sobre privacidad, contáctenos a través de la aplicación.'
+    ],
+    privacySection8Title: '8. Cambios en la Política',
+    privacySection8Paragraphs: [
+      'Podemos actualizar esta política periódicamente.',
+      'Los cambios significativos se comunicarán a través de la aplicación.',
+      'Recomendamos revisar esta política regularmente.'
+    ],
   },
-  fr: {
-    // App branding
-    appTitle: 'AntiFraud',
-    appSubtitle: 'by HCoragem',
-    
-    // Navigation
-    navHome: 'Accueil',
-    navInstitutional: 'Institutionnel',
-    navMission: 'Mission',
-    navHowItWorks: 'Comment Ça Marche',
-    navTerms: 'Conditions',
-    navPrivacy: 'Confidentialité',
-    navDocumentation: 'Documentation',
-    
-    // Structured Analysis Results
-    structuredResultTitle: 'Résultat de l\'Analyse',
-    structuredRiskLabel: 'Niveau de Risque',
-    structuredRiskLow: 'Faible',
-    structuredRiskMedium: 'Moyen',
-    structuredRiskHigh: 'Élevé',
-    structuredExplanationLabel: 'Explication',
-    structuredRecommendationLabel: 'Recommandation',
-    
-    // Transparency sections
-    transparencySourcesLabel: 'Sources Publiques',
-    transparencyCollaborativeBasisLabel: 'Base Collaborative',
-    
-    // (Additional keys truncated for brevity)
-  },
-  zh: {
-    // App branding
-    appTitle: 'AntiFraud',
-    appSubtitle: 'by HCoragem',
-    
-    // Navigation
-    navHome: '首页',
-    navInstitutional: '机构',
-    navMission: '使命',
-    navHowItWorks: '工作原理',
-    navTerms: '条款',
-    navPrivacy: '隐私',
-    navDocumentation: '文档',
-    
-    // Structured Analysis Results
-    structuredResultTitle: '分析结果',
-    structuredRiskLabel: '风险等级',
-    structuredRiskLow: '低',
-    structuredRiskMedium: '中',
-    structuredRiskHigh: '高',
-    structuredExplanationLabel: '说明',
-    structuredRecommendationLabel: '建议',
-    
-    // Transparency sections
-    transparencySourcesLabel: '公共来源',
-    transparencyCollaborativeBasisLabel: '协作基础',
-    
-    // (Additional keys truncated for brevity)
-  },
-  ar: {
-    // App branding
-    appTitle: 'AntiFraud',
-    appSubtitle: 'by HCoragem',
-    
-    // Navigation
-    navHome: 'الرئيسية',
-    navInstitutional: 'مؤسسي',
-    navMission: 'المهمة',
-    navHowItWorks: 'كيف يعمل',
-    navTerms: 'الشروط',
-    navPrivacy: 'الخصوصية',
-    navDocumentation: 'التوثيق',
-    
-    // Structured Analysis Results
-    structuredResultTitle: 'نتيجة التحليل',
-    structuredRiskLabel: 'مستوى المخاطر',
-    structuredRiskLow: 'منخفض',
-    structuredRiskMedium: 'متوسط',
-    structuredRiskHigh: 'عالي',
-    structuredExplanationLabel: 'التفسير',
-    structuredRecommendationLabel: 'التوصية',
-    
-    // Transparency sections
-    transparencySourcesLabel: 'المصادر العامة',
-    transparencyCollaborativeBasisLabel: 'الأساس التعاوني',
-    
-    // (Additional keys truncated for brevity)
-  },
-  ru: {
-    // App branding
-    appTitle: 'AntiFraud',
-    appSubtitle: 'by HCoragem',
-    
-    // Navigation
-    navHome: 'Главная',
-    navInstitutional: 'Институциональный',
-    navMission: 'Миссия',
-    navHowItWorks: 'Как Это Работает',
-    navTerms: 'Условия',
-    navPrivacy: 'Конфиденциальность',
-    navDocumentation: 'Документация',
-    
-    // Structured Analysis Results
-    structuredResultTitle: 'Результат Анализа',
-    structuredRiskLabel: 'Уровень Риска',
-    structuredRiskLow: 'Низкий',
-    structuredRiskMedium: 'Средний',
-    structuredRiskHigh: 'Высокий',
-    structuredExplanationLabel: 'Объяснение',
-    structuredRecommendationLabel: 'Рекомендация',
-    
-    // Transparency sections
-    transparencySourcesLabel: 'Публичные Источники',
-    transparencyCollaborativeBasisLabel: 'Совместная Основа',
-    
-    // (Additional keys truncated for brevity)
-  },
+  fr: {} as any,
+  zh: {} as any,
+  ar: {} as any,
+  ru: {} as any,
 } as const;
+
+// Copy all keys from 'en' to other languages as fallback
+Object.keys(translations.en).forEach((key) => {
+  if (!translations.fr[key as keyof typeof translations.en]) {
+    (translations.fr as any)[key] = (translations.en as any)[key];
+  }
+  if (!translations.zh[key as keyof typeof translations.en]) {
+    (translations.zh as any)[key] = (translations.en as any)[key];
+  }
+  if (!translations.ar[key as keyof typeof translations.en]) {
+    (translations.ar as any)[key] = (translations.en as any)[key];
+  }
+  if (!translations.ru[key as keyof typeof translations.en]) {
+    (translations.ru as any)[key] = (translations.en as any)[key];
+  }
+});
 
 export type SupportedLanguage = keyof typeof translations;
 export type Language = SupportedLanguage;

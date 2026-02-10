@@ -1,33 +1,45 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T22:50:46.139Z",
-  "summary": "Implemented transparency rendering in StructuredAnalysisResultCard (Public sources list + Collaborative basis statement) and extended the structured analysis model with `sources` and `collaborativeBasis`. Added i18n labels for transparency sections (file content truncated, but diff summary indicates keys exist). However, the diff does not provide evidence that all analyzers always return at least 2 valid https sources and a truthful collaborative-basis statement for every analysis output, nor that all new engine-generated user-facing strings are fully localized across all supported languages.",
+  "generatedAt": "2026-02-10T23:21:38.596Z",
+  "summary": "REQ-35, REQ-36, and REQ-37 appear implemented via production manifest/service-worker updates, finalized PWA install capture/trigger logic, and InstallButton i18n wiring. REQ-38 is not fully met because several locales are described as falling back to English rather than having complete translations. REQ-39 is partially met (new English checklist exists), but required items like an explicit reference to PWA_WEBAPK_ANDROID_TEST.md and a final pass/fail sign-off section are not evidenced in the truncated document content.",
   "missing_requirements": [
     {
-      "id": "REQ-32",
-      "requirement": "Ensure every analyzer output (message/email/phone/crypto) includes a non-empty (>=2) list of public, legal `https://` sources and a truthful collaborative-basis statement, with all new engine-generated user-facing strings localized for PT/EN/ES/FR/ZH/AR/RU.",
-      "reason": "The diff shows the new types and UI rendering, but the analyzer implementations (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) and their returned `sources`/`collaborativeBasis` payloads are not visible in the provided truncated diff. Therefore there is no evidence that each analyzer always returns >=2 valid absolute `https://` URLs, nor that the collaborative-basis statement is correctly set per output, nor that all newly added engine strings are localized across all supported languages.",
+      "id": "REQ-38",
+      "requirement": "Complete and integrate full multilingual translation set for EN, ES, FR, ZH, AR, RU with no missing UI keys and complete institutional page content per language.",
+      "reason": "The diff evidence indicates French/Chinese/Arabic/Russian are using English fallback rather than complete locale objects derived from Portuguese, which violates the requirement for complete translations (and implies potential missing keys/content in those locales).",
       "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated; analyzer implementations not shown)"
+        "frontend-file-summaries.txt (describes: \"French/Chinese/Arabic/Russian using English as fallback\")",
+        "frontend/src/i18n/translations.ts (truncated; does not demonstrate complete fr/zh/ar/ru content)"
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "requirement": "Verification checklist must include a reference/link to existing frontend/PWA_WEBAPK_ANDROID_TEST.md and end with a clear pass/fail sign-off section.",
+      "reason": "The newly added checklist file is truncated and the shown portion does not include a reference/link to frontend/PWA_WEBAPK_ANDROID_TEST.md, nor does it show a final pass/fail sign-off section. Because only truncated content is available, these required elements are not evidenced as implemented.",
+      "evidence": [
+        "frontend/PRODUCTION_BUILD_VERIFICATION.md (truncated; no visible link to PWA_WEBAPK_ANDROID_TEST.md and no visible sign-off section)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added/advertised a \"critical-keyword High-risk overrides\" mechanism in the antifraud engine.",
-      "reason": "The BuildRequest focuses on transparency payload (sources + collaborative basis) and UI/i18n display. A critical-keyword override system is not requested by REQ-31..34.",
+      "description": "Checklist includes caffeine.ai-specific footer/UTM validation items (\"Built with love using caffeine.ai\", UTM parameters, app identifier based on hostname).",
+      "reason": "REQ-39 requires branding checks for \"AntiFraud / by HCoragem\" and other critical flows, but does not request adding/validating caffeine.ai attribution details or UTM parameter behavior.",
       "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (header comment: \"Supports full localization with critical-keyword High-risk overrides for all languages\")"
+        "frontend/PRODUCTION_BUILD_VERIFICATION.md (section \"Footer Attribution\" with caffeine.ai/UTM items)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/StructuredAnalysisResultCard.tsx",
+    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/service-worker.js",
+    "frontend/src/components/InstallButton.tsx",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/utils/structuredFraudAnalysis.ts",
+    "frontend/src/pwa/install.ts",
     "project_state.json"
   ]
 }

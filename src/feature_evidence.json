@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-extend-the-frontend-antifraud-structured-analysis-result-model-to-include-a-dedicated-renderable-transparency-payload-that-can-cite-public-legal-sources-and-can-describe-the-collaborative-basis-used-for-the-analysis-without-introducing-any-backend-calls-for-the-analysis-itself",
-      "featureTitle": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
+      "featureId": "feature-consolidate-the-pwa-production-configuration-by-replacing-the-current-temporary-test-manifest-and-service-worker-with-the-final-production-versions-while-preserving-the-existing-antifraud-branding-and-icon-paths",
+      "featureTitle": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
       "files": [
-        "frontend/src/utils/structuredFraudAnalysis.ts"
+        "frontend/public/manifest.webmanifest",
+        "frontend/public/service-worker.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,15 +17,15 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-31"
+        "REQ-35"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-structured-antifraud-analysis-engine-so-every-analysis-output-message-email-phone-crypto-includes-public-source-citations-drawn-from-public-legal-references-and-includes-a-collaborative-basis-statement-explaining-what-data-was-or-was-not-used-from-the-collaborative-database",
-      "featureTitle": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
+      "featureId": "feature-replace-the-current-temporary-pwa-install-prompt-capture-implementation-with-the-finalized-production-setuppwainstall-triggerpwainstall-implementation-ensuring-it-captures-beforeinstallprompt-clears-state-on-appinstalled-and-returns-whether-installation-was-accepted",
+      "featureTitle": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
       "files": [
-        "frontend/src/utils/structuredFraudAnalysis.ts"
+        "frontend/src/pwa/install.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -35,15 +36,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-32"
+        "REQ-36"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-enhance-the-structured-analysis-results-ui-so-that-every-analysis-result-clearly-displays-a-a-public-sources-section-with-clickable-references-and-b-a-collaborative-basis-section-that-explains-the-community-data-basis-in-a-transparent-way",
-      "featureTitle": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
+      "featureId": "feature-make-the-install-cta-fully-production-ready-by-removing-hardcoded-portuguese-strings-from-the-install-button-and-fallback-alert-and-wiring-all-install-cta-user-facing-text-through-i18n-across-all-supported-languages",
+      "featureTitle": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
       "files": [
-        "frontend/src/components/StructuredAnalysisResultCard.tsx"
+        "frontend/src/components/InstallButton.tsx",
+        "frontend/src/i18n/translations.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -54,13 +56,13 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-33"
+        "REQ-37"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-the-necessary-i18n-keys-for-the-new-transparency-ui-public-sources-and-collaborative-basis-across-all-supported-languages-using-english-user-facing-text-for-the-english-locale-and-consistent-equivalents-for-pt-es-fr-zh-ar-ru",
-      "featureTitle": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+      "featureId": "feature-complete-and-integrate-the-full-multilingual-translation-set-derived-from-the-official-portuguese-source-for-en-es-fr-zh-ar-and-ru-covering-navigation-consent-modal-pwa-install-ui-analysis-results-including-transparency-sections-and-all-institutional-page-content",
+      "featureTitle": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
       "files": [
         "frontend/src/i18n/translations.ts"
       ],
@@ -73,7 +75,26 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-34"
+        "REQ-38"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-developer-facing-production-verification-checklist-report-document-that-makes-the-final-build-audit-repeatable-covering-critical-flows-routes-consent-gate-branding-antifraud-engine-frontend-only-public-contact-lookup-behavior-translations-and-pwa-webapk-installation-validation",
+      "featureTitle": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
+      "files": [
+        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-39"
       ],
       "confidence": "high"
     }

@@ -1,57 +1,72 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T22:50:46.143Z",
+  "generatedAt": "2026-02-10T23:21:38.602Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-31",
-        "summary": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
+        "id": "REQ-35",
+        "summary": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
+          "frontend/public/manifest.webmanifest",
+          "frontend/public/service-worker.js"
         ],
         "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
+          "frontend/public/manifest.webmanifest",
+          "frontend/public/service-worker.js"
         ]
       },
       {
-        "id": "REQ-32",
-        "summary": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
+        "id": "REQ-36",
+        "summary": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
+          "frontend/src/pwa/install.ts"
         ],
         "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
+          "frontend/src/pwa/install.ts"
         ]
       },
       {
-        "id": "REQ-33",
-        "summary": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
+        "id": "REQ-37",
+        "summary": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/StructuredAnalysisResultCard.tsx"
+          "frontend/src/components/InstallButton.tsx",
+          "frontend/src/i18n/translations.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/StructuredAnalysisResultCard.tsx"
+          "frontend/src/components/InstallButton.tsx",
+          "frontend/src/i18n/translations.ts"
         ]
       },
       {
-        "id": "REQ-34",
-        "summary": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+        "id": "REQ-38",
+        "summary": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/i18n/translations.ts"
         ],
         "matchedFiles": [
           "frontend/src/i18n/translations.ts"
+        ]
+      },
+      {
+        "id": "REQ-39",
+        "summary": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/PRODUCTION_BUILD_VERIFICATION.md"
+        ],
+        "matchedFiles": [
+          "frontend/PRODUCTION_BUILD_VERIFICATION.md"
         ]
       }
     ]
@@ -61,9 +76,12 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/StructuredAnalysisResultCard.tsx",
+    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/service-worker.js",
+    "frontend/src/components/InstallButton.tsx",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/utils/structuredFraudAnalysis.ts",
+    "frontend/src/pwa/install.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

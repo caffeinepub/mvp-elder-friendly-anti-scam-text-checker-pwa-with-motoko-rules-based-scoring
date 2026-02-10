@@ -1,91 +1,113 @@
 {
   "kind": "build_request",
-  "title": "PASSO 5: Add transparent public-source citations and visible collaborative-basis references to antifraud analyses",
+  "title": "Finalize production build: consolidate PWA/WebAPK, complete i18n, and production verification checklist",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-31",
-      "text": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
+      "id": "REQ-35",
+      "text": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Perfeito — podes avançar para o PASSO 5 agora."
+          "Instrução explícita: Iniciar build final de produção. Vou executar a compilação completa, integrando todos os ajustes de código, manifest, service worker, motor antifraude, PWA/WebAPK, traduções, consentimento e branding, conforme definimos."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/utils/structuredFraudAnalysis.ts` exports an updated `StructuredAnalysisResult` type that includes additional fields for: (1) a list of public sources (each with at least a human-readable name and a URL) and (2) a collaborative-basis descriptor (human-readable text, plus optional reference/identifier fields if needed).",
-        "All existing analysis entry points (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) still return a valid `StructuredAnalysisResult` and TypeScript compilation succeeds across the frontend.",
-        "No analysis function invokes any backend/canister method (analysis remains 100% frontend/deterministic)."
+        "`frontend/public/manifest.webmanifest` is updated for production (no test-only description such as \"Teste PWA WebAPK AntiFraud\"), keeps `name`/`short_name` as AntiFraud, keeps the existing generated icon paths, and includes `id` plus `prefer_related_applications: false`.",
+        "`frontend/public/service-worker.js` is updated for production (not the temporary `antifraud-test` cache), uses the consolidated production caching strategy required for stable installability (WebAPK where supported), and does not break normal navigation/routing.",
+        "A production build served over HTTPS loads with the manifest detected by the browser and the service worker controlling the page (no registration errors in console in production mode)."
       ]
     },
     {
-      "id": "REQ-32",
-      "text": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
+      "id": "REQ-36",
+      "text": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Perfeito — podes avançar para o PASSO 5 agora."
+          "Manifest e service worker consolidados na versão definitiva de produção.",
+          "CTA de instalação com deferredPrompt.prompt() funcionando.",
+          "Evento appinstalled capturado."
         ]
       },
       "acceptanceCriteria": [
-        "For each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`), the returned result always includes a non-empty `sources` list (at least 2 sources).",
-        "The `sources` URLs are valid absolute `https://` URLs and point to public, legally accessible resources (no private/internal endpoints).",
-        "Each returned result includes a collaborative-basis statement that is truthful and does not claim that community reports were checked unless the UI actually performed a lookup for the user’s input.",
-        "All newly added user-facing strings produced by the antifraud engine are fully localized for PT/EN/ES/FR/ZH/AR/RU (no mixed-language output in explanations/recommendations/transparency text)."
+        "`frontend/src/pwa/install.ts` no longer contains temporary debug/test-only behavior (e.g., `window.PWA_CAN_INSTALL` flags and console-only instrumentation intended for testing).",
+        "Calling `setupPWAInstall()` once on app startup results in `beforeinstallprompt` being captured (via a module-level deferred prompt) when the app becomes installable.",
+        "Clicking the install CTA triggers `deferredPrompt.prompt()` when available, and `triggerPWAInstall()` resolves to `true` only when the user accepts the prompt; the deferred prompt is cleared after `userChoice` and also on the `appinstalled` event."
       ]
     },
     {
-      "id": "REQ-33",
-      "text": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
+      "id": "REQ-37",
+      "text": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Perfeito — podes avançar para o PASSO 5 agora."
+          "Configurar PWA e CTA instalável corretamente em todos os idiomas.",
+          "Traduções multilíngues aplicadas e verificadas."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/StructuredAnalysisResultCard.tsx` renders a visible section for public-source citations whenever a result is displayed.",
-        "The public sources render as a list of link items (anchor tags) that open the cited URLs safely (no inline HTML injection; use standard React rendering).",
-        "The card renders a visible “Collaborative basis” block that displays the collaborative-basis statement provided by the analysis result.",
-        "All new UI labels for these sections are localized using the existing i18n system (no hard-coded Portuguese strings introduced)."
+        "`frontend/src/components/InstallButton.tsx` does not contain hardcoded Portuguese strings for the button label or alert message.",
+        "The install button label uses the existing i18n key (`installPrimaryButton`) and renders correctly for PT/EN/ES/FR/ZH/AR/RU.",
+        "If installation is not eligible, the fallback message is localized via a dedicated i18n key added for this purpose (English text present in the EN locale)."
       ]
     },
     {
-      "id": "REQ-34",
-      "text": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+      "id": "REQ-38",
+      "text": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Perfeito — podes avançar para o PASSO 5 agora."
+          "todas as páginas institucionais com conteúdos PT verbatim + traduções EN/ES/FR/ZH/AR/RU.",
+          "Confirmar que as traduções EN/ES/FR/ZH/AR/RU estão corretas."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/i18n/translations.ts` includes new keys for the transparency sections (e.g., headings/labels/disclaimers) in all supported languages (PT/EN/ES/FR/ZH/AR/RU).",
-        "Switching languages in the UI changes these labels accordingly and no fallback-to-raw-key behavior is visible in the UI."
+        "`frontend/src/i18n/translations.ts` includes complete locale objects for `en`, `es`, `fr`, `zh`, `ar`, and `ru` (in addition to `pt`) with no missing keys used by the UI.",
+        "Switching languages via the existing language selector updates all visible UI strings (navigation, home page, consent modal, install CTA, analysis results, transparency labels) without falling back to Portuguese or showing undefined/missing text.",
+        "Institutional pages (`/mission`, `/how-it-works`, `/terms`, `/privacy`) render complete localized content for each supported language (not placeholders or truncated summaries)."
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Revisar todos os fluxos críticos e gerar relatório de verificação.",
+          "Relatório final de verificação de todos os módulos."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new markdown file (e.g., `frontend/PRODUCTION_BUILD_VERIFICATION.md`) exists and is written in English.",
+        "The checklist includes explicit, step-by-step validation items for: SPA navigation/routes (including aliases and 404 fallback behavior), consent gate blocking behavior until accepted, global AntiFraud / by HCoragem branding presence, antifraud analysis for message/email/phone/crypto with transparency sections, multilingual smoke checks for PT/EN/ES/FR/ZH/AR/RU, and PWA install behavior (including a reference/link to the existing `frontend/PWA_WEBAPK_ANDROID_TEST.md` for the Android WebAPK validation flow).",
+        "The document ends with a clear pass/fail sign-off section indicating whether the build is ready for live deployment."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under `frontend/src/components/ui` or any path listed in `frontend.immutablePaths` from SYSTEM_CONTEXT.",
-    "Keep antifraud analysis 100% frontend (no canister calls for message/email/phone/crypto analysis computations).",
-    "Use English for any user-facing text described in this build request (the implemented app remains multilingual via i18n)."
+    "Do not modify any frontend immutable paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
+    "Keep the backend as a single Motoko actor in `backend/main.mo`; only introduce `backend/migration.mo` if a state migration is strictly required (not expected for this request).",
+    "Preserve existing AntiFraud branding and generated icon asset paths referenced by the manifest/service worker unless explicitly required for production correctness."
   ],
   "nonGoals": [
-    "Do not implement native Android/iOS apps or any app-store publishing flow (out of scope for PASSO 5).",
-    "Do not change the PWA installation flow in this step.",
-    "Do not redesign the overall Home page layout beyond what is necessary to display the new transparency sections in the existing structured results card."
+    "Build or publish native Android/iOS applications, app store submissions, signing/provisioning, or any Google Play / Apple App Store distribution work.",
+    "Introduce new backend services, external databases, or third-party authentication providers beyond Internet Identity.",
+    "Redesign unrelated UI/UX or add new product features beyond production consolidation, i18n completeness, and verification documentation."
   ],
   "imageRequirements": {
     "required": [],

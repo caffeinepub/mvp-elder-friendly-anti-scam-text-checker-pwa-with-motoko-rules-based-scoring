@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add transparent, user-visible citations to public legal sources and a clear collaborative-basis explanation to every antifraud structured analysis result, fully localized across all supported languages.
+**Goal:** Finalize the production frontend build by consolidating PWA/WebAPK configuration, completing i18n coverage, and adding a repeatable production verification checklist.
 
 **Planned changes:**
-- Extend the `StructuredAnalysisResult` frontend model to include a renderable transparency payload: (1) a `sources` list (name + absolute `https://` URL) and (2) a collaborative-basis descriptor (human-readable statement with optional identifiers if needed).
-- Update all antifraud analyzers (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) to always populate a non-empty public-sources list (at least 2) and a truthful collaborative-basis statement, without adding any backend/canister calls.
-- Update `StructuredAnalysisResultCard` UI to display a “Public sources” section (safe clickable links) and a “Collaborative basis” section (statement text) for every shown result.
-- Add i18n keys and translations for the new transparency sections (headings/labels) across PT/EN/ES/FR/ZH/AR/RU, ensuring language switching updates these labels with no raw-key fallback.
+- Update the PWA production manifest and service worker to final production versions (remove test-only values), while preserving existing AntiFraud branding and generated icon paths.
+- Replace the temporary PWA install prompt capture with finalized `setupPWAInstall()` / `triggerPWAInstall()` behavior (capture `beforeinstallprompt`, clear on `appinstalled`, and resolve acceptance correctly).
+- Make the install CTA fully localized by routing the button label and fallback messaging through i18n for all supported languages (PT/EN/ES/FR/ZH/AR/RU).
+- Complete and integrate full translations for EN/ES/FR/ZH/AR/RU based on the official Portuguese source across navigation, consent, PWA install UI, analysis results (including transparency), and institutional pages.
+- Add an English production verification checklist/report markdown document covering critical flows (routes, consent gate, branding, antifraud engine flows, contact lookup behavior, translations, and PWA/WebAPK validation), with pass/fail sign-off.
 
-**User-visible outcome:** Every structured antifraud analysis result now shows a localized “Public sources” list with clickable references and a localized “Collaborative basis” explanation describing what community/collaborative data was (or was not) used.
+**User-visible outcome:** The app is production-ready with a stable installable PWA experience, complete multilingual UI/content across all supported languages, and an included checklist to verify the build end-to-end before deployment.

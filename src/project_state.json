@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
-  "summary": "Adotar execução faseada e controlada do AntiFraud / by HCoragem: Fase 1 (LIVE) como web app institucional + antifraude 100% frontend, legal e transparente (UI sólida sem transparências, páginas PT verbatim + i18n, modal obrigatório, PWA honesta sem promessas de app nativa/WebAPK); Fase 2 (Pro) como apps nativas Android/iOS com detecção em tempo real (SMS/WhatsApp/chamadas), push, processamento local, conformidade e subscrição; Fase 3 roadmap técnico e integração (app + backend colaborativo) com testes.",
+  "projectStateVersion": 19,
+  "summary": "Projeto AntiFraud com PASSO 5 e PASSO 6 validados; todos os módulos (conteúdos PT verbatim + traduções, motor antifraude 100% frontend, pesquisa pública de contactos, branding, consentimento, PWA/WebAPK) considerados completos e integrados. Próximo estágio: preparar e gerar um build final real de produção LIVE, consolidando manifest/service worker definitivos e implementando validações no código antes do deployment.",
   "architectural_notes": [
     "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
     "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
@@ -237,6 +237,46 @@
         "REQ-34"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-consolidate-the-pwa-production-configuration-by-replacing-the-current-temporary-test-manifest-and-service-worker-with-the-final-production-versions-while-preserving-the-existing-antifraud-branding-and-icon-paths",
+      "title": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-temporary-pwa-install-prompt-capture-implementation-with-the-finalized-production-setuppwainstall-triggerpwainstall-implementation-ensuring-it-captures-beforeinstallprompt-clears-state-on-appinstalled-and-returns-whether-installation-was-accepted",
+      "title": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-install-cta-fully-production-ready-by-removing-hardcoded-portuguese-strings-from-the-install-button-and-fallback-alert-and-wiring-all-install-cta-user-facing-text-through-i18n-across-all-supported-languages",
+      "title": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-complete-and-integrate-the-full-multilingual-translation-set-derived-from-the-official-portuguese-source-for-en-es-fr-zh-ar-and-ru-covering-navigation-consent-modal-pwa-install-ui-analysis-results-including-transparency-sections-and-all-institutional-page-content",
+      "title": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-developer-facing-production-verification-checklist-report-document-that-makes-the-final-build-audit-repeatable-covering-critical-flows-routes-consent-gate-branding-antifraud-engine-frontend-only-public-contact-lookup-behavior-translations-and-pwa-webapk-installation-validation",
+      "title": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -371,6 +411,12 @@
       "summary": "PASSO 8 (Fase 1): Checklist final auditável para validação antes de publicar LIVE (UI sólida, conteúdos completos, idiomas corretos, antifraude funcional e explicado, modal obrigatório, branding limpo, zero referências antigas e zero promessas falsas).",
       "reqIds": [],
       "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Preparar e gerar build final real de produção (LIVE): consolidar código/UI/branding, implementar validações no código (rotas, consentimento, antifraude 100% frontend, pesquisa pública, traduções, PWA/WebAPK), e consolidar manifest + service worker definitivos (não temporários) para garantir instalação PWA/WebAPK no Android Chrome.",
+      "reqIds": [],
+      "status": "in_progress"
     }
   ],
   "projectName": "AntiFraud",

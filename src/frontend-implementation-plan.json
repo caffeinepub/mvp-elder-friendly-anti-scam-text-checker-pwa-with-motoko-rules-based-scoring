@@ -1,70 +1,95 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "PASSO 5: Transparency citations and collaborative-basis references for antifraud structured analyses (frontend-only)",
+  "title": "Production PWA consolidation, finalized install flow, complete i18n, and verification checklist",
   "requirements": [
     {
-      "id": "REQ-31",
-      "summary": "Extend the frontend structured antifraud result model with a renderable transparency payload (public sources + collaborative-basis descriptor) without adding any analysis backend calls.",
+      "id": "REQ-35",
+      "summary": "Replace temporary PWA manifest and service worker with final production versions while preserving AntiFraud branding and generated icon asset paths.",
       "acceptanceCriteria": [
-        "`frontend/src/utils/structuredFraudAnalysis.ts` exports an updated `StructuredAnalysisResult` type that includes additional fields for: (1) a list of public sources (each with at least a human-readable name and a URL) and (2) a collaborative-basis descriptor (human-readable text, plus optional reference/identifier fields if needed).",
-        "All existing analysis entry points (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) still return a valid `StructuredAnalysisResult` and TypeScript compilation succeeds across the frontend.",
-        "No analysis function invokes any backend/canister method (analysis remains 100% frontend/deterministic)."
+        "`frontend/public/manifest.webmanifest` is updated for production (no test-only description such as \"Teste PWA WebAPK AntiFraud\"), keeps `name`/`short_name` as AntiFraud, keeps the existing generated icon paths, and includes `id` plus `prefer_related_applications: false`.",
+        "`frontend/public/service-worker.js` is updated for production (not the temporary `antifraud-test` cache), uses the consolidated production caching strategy required for stable installability (WebAPK where supported), and does not break normal navigation/routing.",
+        "A production build served over HTTPS loads with the manifest detected by the browser and the service worker controlling the page (no registration errors in console in production mode)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "path": "frontend/public/manifest.webmanifest",
           "operation": "modify",
-          "description": "Update exported `StructuredAnalysisResult` to include a dedicated transparency payload: (1) `sources` as an array of public citations (each with at least `name` and absolute `https://` `url`) and (2) a `collaborativeBasis` descriptor (human-readable statement plus optional reference/identifier fields). Ensure these fields are designed to be directly rendered in the UI and that all analyzer functions remain fully deterministic and do not call any backend capability."
+          "description": "Update manifest metadata for production: remove test-only description, keep `name`/`short_name` as AntiFraud, keep `id`, keep `prefer_related_applications: false`, and preserve existing icon paths `/assets/generated/antifraud-pwa-icon.dim_192x192.png` and `/assets/generated/antifraud-pwa-icon.dim_512x512.png`."
+        },
+        {
+          "path": "frontend/public/service-worker.js",
+          "operation": "modify",
+          "description": "Replace the temporary test cache configuration with a production cache name/version and a consolidated production caching strategy that maintains stable installability and supports SPA navigation (ensure navigation requests are not broken and can fall back to the app shell when appropriate), while preserving caching of `/manifest.webmanifest` and the generated icons `/assets/generated/antifraud-pwa-icon.dim_192x192.png` and `/assets/generated/antifraud-pwa-icon.dim_512x512.png`."
         }
       ]
     },
     {
-      "id": "REQ-32",
-      "summary": "Ensure every structured antifraud analysis output includes localized public-source citations and a truthful, localized collaborative-basis statement.",
+      "id": "REQ-36",
+      "summary": "Finalize PWA install prompt capture with production setup/trigger utilities that manage deferred prompt lifecycle and return accepted status.",
       "acceptanceCriteria": [
-        "For each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`), the returned result always includes a non-empty `sources` list (at least 2 sources).",
-        "The `sources` URLs are valid absolute `https://` URLs and point to public, legally accessible resources (no private/internal endpoints).",
-        "Each returned result includes a collaborative-basis statement that is truthful and does not claim that community reports were checked unless the UI actually performed a lookup for the user’s input.",
-        "All newly added user-facing strings produced by the antifraud engine are fully localized for PT/EN/ES/FR/ZH/AR/RU (no mixed-language output in explanations/recommendations/transparency text)."
+        "`frontend/src/pwa/install.ts` no longer contains temporary debug/test-only behavior (e.g., `window.PWA_CAN_INSTALL` flags and console-only instrumentation intended for testing).",
+        "Calling `setupPWAInstall()` once on app startup results in `beforeinstallprompt` being captured (via a module-level deferred prompt) when the app becomes installable.",
+        "Clicking the install CTA triggers `deferredPrompt.prompt()` when available, and `triggerPWAInstall()` resolves to `true` only when the user accepts the prompt; the deferred prompt is cleared after `userChoice` and also on the `appinstalled` event."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "path": "frontend/src/pwa/install.ts",
           "operation": "modify",
-          "description": "Augment each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) to always populate the new transparency fields: include at least two public, legally accessible `https://` sources per result and provide a truthful collaborative-basis statement that explicitly reflects that the structured analysis is computed locally and does not check community reports unless a separate UI lookup occurred. Add full PT/EN/ES/FR/ZH/AR/RU localization for all new transparency strings so outputs never mix languages."
+          "description": "Implement the production `setupPWAInstall()` / `triggerPWAInstall()` flow: capture and store `beforeinstallprompt` in a module-level deferred prompt, clear prompt state on `appinstalled`, remove test-only globals/logging, prevent duplicate listener registration when `setupPWAInstall()` is called multiple times, and ensure `triggerPWAInstall()` returns a boolean indicating whether the user accepted installation and clears the deferred prompt after `userChoice`."
         }
       ]
     },
     {
-      "id": "REQ-33",
-      "summary": "Render transparency sections in the structured analysis results UI (public sources + collaborative basis) with safe clickable links and localized labels.",
+      "id": "REQ-37",
+      "summary": "Localize all user-facing install CTA strings (button label and ineligible fallback message) via i18n for all supported languages.",
       "acceptanceCriteria": [
-        "`frontend/src/components/StructuredAnalysisResultCard.tsx` renders a visible section for public-source citations whenever a result is displayed.",
-        "The public sources render as a list of link items (anchor tags) that open the cited URLs safely (no inline HTML injection; use standard React rendering).",
-        "The card renders a visible “Collaborative basis” block that displays the collaborative-basis statement provided by the analysis result.",
-        "All new UI labels for these sections are localized using the existing i18n system (no hard-coded Portuguese strings introduced)."
+        "`frontend/src/components/InstallButton.tsx` does not contain hardcoded Portuguese strings for the button label or alert message.",
+        "The install button label uses the existing i18n key (`installPrimaryButton`) and renders correctly for PT/EN/ES/FR/ZH/AR/RU.",
+        "If installation is not eligible, the fallback message is localized via a dedicated i18n key added for this purpose (English text present in the EN locale)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/StructuredAnalysisResultCard.tsx",
+          "path": "frontend/src/components/InstallButton.tsx",
           "operation": "modify",
-          "description": "Update the card to render two new visible sections for every structured analysis result: (a) a 'Public sources' section that maps `result.sources` into a list of safe anchor links (standard React rendering, `target=\"_blank\"`, `rel=\"noreferrer noopener\"`) and (b) a 'Collaborative basis' section that displays `result.collaborativeBasis` text. Use the existing i18n system (`useI18n`) for all new labels (no hard-coded Portuguese strings)."
+          "description": "Replace hardcoded Portuguese strings with i18n-driven text using `useI18n()`: button label should use `t.installPrimaryButton`, and the non-eligible fallback alert should use a new dedicated i18n key (e.g., `installNotEligibleMessage`) instead of a hardcoded string."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add a dedicated localized string key for the install ineligible fallback message (ensure English text is present in the EN locale and include equivalents for ES/FR/ZH/AR/RU), and ensure PT remains the source of truth for the Portuguese string."
         }
       ]
     },
     {
-      "id": "REQ-34",
-      "summary": "Add i18n keys for transparency UI labels across PT/EN/ES/FR/ZH/AR/RU and ensure language switching updates the new labels without key fallbacks.",
+      "id": "REQ-38",
+      "summary": "Add complete EN/ES/FR/ZH/AR/RU translations derived from Portuguese, ensuring no missing UI keys and full localized institutional content.",
       "acceptanceCriteria": [
-        "`frontend/src/i18n/translations.ts` includes new keys for the transparency sections (e.g., headings/labels/disclaimers) in all supported languages (PT/EN/ES/FR/ZH/AR/RU).",
-        "Switching languages in the UI changes these labels accordingly and no fallback-to-raw-key behavior is visible in the UI."
+        "`frontend/src/i18n/translations.ts` includes complete locale objects for `en`, `es`, `fr`, `zh`, `ar`, and `ru` (in addition to `pt`) with no missing keys used by the UI.",
+        "Switching languages via the existing language selector updates all visible UI strings (navigation, home page, consent modal, install CTA, analysis results, transparency labels) without falling back to Portuguese or showing undefined/missing text.",
+        "Institutional pages (`/mission`, `/how-it-works`, `/terms`, `/privacy`) render complete localized content for each supported language (not placeholders or truncated summaries)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add new translation keys for the transparency UI sections (e.g., headings/labels and any short disclaimers needed) for all supported locales (PT/EN/ES/FR/ZH/AR/RU). Ensure English locale values are English user-facing text and that `StructuredAnalysisResultCard` can read these keys via the existing `t` object without any raw-key fallback appearing when switching languages."
+          "description": "Populate full translation objects for `en`, `es`, `fr`, `zh`, `ar`, and `ru`, mirroring all keys used by the UI from the official Portuguese source, including: navigation, consent modal, PWA install UI (including the new fallback key), analysis results and transparency labels, and complete institutional page content keys/paragraph arrays for Mission/How It Works/Terms/Privacy."
+        }
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "summary": "Create a repeatable, developer-facing production verification checklist/report for the final build.",
+      "acceptanceCriteria": [
+        "A new markdown file (e.g., `frontend/PRODUCTION_BUILD_VERIFICATION.md`) exists and is written in English.",
+        "The checklist includes explicit, step-by-step validation items for: SPA navigation/routes (including aliases and 404 fallback behavior), consent gate blocking behavior until accepted, global AntiFraud / by HCoragem branding presence, antifraud analysis for message/email/phone/crypto with transparency sections, multilingual smoke checks for PT/EN/ES/FR/ZH/AR/RU, and PWA install behavior (including a reference/link to the existing `frontend/PWA_WEBAPK_ANDROID_TEST.md` for the Android WebAPK validation flow).",
+        "The document ends with a clear pass/fail sign-off section indicating whether the build is ready for live deployment."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+          "operation": "create",
+          "description": "Add an English production verification checklist/report covering: route navigation (including `/institucional` alias behavior and unknown-route handling), 404 fallback behavior, consent gate blocking until accepted, AntiFraud/by HCoragem branding checks, antifraud analysis flows (message/email/phone/crypto) including transparency sections, public contact lookup behavior, full multilingual smoke checks for PT/EN/ES/FR/ZH/AR/RU, and PWA installation validation (include a reference to `frontend/PWA_WEBAPK_ANDROID_TEST.md` for Android WebAPK flow). End with a clear pass/fail sign-off section."
         }
       ]
     }
