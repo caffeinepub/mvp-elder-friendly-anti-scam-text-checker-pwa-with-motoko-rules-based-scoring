@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-implement-complete-a-100-frontend-antifraud-analysis-engine-for-all-home-page-verification-tabs-message-email-phone-crypto-using-deterministic-heuristics-only-returning-a-structured-result-object-with-risk-low-medium-high-explanation-recommendation-and-without-calling-any-backend-canister-methods-for-these-analyses",
-      "featureTitle": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
+      "featureId": "feature-extend-the-frontend-antifraud-structured-analysis-result-model-to-include-a-dedicated-renderable-transparency-payload-that-can-cite-public-legal-sources-and-can-describe-the-collaborative-basis-used-for-the-analysis-without-introducing-any-backend-calls-for-the-analysis-itself",
+      "featureTitle": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
       "files": [
         "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
@@ -16,15 +16,14 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-28"
+        "REQ-31"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-mandatory-high-risk-override-for-critical-scam-keywords-for-message-analysis-in-all-supported-ui-languages-pt-en-es-fr-zh-ar-ru-if-any-critical-keyword-is-detected-case-insensitive-accent-insensitive-where-applicable-the-risk-must-be-forced-to-high-regardless-of-other-heuristic-scores-and-the-explanation-must-clearly-state-that-the-high-risk-was-triggered-by-critical-keywords",
-      "featureTitle": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
+      "featureId": "feature-update-the-structured-antifraud-analysis-engine-so-every-analysis-output-message-email-phone-crypto-includes-public-source-citations-drawn-from-public-legal-references-and-includes-a-collaborative-basis-statement-explaining-what-data-was-or-was-not-used-from-the-collaborative-database",
+      "featureTitle": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
       "files": [
-        "frontend/src/utils/antifraudTextNormalize.ts",
         "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
@@ -36,15 +35,15 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-29"
+        "REQ-32"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-all-antifraud-engine-outputs-are-fully-localized-for-pt-en-es-fr-zh-ar-ru-including-indicator-labels-e-g-urgency-language-credential-requests-links-detected-so-that-explanations-read-naturally-in-the-selected-language-and-do-not-mix-languages",
-      "featureTitle": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
+      "featureId": "feature-enhance-the-structured-analysis-results-ui-so-that-every-analysis-result-clearly-displays-a-a-public-sources-section-with-clickable-references-and-b-a-collaborative-basis-section-that-explains-the-community-data-basis-in-a-transparent-way",
+      "featureTitle": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
       "files": [
-        "frontend/src/utils/structuredFraudAnalysis.ts"
+        "frontend/src/components/StructuredAnalysisResultCard.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -55,7 +54,26 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-30"
+        "REQ-33"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-the-necessary-i18n-keys-for-the-new-transparency-ui-public-sources-and-collaborative-basis-across-all-supported-languages-using-english-user-facing-text-for-the-english-locale-and-consistent-equivalents-for-pt-es-fr-zh-ar-ru",
+      "featureTitle": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+      "files": [
+        "frontend/src/i18n/translations.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-34"
       ],
       "confidence": "high"
     }

@@ -1,73 +1,91 @@
 {
   "kind": "build_request",
-  "title": "Step 4: Implement 100% frontend antifraud engine (deterministic heuristics + mandatory High-risk overrides)",
+  "title": "PASSO 5: Add transparent public-source citations and visible collaborative-basis references to antifraud analyses",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-28",
-      "text": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
+      "id": "REQ-31",
+      "text": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-apply-step-4"
+          "msg-7"
         ],
         "quotes": [
-          "Aplicar Passo 4"
+          "Perfeito — podes avançar para o PASSO 5 agora."
         ]
       },
       "acceptanceCriteria": [
-        "On the Home page, running analyses for Message/Email/Phone/Crypto uses only frontend utility functions and does not perform any backend actor calls.",
-        "Each analysis returns a consistent StructuredAnalysisResult with risk in {'Low','Medium','High'} and non-empty explanation/recommendation strings.",
-        "The UI continues to render results via the existing StructuredAnalysisResultCard component with no regressions to navigation, consent gating, PWA install flow, or institutional pages."
+        "`frontend/src/utils/structuredFraudAnalysis.ts` exports an updated `StructuredAnalysisResult` type that includes additional fields for: (1) a list of public sources (each with at least a human-readable name and a URL) and (2) a collaborative-basis descriptor (human-readable text, plus optional reference/identifier fields if needed).",
+        "All existing analysis entry points (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) still return a valid `StructuredAnalysisResult` and TypeScript compilation succeeds across the frontend.",
+        "No analysis function invokes any backend/canister method (analysis remains 100% frontend/deterministic)."
       ]
     },
     {
-      "id": "REQ-29",
-      "text": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
+      "id": "REQ-32",
+      "text": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-apply-step-4"
+          "msg-7"
         ],
         "quotes": [
-          "Aplicar Passo 4"
+          "Perfeito — podes avançar para o PASSO 5 agora."
         ]
       },
       "acceptanceCriteria": [
-        "For each supported language, there is a defined set of critical keywords used for mandatory High-risk detection (not only Portuguese).",
-        "If a message contains any critical keyword (including accented/unaccented variants where relevant), analyzeMessage returns risk === 'High' even if no other indicators are present.",
-        "The returned explanation/recommendation are localized to the selected UI language, and the explanation mentions that the High risk was triggered by critical keywords (localized wording)."
+        "For each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`), the returned result always includes a non-empty `sources` list (at least 2 sources).",
+        "The `sources` URLs are valid absolute `https://` URLs and point to public, legally accessible resources (no private/internal endpoints).",
+        "Each returned result includes a collaborative-basis statement that is truthful and does not claim that community reports were checked unless the UI actually performed a lookup for the user’s input.",
+        "All newly added user-facing strings produced by the antifraud engine are fully localized for PT/EN/ES/FR/ZH/AR/RU (no mixed-language output in explanations/recommendations/transparency text)."
       ]
     },
     {
-      "id": "REQ-30",
-      "text": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
+      "id": "REQ-33",
+      "text": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-apply-step-4"
+          "msg-7"
         ],
         "quotes": [
-          "Aplicar Passo 4"
+          "Perfeito — podes avançar para o PASSO 5 agora."
         ]
       },
       "acceptanceCriteria": [
-        "Switching the language selector changes the language of explanation and recommendation strings returned by all analyze* functions.",
-        "Indicator phrases embedded inside explanations are localized (no Portuguese-only indicator strings when language is not PT).",
-        "If an unsupported language code is encountered, outputs fall back to English consistently."
+        "`frontend/src/components/StructuredAnalysisResultCard.tsx` renders a visible section for public-source citations whenever a result is displayed.",
+        "The public sources render as a list of link items (anchor tags) that open the cited URLs safely (no inline HTML injection; use standard React rendering).",
+        "The card renders a visible “Collaborative basis” block that displays the collaborative-basis statement provided by the analysis result.",
+        "All new UI labels for these sections are localized using the existing i18n system (no hard-coded Portuguese strings introduced)."
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "text": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Perfeito — podes avançar para o PASSO 5 agora."
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/src/i18n/translations.ts` includes new keys for the transparency sections (e.g., headings/labels/disclaimers) in all supported languages (PT/EN/ES/FR/ZH/AR/RU).",
+        "Switching languages in the UI changes these labels accordingly and no fallback-to-raw-key behavior is visible in the UI."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any immutable frontend paths listed in SYSTEM_CONTEXT (e.g., frontend/src/main.tsx, Internet Identity hooks, frontend/src/components/ui).",
-    "Keep the antifraud engine deterministic and fully frontend-only (no external APIs, no LLM calls, no WebSockets).",
-    "Do not change the PWA install flow behavior, manifest, or service worker as part of Step 4.",
-    "Do not change the consent gate flow or institutional/legal page content as part of Step 4."
+    "Do not modify any files under `frontend/src/components/ui` or any path listed in `frontend.immutablePaths` from SYSTEM_CONTEXT.",
+    "Keep antifraud analysis 100% frontend (no canister calls for message/email/phone/crypto analysis computations).",
+    "Use English for any user-facing text described in this build request (the implemented app remains multilingual via i18n)."
   ],
   "nonGoals": [
-    "Building native Android/iOS apps or preparing App Store / Google Play submissions.",
-    "Adding real-time message/call monitoring, push notifications, or device integrations.",
-    "Introducing new backend persistence, databases, or additional canisters/services."
+    "Do not implement native Android/iOS apps or any app-store publishing flow (out of scope for PASSO 5).",
+    "Do not change the PWA installation flow in this step.",
+    "Do not redesign the overall Home page layout beyond what is necessary to display the new transparency sections in the existing structured results card."
   ],
   "imageRequirements": {
     "required": [],

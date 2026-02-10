@@ -1,40 +1,32 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T22:37:28.936Z",
-  "summary": "Diff adds a text normalization utility (accent/case-insensitive matching) and begins updating the frontend structured antifraud engine with localized templates/labels, but the provided diff is truncated and does not show the full implementation of analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto or the mandatory multi-language critical-keyword High-risk override end-to-end.",
+  "generatedAt": "2026-02-10T22:50:46.139Z",
+  "summary": "Implemented transparency rendering in StructuredAnalysisResultCard (Public sources list + Collaborative basis statement) and extended the structured analysis model with `sources` and `collaborativeBasis`. Added i18n labels for transparency sections (file content truncated, but diff summary indicates keys exist). However, the diff does not provide evidence that all analyzers always return at least 2 valid https sources and a truthful collaborative-basis statement for every analysis output, nor that all new engine-generated user-facing strings are fully localized across all supported languages.",
   "missing_requirements": [
     {
-      "id": "REQ-28",
-      "requirement": "Complete a 100% frontend antifraud analysis engine for Message/Email/Phone/Crypto tabs using deterministic heuristics only, returning StructuredAnalysisResult and performing no backend/canister calls.",
-      "reason": "While structuredFraudAnalysis.ts is described as a frontend-only engine, the diff excerpt does not show the actual analyze* functions for message/email/phone/crypto, their deterministic heuristics, or evidence that no backend actor calls occur in these paths.",
+      "id": "REQ-32",
+      "requirement": "Ensure every analyzer output (message/email/phone/crypto) includes a non-empty (>=2) list of public, legal `https://` sources and a truthful collaborative-basis statement, with all new engine-generated user-facing strings localized for PT/EN/ES/FR/ZH/AR/RU.",
+      "reason": "The diff shows the new types and UI rendering, but the analyzer implementations (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) and their returned `sources`/`collaborativeBasis` payloads are not visible in the provided truncated diff. Therefore there is no evidence that each analyzer always returns >=2 valid absolute `https://` URLs, nor that the collaborative-basis statement is correctly set per output, nor that all newly added engine strings are localized across all supported languages.",
       "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "requirement": "Mandatory High-risk override for critical scam keywords for message analysis across PT/EN/ES/FR/ZH/AR/RU (case-insensitive, accent-insensitive) with localized explanation stating High risk was triggered by critical keywords.",
-      "reason": "The diff shows a normalization utility and a PT template field (criticalKeywordTrigger), but does not show: (1) the per-language critical keyword sets for all supported languages, (2) the actual message-analysis override logic forcing risk === 'High', or (3) localized wording in each language explicitly stating the High risk was triggered by critical keywords.",
-      "evidence": [
-        "frontend/src/utils/antifraudTextNormalize.ts",
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-30",
-      "requirement": "All antifraud outputs fully localized for PT/EN/ES/FR/ZH/AR/RU (including indicator labels), with English fallback for unsupported language codes.",
-      "reason": "The diff shows Portuguese templates/labels interfaces and partial PT content, but does not provide evidence of complete templates/labels for EN/ES/FR/ZH/AR/RU, nor the fallback-to-English behavior when an unsupported language code is encountered.",
-      "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated; analyzer implementations not shown)"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.56,
+  "hallucinated_features": [
+    {
+      "description": "Added/advertised a \"critical-keyword High-risk overrides\" mechanism in the antifraud engine.",
+      "reason": "The BuildRequest focuses on transparency payload (sources + collaborative basis) and UI/i18n display. A critical-keyword override system is not requested by REQ-31..34.",
+      "evidence": [
+        "frontend/src/utils/structuredFraudAnalysis.ts (header comment: \"Supports full localization with critical-keyword High-risk overrides for all languages\")"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/components/StructuredAnalysisResultCard.tsx",
+    "frontend/src/i18n/translations.ts",
     "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json"
   ]

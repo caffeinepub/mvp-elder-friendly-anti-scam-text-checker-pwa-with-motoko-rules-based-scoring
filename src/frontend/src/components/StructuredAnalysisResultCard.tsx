@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Shield, AlertCircle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { AlertTriangle, Shield, AlertCircle, ExternalLink, Info } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
 
@@ -73,6 +74,42 @@ export function StructuredAnalysisResultCard({ result }: StructuredAnalysisResul
           </div>
           <p className="text-foreground leading-relaxed font-medium">
             {result.recommendation}
+          </p>
+        </div>
+
+        <Separator className="my-4" />
+
+        {/* Public Sources */}
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <ExternalLink className="h-4 w-4" />
+            {t.transparencySourcesLabel}
+          </div>
+          <ul className="space-y-1.5 text-sm">
+            {result.sources.map((source, index) => (
+              <li key={index}>
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  {source.name}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Collaborative Basis */}
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            {t.transparencyCollaborativeBasisLabel}
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {result.collaborativeBasis.statement}
           </p>
         </div>
       </CardContent>

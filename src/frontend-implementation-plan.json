@@ -1,68 +1,70 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Step 4: Frontend-only deterministic antifraud engine with localized critical-keyword High-risk overrides",
+  "title": "PASSO 5: Transparency citations and collaborative-basis references for antifraud structured analyses (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-28",
-      "summary": "Complete the frontend-only deterministic antifraud engine for Message/Email/Phone/Crypto tabs, returning a consistent StructuredAnalysisResult without any backend/canister calls.",
+      "id": "REQ-31",
+      "summary": "Extend the frontend structured antifraud result model with a renderable transparency payload (public sources + collaborative-basis descriptor) without adding any analysis backend calls.",
       "acceptanceCriteria": [
-        "On the Home page, running analyses for Message/Email/Phone/Crypto uses only frontend utility functions and does not perform any backend actor calls.",
-        "Each analysis returns a consistent StructuredAnalysisResult with risk in {'Low','Medium','High'} and non-empty explanation/recommendation strings.",
-        "The UI continues to render results via the existing StructuredAnalysisResultCard component with no regressions to navigation, consent gating, PWA install flow, or institutional pages."
+        "`frontend/src/utils/structuredFraudAnalysis.ts` exports an updated `StructuredAnalysisResult` type that includes additional fields for: (1) a list of public sources (each with at least a human-readable name and a URL) and (2) a collaborative-basis descriptor (human-readable text, plus optional reference/identifier fields if needed).",
+        "All existing analysis entry points (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) still return a valid `StructuredAnalysisResult` and TypeScript compilation succeeds across the frontend.",
+        "No analysis function invokes any backend/canister method (analysis remains 100% frontend/deterministic)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/utils/structuredFraudAnalysis.ts",
           "operation": "modify",
-          "description": "Refactor/complete analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto to be fully deterministic and frontend-only, ensure all code paths return { risk: 'Low'|'Medium'|'High', explanation: non-empty, recommendation: non-empty }, and remove/avoid any accidental backend/canister integrations (keep this module pure utility logic)."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Audit HomePage handlers to ensure they only call local analyze* utilities and never call backend actors for message/email/phone/crypto analysis; keep existing rendering via StructuredAnalysisResultCard and do not alter consent gating or PWA install behavior."
+          "description": "Update exported `StructuredAnalysisResult` to include a dedicated transparency payload: (1) `sources` as an array of public citations (each with at least `name` and absolute `https://` `url`) and (2) a `collaborativeBasis` descriptor (human-readable statement plus optional reference/identifier fields). Ensure these fields are designed to be directly rendered in the UI and that all analyzer functions remain fully deterministic and do not call any backend capability."
         }
       ]
     },
     {
-      "id": "REQ-29",
-      "summary": "Add mandatory High-risk override for critical scam keywords in message analysis for PT/EN/ES/FR/ZH/AR/RU with case-insensitive and accent-insensitive matching, with localized explanation noting the override trigger.",
+      "id": "REQ-32",
+      "summary": "Ensure every structured antifraud analysis output includes localized public-source citations and a truthful, localized collaborative-basis statement.",
       "acceptanceCriteria": [
-        "For each supported language, there is a defined set of critical keywords used for mandatory High-risk detection (not only Portuguese).",
-        "If a message contains any critical keyword (including accented/unaccented variants where relevant), analyzeMessage returns risk === 'High' even if no other indicators are present.",
-        "The returned explanation/recommendation are localized to the selected UI language, and the explanation mentions that the High risk was triggered by critical keywords (localized wording)."
+        "For each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`), the returned result always includes a non-empty `sources` list (at least 2 sources).",
+        "The `sources` URLs are valid absolute `https://` URLs and point to public, legally accessible resources (no private/internal endpoints).",
+        "Each returned result includes a collaborative-basis statement that is truthful and does not claim that community reports were checked unless the UI actually performed a lookup for the user’s input.",
+        "All newly added user-facing strings produced by the antifraud engine are fully localized for PT/EN/ES/FR/ZH/AR/RU (no mixed-language output in explanations/recommendations/transparency text)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/utils/structuredFraudAnalysis.ts",
           "operation": "modify",
-          "description": "Implement a language-keyed critical keyword dictionary for PT/EN/ES/FR/ZH/AR/RU; apply a mandatory High-risk override in analyzeMessage using case-insensitive + accent-insensitive normalization, and return a localized explanation/recommendation that explicitly states the High risk was triggered by critical keywords (with consistent fallback to English when language is unsupported)."
-        },
-        {
-          "path": "frontend/src/utils/antifraudTextNormalize.ts",
-          "operation": "create",
-          "description": "Add a small shared text normalization helper (lowercasing + unicode diacritic stripping) for accent-insensitive matching used by the message critical-keyword override and other heuristics."
+          "description": "Augment each analyzer (`analyzeMessage`, `analyzeEmail`, `analyzePhone`, `analyzeCrypto`) to always populate the new transparency fields: include at least two public, legally accessible `https://` sources per result and provide a truthful collaborative-basis statement that explicitly reflects that the structured analysis is computed locally and does not check community reports unless a separate UI lookup occurred. Add full PT/EN/ES/FR/ZH/AR/RU localization for all new transparency strings so outputs never mix languages."
         }
       ]
     },
     {
-      "id": "REQ-30",
-      "summary": "Localize all antifraud engine outputs (including embedded indicator labels) for PT/EN/ES/FR/ZH/AR/RU with a consistent English fallback for unsupported language codes.",
+      "id": "REQ-33",
+      "summary": "Render transparency sections in the structured analysis results UI (public sources + collaborative basis) with safe clickable links and localized labels.",
       "acceptanceCriteria": [
-        "Switching the language selector changes the language of explanation and recommendation strings returned by all analyze* functions.",
-        "Indicator phrases embedded inside explanations are localized (no Portuguese-only indicator strings when language is not PT).",
-        "If an unsupported language code is encountered, outputs fall back to English consistently."
+        "`frontend/src/components/StructuredAnalysisResultCard.tsx` renders a visible section for public-source citations whenever a result is displayed.",
+        "The public sources render as a list of link items (anchor tags) that open the cited URLs safely (no inline HTML injection; use standard React rendering).",
+        "The card renders a visible “Collaborative basis” block that displays the collaborative-basis statement provided by the analysis result.",
+        "All new UI labels for these sections are localized using the existing i18n system (no hard-coded Portuguese strings introduced)."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
-          "operation": "modify",
-          "description": "Introduce a centralized per-language indicator-label map (e.g., urgency language, credential requests, links detected, financial requests, crypto addresses, suspicious domain extension, etc.) and ensure analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto build indicator lists using these localized labels so explanations read naturally in PT/EN/ES/FR/ZH/AR/RU and never mix languages; ensure getTemplates/getIndicatorLabels apply an English fallback for unknown language codes."
-        },
         {
           "path": "frontend/src/components/StructuredAnalysisResultCard.tsx",
           "operation": "modify",
-          "description": "Verify the result card continues to display the structured antifraud outputs as-provided (localized explanation/recommendation), without introducing any new translations inside the card that could cause mixed-language output; keep existing UI behavior intact."
+          "description": "Update the card to render two new visible sections for every structured analysis result: (a) a 'Public sources' section that maps `result.sources` into a list of safe anchor links (standard React rendering, `target=\"_blank\"`, `rel=\"noreferrer noopener\"`) and (b) a 'Collaborative basis' section that displays `result.collaborativeBasis` text. Use the existing i18n system (`useI18n`) for all new labels (no hard-coded Portuguese strings)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "summary": "Add i18n keys for transparency UI labels across PT/EN/ES/FR/ZH/AR/RU and ensure language switching updates the new labels without key fallbacks.",
+      "acceptanceCriteria": [
+        "`frontend/src/i18n/translations.ts` includes new keys for the transparency sections (e.g., headings/labels/disclaimers) in all supported languages (PT/EN/ES/FR/ZH/AR/RU).",
+        "Switching languages in the UI changes these labels accordingly and no fallback-to-raw-key behavior is visible in the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add new translation keys for the transparency UI sections (e.g., headings/labels and any short disclaimers needed) for all supported locales (PT/EN/ES/FR/ZH/AR/RU). Ensure English locale values are English user-facing text and that `StructuredAnalysisResultCard` can read these keys via the existing `t` object without any raw-key fallback appearing when switching languages."
         }
       ]
     }

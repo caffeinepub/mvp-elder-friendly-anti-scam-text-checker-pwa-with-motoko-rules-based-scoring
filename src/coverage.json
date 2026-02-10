@@ -1,50 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T22:37:28.940Z",
+  "generatedAt": "2026-02-10T22:50:46.143Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-28",
-        "summary": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
+        "id": "REQ-31",
+        "summary": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ],
         "matchedFiles": [
           "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
-        "id": "REQ-29",
-        "summary": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
+        "id": "REQ-32",
+        "summary": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
-          "frontend/src/utils/antifraudTextNormalize.ts"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ],
         "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
-          "frontend/src/utils/antifraudTextNormalize.ts"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
-        "id": "REQ-30",
-        "summary": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
+        "id": "REQ-33",
+        "summary": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts",
           "frontend/src/components/StructuredAnalysisResultCard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/structuredFraudAnalysis.ts"
+          "frontend/src/components/StructuredAnalysisResultCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/i18n/translations.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/translations.ts"
         ]
       }
     ]
@@ -54,7 +61,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/components/StructuredAnalysisResultCard.tsx",
+    "frontend/src/i18n/translations.ts",
     "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",

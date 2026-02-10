@@ -1,16 +1,28 @@
 // Frontend-only structured fraud analysis engine
 // Implements deterministic heuristic rules for message/email/phone/crypto analysis
-// Returns structured results: { risk: 'Low'|'Medium'|'High', explanation: string, recommendation: string }
+// Returns structured results with transparency citations and collaborative-basis references
 // Supports full localization with critical-keyword High-risk overrides for all languages
 
 import { normalizeText, containsAnyKeyword } from './antifraudTextNormalize';
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
+export interface PublicSource {
+  name: string;
+  url: string;
+}
+
+export interface CollaborativeBasis {
+  statement: string;
+  reference?: string;
+}
+
 export interface StructuredAnalysisResult {
   risk: RiskLevel;
   explanation: string;
   recommendation: string;
+  sources: PublicSource[];
+  collaborativeBasis: CollaborativeBasis;
 }
 
 // Language-specific templates for analysis outputs
@@ -21,7 +33,8 @@ interface AnalysisTemplates {
   mediumRisk: (indicators: string) => { explanation: string; recommendation: string };
   lowRisk: (indicators: string) => { explanation: string; recommendation: string };
   noIndicators: { explanation: string; recommendation: string };
-  criticalKeywordTrigger: string; // Localized explanation for critical keyword override
+  criticalKeywordTrigger: string;
+  collaborativeBasisStatement: string;
 }
 
 // Language-specific indicator labels
@@ -75,7 +88,8 @@ const PT_TEMPLATES: AnalysisTemplates = {
     explanation: 'Nenhum indicador de risco significativo detectado.',
     recommendation: 'O conteúdo parece seguro, mas sempre verifique a identidade do remetente para pedidos importantes.'
   },
-  criticalKeywordTrigger: 'palavras-chave críticas de alto risco detectadas'
+  criticalKeywordTrigger: 'palavras-chave críticas de alto risco detectadas',
+  collaborativeBasisStatement: 'Esta análise é calculada localmente no seu dispositivo usando heurísticas determinísticas. Não consulta reportes da comunidade a menos que você execute uma pesquisa separada na base colaborativa.'
 };
 
 const PT_LABELS: IndicatorLabels = {
@@ -128,7 +142,8 @@ const EN_TEMPLATES: AnalysisTemplates = {
     explanation: 'No significant risk indicators detected.',
     recommendation: 'Content appears safe, but always verify sender identity for important requests.'
   },
-  criticalKeywordTrigger: 'critical high-risk keywords detected'
+  criticalKeywordTrigger: 'critical high-risk keywords detected',
+  collaborativeBasisStatement: 'This analysis is computed locally on your device using deterministic heuristics. It does not check community reports unless you perform a separate lookup in the collaborative database.'
 };
 
 const EN_LABELS: IndicatorLabels = {
@@ -181,7 +196,8 @@ const ES_TEMPLATES: AnalysisTemplates = {
     explanation: 'No se detectaron indicadores de riesgo significativos.',
     recommendation: 'El contenido parece seguro, pero siempre verifique la identidad del remitente para solicitudes importantes.'
   },
-  criticalKeywordTrigger: 'palabras clave críticas de alto riesgo detectadas'
+  criticalKeywordTrigger: 'palabras clave críticas de alto riesgo detectadas',
+  collaborativeBasisStatement: 'Este análisis se calcula localmente en su dispositivo utilizando heurísticas determinísticas. No consulta informes de la comunidad a menos que realice una búsqueda separada en la base de datos colaborativa.'
 };
 
 const ES_LABELS: IndicatorLabels = {
@@ -234,7 +250,8 @@ const FR_TEMPLATES: AnalysisTemplates = {
     explanation: 'Aucun indicateur de risque significatif détecté.',
     recommendation: 'Le contenu semble sûr, mais vérifiez toujours l\'identité de l\'expéditeur pour les demandes importantes.'
   },
-  criticalKeywordTrigger: 'mots-clés critiques à haut risque détectés'
+  criticalKeywordTrigger: 'mots-clés critiques à haut risque détectés',
+  collaborativeBasisStatement: 'Cette analyse est calculée localement sur votre appareil à l\'aide d\'heuristiques déterministes. Elle ne consulte pas les rapports de la communauté sauf si vous effectuez une recherche séparée dans la base de données collaborative.'
 };
 
 const FR_LABELS: IndicatorLabels = {
@@ -287,7 +304,8 @@ const ZH_TEMPLATES: AnalysisTemplates = {
     explanation: '未检测到重大风险指标。',
     recommendation: '内容似乎安全，但对于重要请求，请始终验证发件人身份。'
   },
-  criticalKeywordTrigger: '检测到关键高风险关键词'
+  criticalKeywordTrigger: '检测到关键高风险关键词',
+  collaborativeBasisStatement: '此分析使用确定性启发式方法在您的设备上本地计算。除非您在协作数据库中执行单独的查找，否则它不会检查社区报告。'
 };
 
 const ZH_LABELS: IndicatorLabels = {
@@ -340,7 +358,8 @@ const AR_TEMPLATES: AnalysisTemplates = {
     explanation: 'لم يتم اكتشاف مؤشرات مخاطر كبيرة.',
     recommendation: 'يبدو المحتوى آمنًا، ولكن تحقق دائمًا من هوية المرسل للطلبات المهمة.'
   },
-  criticalKeywordTrigger: 'تم اكتشاف كلمات رئيسية حرجة عالية المخاطر'
+  criticalKeywordTrigger: 'تم اكتشاف كلمات رئيسية حرجة عالية المخاطر',
+  collaborativeBasisStatement: 'يتم حساب هذا التحليل محليًا على جهازك باستخدام الاستدلالات الحتمية. لا يتحقق من تقارير المجتمع ما لم تقم بإجراء بحث منفصل في قاعدة البيانات التعاونية.'
 };
 
 const AR_LABELS: IndicatorLabels = {
@@ -393,7 +412,8 @@ const RU_TEMPLATES: AnalysisTemplates = {
     explanation: 'Значительных индикаторов риска не обнаружено.',
     recommendation: 'Контент кажется безопасным, но всегда проверяйте личность отправителя для важных запросов.'
   },
-  criticalKeywordTrigger: 'обнаружены критические ключевые слова высокого риска'
+  criticalKeywordTrigger: 'обнаружены критические ключевые слова высокого риска',
+  collaborativeBasisStatement: 'Этот анализ вычисляется локально на вашем устройстве с использованием детерминированных эвристик. Он не проверяет отчеты сообщества, если вы не выполните отдельный поиск в совместной базе данных.'
 };
 
 const RU_LABELS: IndicatorLabels = {
@@ -422,7 +442,7 @@ const RU_LABELS: IndicatorLabels = {
 
 // Template and label selectors with English fallback
 function getTemplates(language: string): AnalysisTemplates {
-  switch (language) {
+  switch (language.toLowerCase()) {
     case 'pt': return PT_TEMPLATES;
     case 'en': return EN_TEMPLATES;
     case 'es': return ES_TEMPLATES;
@@ -430,12 +450,12 @@ function getTemplates(language: string): AnalysisTemplates {
     case 'zh': return ZH_TEMPLATES;
     case 'ar': return AR_TEMPLATES;
     case 'ru': return RU_TEMPLATES;
-    default: return EN_TEMPLATES; // Fallback to English
+    default: return EN_TEMPLATES;
   }
 }
 
-function getIndicatorLabels(language: string): IndicatorLabels {
-  switch (language) {
+function getLabels(language: string): IndicatorLabels {
+  switch (language.toLowerCase()) {
     case 'pt': return PT_LABELS;
     case 'en': return EN_LABELS;
     case 'es': return ES_LABELS;
@@ -443,442 +463,458 @@ function getIndicatorLabels(language: string): IndicatorLabels {
     case 'zh': return ZH_LABELS;
     case 'ar': return AR_LABELS;
     case 'ru': return RU_LABELS;
-    default: return EN_LABELS; // Fallback to English
+    default: return EN_LABELS;
   }
 }
 
-// ============================================================================
-// CRITICAL KEYWORDS (Mandatory High-risk override for all languages)
-// ============================================================================
+// Public sources for transparency (same for all languages, URLs are universal)
+function getPublicSources(): PublicSource[] {
+  return [
+    {
+      name: 'Federal Trade Commission (FTC) - Scam Alerts',
+      url: 'https://www.ftc.gov/news-events/topics/consumer-alerts/scam-alerts'
+    },
+    {
+      name: 'Anti-Phishing Working Group (APWG)',
+      url: 'https://apwg.org/'
+    },
+    {
+      name: 'Internet Crime Complaint Center (IC3)',
+      url: 'https://www.ic3.gov/'
+    }
+  ];
+}
 
-const CRITICAL_KEYWORDS_BY_LANGUAGE: Record<string, string[]> = {
+// Critical keywords that trigger High risk across all languages
+const CRITICAL_KEYWORDS_MULTILANG = {
   pt: [
-    'dinheiro', 'lucro', 'promoção', 'oportunidade', 'grátis', 'gratis',
-    'encontros', 'investimento', 'criptomoeda', 'bitcoin', 'ganhe', 'prêmio'
+    'urgente', 'imediato', 'bloqueado', 'suspenso', 'verificar agora',
+    'clique aqui', 'confirme seus dados', 'atualize suas informações',
+    'ganhe dinheiro', 'prêmio', 'loteria', 'herança', 'transferência',
+    'bitcoin', 'criptomoeda', 'investimento garantido', 'lucro rápido'
   ],
   en: [
-    'money', 'profit', 'promotion', 'opportunity', 'free', 'dating',
-    'investment', 'cryptocurrency', 'bitcoin', 'earn', 'prize', 'winner'
+    'urgent', 'immediate', 'blocked', 'suspended', 'verify now',
+    'click here', 'confirm your details', 'update your information',
+    'make money', 'prize', 'lottery', 'inheritance', 'transfer',
+    'bitcoin', 'cryptocurrency', 'guaranteed investment', 'quick profit'
   ],
   es: [
-    'dinero', 'lucro', 'promoción', 'oportunidad', 'gratis', 'citas',
-    'inversión', 'criptomoneda', 'bitcoin', 'gana', 'premio', 'ganador'
+    'urgente', 'inmediato', 'bloqueado', 'suspendido', 'verificar ahora',
+    'haga clic aquí', 'confirme sus datos', 'actualice su información',
+    'ganar dinero', 'premio', 'lotería', 'herencia', 'transferencia',
+    'bitcoin', 'criptomoneda', 'inversión garantizada', 'ganancia rápida'
   ],
   fr: [
-    'argent', 'profit', 'promotion', 'opportunité', 'gratuit', 'rencontres',
-    'investissement', 'cryptomonnaie', 'bitcoin', 'gagner', 'prix', 'gagnant'
+    'urgent', 'immédiat', 'bloqué', 'suspendu', 'vérifier maintenant',
+    'cliquez ici', 'confirmez vos données', 'mettez à jour vos informations',
+    'gagner de l\'argent', 'prix', 'loterie', 'héritage', 'transfert',
+    'bitcoin', 'cryptomonnaie', 'investissement garanti', 'profit rapide'
   ],
   zh: [
-    '钱', '利润', '促销', '机会', '免费', '约会',
-    '投资', '加密货币', '比特币', '赚钱', '奖品', '赢家'
+    '紧急', '立即', '已封锁', '已暂停', '立即验证',
+    '点击这里', '确认您的详细信息', '更新您的信息',
+    '赚钱', '奖品', '彩票', '遗产', '转账',
+    '比特币', '加密货币', '保证投资', '快速利润'
   ],
   ar: [
-    'مال', 'ربح', 'ترويج', 'فرصة', 'مجاني', 'مواعدة',
-    'استثمار', 'عملة_مشفرة', 'بيتكوين', 'اكسب', 'جائزة', 'فائز'
+    'عاجل', 'فوري', 'محظور', 'معلق', 'تحقق الآن',
+    'انقر هنا', 'أكد تفاصيلك', 'حدث معلوماتك',
+    'اكسب المال', 'جائزة', 'يانصيب', 'ميراث', 'تحويل',
+    'بيتكوين', 'عملة مشفرة', 'استثمار مضمون', 'ربح سريع'
   ],
   ru: [
-    'деньги', 'прибыль', 'акция', 'возможность', 'бесплатно', 'знакомства',
-    'инвестиция', 'криптовалюта', 'биткоин', 'заработать', 'приз', 'победитель'
+    'срочно', 'немедленно', 'заблокирован', 'приостановлен', 'проверить сейчас',
+    'нажмите здесь', 'подтвердите свои данные', 'обновите свою информацию',
+    'заработать деньги', 'приз', 'лотерея', 'наследство', 'перевод',
+    'биткоин', 'криптовалюта', 'гарантированная инвестиция', 'быстрая прибыль'
   ]
 };
 
-// Get all critical keywords (union of all languages for comprehensive detection)
-function getAllCriticalKeywords(): string[] {
-  const allKeywords = new Set<string>();
-  Object.values(CRITICAL_KEYWORDS_BY_LANGUAGE).forEach(keywords => {
-    keywords.forEach(kw => allKeywords.add(kw));
-  });
-  return Array.from(allKeywords);
+function getCriticalKeywords(language: string): string[] {
+  const lang = language.toLowerCase();
+  return CRITICAL_KEYWORDS_MULTILANG[lang as keyof typeof CRITICAL_KEYWORDS_MULTILANG] || CRITICAL_KEYWORDS_MULTILANG.en;
 }
 
-// ============================================================================
-// MESSAGE ANALYSIS
-// ============================================================================
-
-const MESSAGE_PATTERNS = {
-  urgencyKeywords: [
-    'urgente', 'imediatamente', 'agora', 'rápido', 'última chance', 'expira',
-    'urgent', 'immediately', 'now', 'fast', 'last chance', 'expires',
-    'ação imediata', 'immediate action', 'conta bloqueada', 'account blocked',
-    'urgente', 'inmediatamente', 'ahora', 'rápido', 'última oportunidad', 'expira',
-    'urgent', 'immédiatement', 'maintenant', 'rapide', 'dernière chance', 'expire',
-    '紧急', '立即', '现在', '快速', '最后机会', '过期',
-    'عاجل', 'فورا', 'الآن', 'سريع', 'آخر_فرصة', 'ينتهي',
-    'срочно', 'немедленно', 'сейчас', 'быстро', 'последний_шанс', 'истекает'
-  ],
-  financialKeywords: [
-    'dinheiro', 'pagamento', 'transferência', 'conta bancária', 'cartão',
-    'money', 'payment', 'transfer', 'bank account', 'card', 'credit',
-    'pix', 'mbway', 'paypal', 'bitcoin', 'crypto', 'investimento', 'investment',
-    'dinero', 'pago', 'transferencia', 'cuenta bancaria', 'tarjeta',
-    'argent', 'paiement', 'virement', 'compte bancaire', 'carte',
-    '钱', '支付', '转账', '银行账户', '卡',
-    'مال', 'دفع', 'تحويل', 'حساب_بنكي', 'بطاقة',
-    'деньги', 'платеж', 'перевод', 'банковский_счет', 'карта'
-  ],
-  credentialRequests: [
-    'senha', 'password', 'pin', 'código', 'verificação', 'verification',
-    'confirme', 'confirm', 'dados pessoais', 'personal data', 'login',
-    'contraseña', 'código', 'verificación', 'confirmar', 'datos personales',
-    'mot de passe', 'code', 'vérification', 'confirmer', 'données personnelles',
-    '密码', '验证码', '验证', '确认', '个人数据',
-    'كلمة_السر', 'رمز', 'تحقق', 'تأكيد', 'بيانات_شخصية',
-    'пароль', 'код', 'проверка', 'подтвердить', 'личные_данные'
-  ],
-  suspiciousUrls: /https?:\/\/[^\s]+/gi,
-  cryptoAddresses: /\b(0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b/g,
-  excessivePunctuation: /[!?]{3,}/g,
-  allCaps: /\b[A-Z]{5,}\b/g,
-};
-
+// Message analysis
 export function analyzeMessage(message: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
-  const labels = getIndicatorLabels(language);
-  
+  const labels = getLabels(language);
+  const sources = getPublicSources();
+  const collaborativeBasis: CollaborativeBasis = {
+    statement: templates.collaborativeBasisStatement,
+    reference: 'local-heuristic-analysis'
+  };
+
   if (!message || message.trim().length === 0) {
     return {
       risk: 'Low',
-      ...templates.emptyInput
+      ...templates.emptyInput,
+      sources,
+      collaborativeBasis
     };
   }
 
-  // Safety: handle very long messages
-  const safeMessage = message.slice(0, 10000);
-  const lowerMessage = safeMessage.toLowerCase();
-  
-  // MANDATORY HIGH-RISK OVERRIDE: Check for critical keywords (all languages)
-  const allCriticalKeywords = getAllCriticalKeywords();
-  const hasCriticalKeyword = containsAnyKeyword(safeMessage, allCriticalKeywords);
-  
-  if (hasCriticalKeyword) {
-    // Force High risk for messages containing critical keywords
-    return {
-      risk: 'High',
-      ...templates.highRisk(templates.criticalKeywordTrigger)
-    };
-  }
-  
-  let riskScore = 0;
+  const normalized = normalizeText(message);
   const indicators: string[] = [];
+  let score = 0;
 
-  // Check urgency language (high risk indicator)
-  const urgencyCount = MESSAGE_PATTERNS.urgencyKeywords.filter(kw => 
-    lowerMessage.includes(kw.toLowerCase())
-  ).length;
-  if (urgencyCount >= 2) {
-    riskScore += 3;
-    indicators.push(labels.multipleUrgency);
-  } else if (urgencyCount === 1) {
-    riskScore += 1;
-    indicators.push(labels.urgencyLanguage);
-  }
-
-  // Check financial keywords
-  const financialCount = MESSAGE_PATTERNS.financialKeywords.filter(kw => 
-    lowerMessage.includes(kw.toLowerCase())
-  ).length;
-  if (financialCount >= 2) {
-    riskScore += 2;
-    indicators.push(labels.financialRequests);
-  } else if (financialCount === 1) {
-    riskScore += 1;
-  }
-
-  // Check credential requests (very high risk)
-  const credentialCount = MESSAGE_PATTERNS.credentialRequests.filter(kw => 
-    lowerMessage.includes(kw.toLowerCase())
-  ).length;
-  if (credentialCount >= 1) {
-    riskScore += 3;
-    indicators.push(labels.credentialRequests);
-  }
-
-  // Check for URLs
-  const urls = safeMessage.match(MESSAGE_PATTERNS.suspiciousUrls);
-  if (urls && urls.length > 0) {
-    riskScore += 2;
-    indicators.push(labels.containsLinks);
-  }
-
-  // Check for crypto addresses
-  const cryptoAddresses = safeMessage.match(MESSAGE_PATTERNS.cryptoAddresses);
-  if (cryptoAddresses && cryptoAddresses.length > 0) {
-    riskScore += 2;
-    indicators.push(labels.cryptoAddresses);
-  }
-
-  // Check excessive punctuation
-  const excessivePunct = safeMessage.match(MESSAGE_PATTERNS.excessivePunctuation);
-  if (excessivePunct && excessivePunct.length >= 2) {
-    riskScore += 1;
-    indicators.push(labels.excessivePunctuation);
-  }
-
-  // Check all caps (shouting)
-  const allCaps = safeMessage.match(MESSAGE_PATTERNS.allCaps);
-  if (allCaps && allCaps.length >= 3) {
-    riskScore += 1;
-    indicators.push(labels.excessiveCapitalization);
-  }
-
-  // Determine risk level and generate response
-  const indicatorText = indicators.join(', ');
-  
-  if (riskScore >= 6) {
+  // Critical keyword check (immediate High risk)
+  const criticalKeywords = getCriticalKeywords(language);
+  if (containsAnyKeyword(normalized, criticalKeywords)) {
     return {
       risk: 'High',
-      ...templates.highRisk(indicatorText)
+      ...templates.highRisk(templates.criticalKeywordTrigger),
+      sources,
+      collaborativeBasis
     };
-  } else if (riskScore >= 3) {
+  }
+
+  // Urgency language
+  const urgencyWords = ['urgent', 'urgente', 'immediate', 'imediato', 'now', 'agora', 'quickly', 'rapidamente'];
+  const urgencyCount = urgencyWords.filter(word => normalized.includes(normalizeText(word))).length;
+  if (urgencyCount > 0) {
+    indicators.push(labels.urgencyLanguage);
+    score += urgencyCount > 1 ? 3 : 2;
+    if (urgencyCount > 1) {
+      indicators.push(labels.multipleUrgency);
+    }
+  }
+
+  // Financial requests
+  const financialWords = ['money', 'dinheiro', 'payment', 'pagamento', 'bank', 'banco', 'card', 'cartao', 'account', 'conta'];
+  if (containsAnyKeyword(normalized, financialWords)) {
+    indicators.push(labels.financialRequests);
+    score += 3;
+  }
+
+  // Credential requests
+  const credentialWords = ['password', 'senha', 'pin', 'code', 'codigo', 'verify', 'verificar', 'confirm', 'confirmar'];
+  if (containsAnyKeyword(normalized, credentialWords)) {
+    indicators.push(labels.credentialRequests);
+    score += 3;
+  }
+
+  // Links
+  if (/https?:\/\/|www\./i.test(message)) {
+    indicators.push(labels.containsLinks);
+    score += 2;
+  }
+
+  // Crypto addresses
+  if (/0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34}/.test(message)) {
+    indicators.push(labels.cryptoAddresses);
+    score += 2;
+  }
+
+  // Excessive punctuation
+  const punctuationCount = (message.match(/[!?]{2,}/g) || []).length;
+  if (punctuationCount > 0) {
+    indicators.push(labels.excessivePunctuation);
+    score += 1;
+  }
+
+  // Excessive capitalization
+  const capsRatio = (message.match(/[A-Z]/g) || []).length / message.length;
+  if (capsRatio > 0.5 && message.length > 10) {
+    indicators.push(labels.excessiveCapitalization);
+    score += 1;
+  }
+
+  // Determine risk level
+  let risk: RiskLevel;
+  if (score >= 6) {
+    risk = 'High';
     return {
-      risk: 'Medium',
-      ...templates.mediumRisk(indicatorText)
+      risk,
+      ...templates.highRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
+    };
+  } else if (score >= 3) {
+    risk = 'Medium';
+    return {
+      risk,
+      ...templates.mediumRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
   } else {
+    risk = 'Low';
     return {
-      risk: 'Low',
-      ...(indicators.length > 0 ? templates.lowRisk(indicatorText) : templates.noIndicators)
+      risk,
+      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
+      sources,
+      collaborativeBasis
     };
   }
 }
 
-// ============================================================================
-// EMAIL ANALYSIS
-// ============================================================================
-
-const EMAIL_PATTERNS = {
-  suspiciousDomains: [
-    'tempmail', 'throwaway', 'guerrillamail', 'mailinator', 'maildrop',
-    'yopmail', '10minutemail', 'fakeinbox', 'trashmail', 'getnada'
-  ],
-  suspiciousTlds: ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.work', '.click'],
-  typosquatPatterns: [
-    'paypa1', 'paypai', 'arnaz0n', 'arnazon', 'micr0soft', 'g00gle',
-    'app1e', 'netf1ix', 'faceb00k', 'tw1tter', 'inst4gram', 'goog1e'
-  ],
-  excessiveNumbers: /\d{4,}/,
-  randomPattern: /[a-z0-9]{20,}/i,
-};
-
+// Email analysis
 export function analyzeEmail(email: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
-  const labels = getIndicatorLabels(language);
-  
+  const labels = getLabels(language);
+  const sources = getPublicSources();
+  const collaborativeBasis: CollaborativeBasis = {
+    statement: templates.collaborativeBasisStatement,
+    reference: 'local-heuristic-analysis'
+  };
+
   if (!email || email.trim().length === 0) {
     return {
       risk: 'Low',
-      ...templates.emptyInput
+      ...templates.emptyInput,
+      sources,
+      collaborativeBasis
     };
   }
 
-  const safeEmail = email.trim().slice(0, 500).toLowerCase();
-  const parts = safeEmail.split('@');
-  
-  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
     return {
       risk: 'Low',
-      ...templates.invalidFormat
+      ...templates.invalidFormat,
+      sources,
+      collaborativeBasis
     };
   }
 
-  const [localPart, domain] = parts;
-  let riskScore = 0;
+  const normalized = normalizeText(email);
   const indicators: string[] = [];
+  let score = 0;
 
-  // Check for temporary/disposable email services
-  for (const suspDomain of EMAIL_PATTERNS.suspiciousDomains) {
-    if (domain.includes(suspDomain)) {
-      riskScore += 3;
-      indicators.push(labels.disposableEmail);
-      break;
-    }
+  // Disposable email services
+  const disposableDomains = ['tempmail', 'guerrillamail', '10minutemail', 'throwaway', 'mailinator'];
+  if (containsAnyKeyword(normalized, disposableDomains)) {
+    indicators.push(labels.disposableEmail);
+    score += 3;
   }
 
-  // Check for suspicious TLDs
-  for (const tld of EMAIL_PATTERNS.suspiciousTlds) {
-    if (domain.endsWith(tld)) {
-      riskScore += 2;
-      indicators.push(labels.suspiciousDomain);
-      break;
-    }
+  // Suspicious TLDs
+  const suspiciousTlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top'];
+  if (suspiciousTlds.some(tld => email.toLowerCase().endsWith(tld))) {
+    indicators.push(labels.suspiciousDomain);
+    score += 2;
   }
 
-  // Check for typosquatting/impersonation
-  for (const pattern of EMAIL_PATTERNS.typosquatPatterns) {
-    if (domain.includes(pattern)) {
-      riskScore += 3;
-      indicators.push(labels.typosquatting);
-      break;
-    }
+  // Typosquatting patterns (common brand misspellings)
+  const typosquatPatterns = ['paypa1', 'g00gle', 'micros0ft', 'amaz0n', 'app1e'];
+  if (containsAnyKeyword(normalized, typosquatPatterns)) {
+    indicators.push(labels.typosquatting);
+    score += 4;
   }
 
-  // Check for excessive numbers in local part
-  if (EMAIL_PATTERNS.excessiveNumbers.test(localPart)) {
-    riskScore += 1;
+  // Excessive numbers in local part
+  const localPart = email.split('@')[0];
+  const numberCount = (localPart.match(/\d/g) || []).length;
+  if (numberCount > localPart.length * 0.5) {
     indicators.push(labels.excessiveNumbers);
+    score += 1;
   }
 
-  // Check for random-looking patterns
-  if (EMAIL_PATTERNS.randomPattern.test(localPart)) {
-    riskScore += 1;
+  // Random character patterns
+  if (/[a-z]{10,}[0-9]{5,}/i.test(localPart) || /[0-9]{5,}[a-z]{10,}/i.test(localPart)) {
     indicators.push(labels.randomPattern);
+    score += 1;
   }
 
   // Determine risk level
-  const indicatorText = indicators.join(', ');
-  
-  if (riskScore >= 5) {
+  let risk: RiskLevel;
+  if (score >= 5) {
+    risk = 'High';
     return {
-      risk: 'High',
-      ...templates.highRisk(indicatorText)
+      risk,
+      ...templates.highRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
-  } else if (riskScore >= 2) {
+  } else if (score >= 2) {
+    risk = 'Medium';
     return {
-      risk: 'Medium',
-      ...templates.mediumRisk(indicatorText)
+      risk,
+      ...templates.mediumRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
   } else {
+    risk = 'Low';
     return {
-      risk: 'Low',
-      ...(indicators.length > 0 ? templates.lowRisk(indicatorText) : templates.noIndicators)
+      risk,
+      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
+      sources,
+      collaborativeBasis
     };
   }
 }
 
-// ============================================================================
-// PHONE ANALYSIS
-// ============================================================================
-
-const PHONE_PATTERNS = {
-  validFormats: [
-    /^\+?[1-9]\d{7,14}$/,           // International format
-    /^\d{9,11}$/,                    // National format
-    /^\(\d{2,3}\)\s?\d{4,5}-?\d{4}$/ // Formatted (XX) XXXXX-XXXX
-  ],
-  suspiciousPatterns: [
-    /^0{5,}/,      // Too many zeros
-    /^1{5,}/,      // Repeated 1s
-    /^(\d)\1{6,}/, // Same digit repeated 7+ times
-  ]
-};
-
+// Phone analysis
 export function analyzePhone(phone: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
-  const labels = getIndicatorLabels(language);
-  
+  const labels = getLabels(language);
+  const sources = getPublicSources();
+  const collaborativeBasis: CollaborativeBasis = {
+    statement: templates.collaborativeBasisStatement,
+    reference: 'local-heuristic-analysis'
+  };
+
   if (!phone || phone.trim().length === 0) {
     return {
       risk: 'Low',
-      ...templates.emptyInput
+      ...templates.emptyInput,
+      sources,
+      collaborativeBasis
     };
   }
 
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-  let riskScore = 0;
+  const digitsOnly = phone.replace(/\D/g, '');
   const indicators: string[] = [];
+  let score = 0;
 
-  // Check format validity
-  const isValidFormat = PHONE_PATTERNS.validFormats.some(pattern => pattern.test(cleanPhone));
-  if (!isValidFormat) {
-    riskScore += 2;
+  // Basic format validation
+  if (digitsOnly.length === 0) {
     indicators.push(labels.invalidPhoneFormat);
+    return {
+      risk: 'Low',
+      ...templates.invalidFormat,
+      sources,
+      collaborativeBasis
+    };
   }
 
-  // Check length
-  if (cleanPhone.length < 8) {
-    riskScore += 2;
+  // Length checks
+  if (digitsOnly.length < 7) {
     indicators.push(labels.tooShort);
-  } else if (cleanPhone.length > 15) {
-    riskScore += 1;
+    score += 2;
+  } else if (digitsOnly.length > 15) {
     indicators.push(labels.tooLong);
+    score += 1;
   }
 
-  // Check for suspicious patterns
-  for (const pattern of PHONE_PATTERNS.suspiciousPatterns) {
-    if (pattern.test(cleanPhone)) {
-      riskScore += 2;
-      indicators.push(labels.suspiciousPattern);
-      break;
-    }
+  // Suspicious patterns
+  if (/^(.)\1+$/.test(digitsOnly)) {
+    indicators.push(labels.suspiciousPattern);
+    score += 3;
+  }
+
+  if (/^(012|123|234|345|456|567|678|789|987|876|765|654|543|432|321|210)/.test(digitsOnly)) {
+    indicators.push(labels.suspiciousPattern);
+    score += 2;
   }
 
   // Determine risk level
-  const indicatorText = indicators.join(', ');
-  
-  if (riskScore >= 4) {
+  let risk: RiskLevel;
+  if (score >= 4) {
+    risk = 'High';
     return {
-      risk: 'High',
-      ...templates.highRisk(indicatorText)
+      risk,
+      ...templates.highRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
-  } else if (riskScore >= 2) {
+  } else if (score >= 2) {
+    risk = 'Medium';
     return {
-      risk: 'Medium',
-      ...templates.mediumRisk(indicatorText)
+      risk,
+      ...templates.mediumRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
   } else {
+    risk = 'Low';
     return {
-      risk: 'Low',
-      ...(indicators.length > 0 ? templates.lowRisk(indicatorText) : templates.noIndicators)
+      risk,
+      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
+      sources,
+      collaborativeBasis
     };
   }
 }
 
-// ============================================================================
-// CRYPTO ANALYSIS
-// ============================================================================
-
-const CRYPTO_PATTERNS = {
-  bitcoin: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
-  ethereum: /^0x[a-fA-F0-9]{40}$/,
-  bech32: /^bc1[a-z0-9]{39,59}$/,
-};
-
+// Crypto analysis
 export function analyzeCrypto(address: string, language: string = 'pt'): StructuredAnalysisResult {
   const templates = getTemplates(language);
-  const labels = getIndicatorLabels(language);
-  
+  const labels = getLabels(language);
+  const sources = getPublicSources();
+  const collaborativeBasis: CollaborativeBasis = {
+    statement: templates.collaborativeBasisStatement,
+    reference: 'local-heuristic-analysis'
+  };
+
   if (!address || address.trim().length === 0) {
     return {
       risk: 'Low',
-      ...templates.emptyInput
+      ...templates.emptyInput,
+      sources,
+      collaborativeBasis
     };
   }
 
-  const cleanAddress = address.trim();
-  let riskScore = 0;
   const indicators: string[] = [];
+  let score = 0;
 
-  // Check format validity
-  const isValidFormat = 
-    CRYPTO_PATTERNS.bitcoin.test(cleanAddress) ||
-    CRYPTO_PATTERNS.ethereum.test(cleanAddress) ||
-    CRYPTO_PATTERNS.bech32.test(cleanAddress);
+  // Ethereum address validation
+  const ethRegex = /^0x[a-fA-F0-9]{40}$/;
+  // Bitcoin address validation (simplified)
+  const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
 
-  if (!isValidFormat) {
-    riskScore += 2;
+  const isValidEth = ethRegex.test(address);
+  const isValidBtc = btcRegex.test(address);
+
+  if (!isValidEth && !isValidBtc) {
     indicators.push(labels.invalidCryptoFormat);
-  }
-
-  // Note: In a real implementation, we would check against known scam databases
-  // For now, we provide a baseline risk assessment
-  
-  // Determine risk level
-  const indicatorText = indicators.join(', ');
-  
-  if (riskScore >= 4) {
-    return {
-      risk: 'High',
-      ...templates.highRisk(indicatorText)
-    };
-  } else if (riskScore >= 2) {
     return {
       risk: 'Medium',
-      ...templates.mediumRisk(indicatorText)
+      ...templates.invalidFormat,
+      sources,
+      collaborativeBasis
+    };
+  }
+
+  // Known scam patterns (example patterns, not real addresses)
+  const knownScamPatterns = ['0x0000000000000000000000000000000000000000', '0xdead', '0xbeef'];
+  if (knownScamPatterns.some(pattern => address.toLowerCase().includes(pattern))) {
+    indicators.push(labels.knownScamAddress);
+    score += 5;
+  }
+
+  // New/unused address heuristic (all zeros or very simple pattern)
+  if (/^0x0+$/.test(address) || /^0x(.)\1+$/.test(address)) {
+    indicators.push(labels.newAddress);
+    score += 1;
+  }
+
+  // High-value target indicator (this is a placeholder heuristic)
+  // In a real system, this would check against known exchange addresses
+  if (address.toLowerCase().startsWith('0xaaaa') || address.toLowerCase().startsWith('0xffff')) {
+    indicators.push(labels.highValueTarget);
+    score += 1;
+  }
+
+  // Determine risk level
+  let risk: RiskLevel;
+  if (score >= 4) {
+    risk = 'High';
+    return {
+      risk,
+      ...templates.highRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
+    };
+  } else if (score >= 2) {
+    risk = 'Medium';
+    return {
+      risk,
+      ...templates.mediumRisk(indicators.join(', ')),
+      sources,
+      collaborativeBasis
     };
   } else {
+    risk = 'Low';
     return {
-      risk: 'Low',
-      ...(indicators.length > 0 ? templates.lowRisk(indicatorText) : templates.noIndicators)
+      risk,
+      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
+      sources,
+      collaborativeBasis
     };
   }
 }
