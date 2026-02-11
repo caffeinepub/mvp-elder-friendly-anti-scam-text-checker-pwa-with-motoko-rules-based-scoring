@@ -1,113 +1,133 @@
 {
   "kind": "build_request",
-  "title": "Finalize production build: consolidate PWA/WebAPK, complete i18n, and production verification checklist",
+  "title": "Add advanced contact lookup module (phone/email) with antifraud integration, public-source metadata, offline caching, and multilingual UI",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-35",
-      "text": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
+      "id": "REQ-40",
+      "text": "Implement a production-ready “Advanced Contact Lookup” module in the frontend that accepts either a phone number or an email address in a single input, performs basic validation, and runs a lookup when the user presses a dedicated “Search” button.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-advanced-contact-search"
         ],
         "quotes": [
-          "Instrução explícita: Iniciar build final de produção. Vou executar a compilação completa, integrando todos os ajustes de código, manifest, service worker, motor antifraude, PWA/WebAPK, traduções, consentimento e branding, conforme definimos."
+          "Confirmo — podes gerar o código completo do módulo avançado de pesquisa de contactos para integração imediata no projeto.\nSegue exatamente os requisitos: pesquisa de telefone/email, integração com motor antifraude, retorno de informações públicas com fonte e data, compatível com PWA/WebAPK e traduções multilíngues."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/public/manifest.webmanifest` is updated for production (no test-only description such as \"Teste PWA WebAPK AntiFraud\"), keeps `name`/`short_name` as AntiFraud, keeps the existing generated icon paths, and includes `id` plus `prefer_related_applications: false`.",
-        "`frontend/public/service-worker.js` is updated for production (not the temporary `antifraud-test` cache), uses the consolidated production caching strategy required for stable installability (WebAPK where supported), and does not break normal navigation/routing.",
-        "A production build served over HTTPS loads with the manifest detected by the browser and the service worker controlling the page (no registration errors in console in production mode)."
+        "A new UI module exists in the app that provides one input that accepts either phone or email and a single “Search” action.",
+        "The module rejects empty input and displays a localized validation error.",
+        "The module detects whether the input is phone vs email (based on basic heuristics/format checks) and proceeds accordingly.",
+        "The module does not require Internet Identity login to be used (same accessibility level as existing Home analysis tabs)."
       ]
     },
     {
-      "id": "REQ-36",
-      "text": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
+      "id": "REQ-41",
+      "text": "Integrate the Advanced Contact Lookup results with the existing 100% frontend antifraud engine so each searched contact returns a structured risk outcome (Low/Medium/High) plus a user-readable description/explanation and recommendation in the currently selected UI language.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-advanced-contact-search"
         ],
         "quotes": [
-          "Manifest e service worker consolidados na versão definitiva de produção.",
-          "CTA de instalação com deferredPrompt.prompt() funcionando.",
-          "Evento appinstalled capturado."
+          "integração com motor antifraude"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/pwa/install.ts` no longer contains temporary debug/test-only behavior (e.g., `window.PWA_CAN_INSTALL` flags and console-only instrumentation intended for testing).",
-        "Calling `setupPWAInstall()` once on app startup results in `beforeinstallprompt` being captured (via a module-level deferred prompt) when the app becomes installable.",
-        "Clicking the install CTA triggers `deferredPrompt.prompt()` when available, and `triggerPWAInstall()` resolves to `true` only when the user accepts the prompt; the deferred prompt is cleared after `userChoice` and also on the `appinstalled` event."
+        "For phone searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
+        "For email searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
+        "The risk level and explanation/recommendation render in the same results panel as the public lookup information.",
+        "Risk output follows the app’s existing structured results conventions (Low/Medium/High and localized text)."
       ]
     },
     {
-      "id": "REQ-37",
-      "text": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
+      "id": "REQ-42",
+      "text": "Implement a public-information lookup layer for phone/email that returns only legally safe, non-sensitive, publicly presented information and always includes (a) source name, (b) source URL (when applicable), and (c) “as of” date for the returned information.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-advanced-contact-search"
         ],
         "quotes": [
-          "Configurar PWA e CTA instalável corretamente em todos os idiomas.",
-          "Traduções multilíngues aplicadas e verificadas."
+          "Retorno de informações públicas com fonte e data",
+          "Consulta a fontes públicas gratuitas\nAPI/serviço mock ou gratuito para informações legais e públicas sobre números/email.\nGarantia de legalidade total e indicação de fonte e data."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/InstallButton.tsx` does not contain hardcoded Portuguese strings for the button label or alert message.",
-        "The install button label uses the existing i18n key (`installPrimaryButton`) and renders correctly for PT/EN/ES/FR/ZH/AR/RU.",
-        "If installation is not eligible, the fallback message is localized via a dedicated i18n key added for this purpose (English text present in the EN locale)."
+        "Search results include a “Public information” section with at least: display name (only when available), summary/details text, source, and date.",
+        "If no public info is found, the UI shows a localized “No public information found” state while still showing antifraud analysis results.",
+        "All returned public info is explicitly presented as public-source information with clear attribution (source + date) visible to the user.",
+        "The implementation does not require any new external paid services, API keys, or third-party authentication providers."
       ]
     },
     {
-      "id": "REQ-38",
-      "text": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
+      "id": "REQ-43",
+      "text": "Make the Advanced Contact Lookup module compatible with PWA/WebAPK usage by enabling offline partial behavior: the module’s static resources and any same-origin lookup resources must be cacheable, and previously viewed lookup results should remain available when offline (best-effort).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-advanced-contact-search"
         ],
         "quotes": [
-          "todas as páginas institucionais com conteúdos PT verbatim + traduções EN/ES/FR/ZH/AR/RU.",
-          "Confirmar que as traduções EN/ES/FR/ZH/AR/RU estão corretas."
+          "PWA e offline\nResultados cacheáveis no service worker (offline parcial).\nCompatível com WebAPK e instalação nativa."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/i18n/translations.ts` includes complete locale objects for `en`, `es`, `fr`, `zh`, `ar`, and `ru` (in addition to `pt`) with no missing keys used by the UI.",
-        "Switching languages via the existing language selector updates all visible UI strings (navigation, home page, consent modal, install CTA, analysis results, transparency labels) without falling back to Portuguese or showing undefined/missing text.",
-        "Institutional pages (`/mission`, `/how-it-works`, `/terms`, `/privacy`) render complete localized content for each supported language (not placeholders or truncated summaries)."
+        "When the app is installed as a PWA and the device is offline, the Advanced Contact Lookup UI still loads (app shell works) and the module does not crash.",
+        "Previously viewed lookup results are available offline (best-effort), with a localized indicator if the app is offline and cannot refresh data.",
+        "`frontend/public/service-worker.js` continues to use a network-first strategy for general requests and does not regress installability/WebAPK behavior.",
+        "Offline behavior does not introduce new backend dependencies."
       ]
     },
     {
-      "id": "REQ-39",
-      "text": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
+      "id": "REQ-44",
+      "text": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-advanced-contact-search"
         ],
         "quotes": [
-          "Revisar todos os fluxos críticos e gerar relatório de verificação.",
-          "Relatório final de verificação de todos os módulos."
+          "traduções multilíngues"
         ]
       },
       "acceptanceCriteria": [
-        "A new markdown file (e.g., `frontend/PRODUCTION_BUILD_VERIFICATION.md`) exists and is written in English.",
-        "The checklist includes explicit, step-by-step validation items for: SPA navigation/routes (including aliases and 404 fallback behavior), consent gate blocking behavior until accepted, global AntiFraud / by HCoragem branding presence, antifraud analysis for message/email/phone/crypto with transparency sections, multilingual smoke checks for PT/EN/ES/FR/ZH/AR/RU, and PWA install behavior (including a reference/link to the existing `frontend/PWA_WEBAPK_ANDROID_TEST.md` for the Android WebAPK validation flow).",
-        "The document ends with a clear pass/fail sign-off section indicating whether the build is ready for live deployment."
+        "All new labels/buttons/errors/empty-states in the Advanced Contact Lookup module are sourced from the i18n dictionary.",
+        "The module displays correct translations for PT/EN/ES/FR/ZH/AR/RU when switching languages via the existing language selector.",
+        "No new Advanced Contact Lookup user-facing strings are left hardcoded in Portuguese or English inside React components."
+      ]
+    },
+    {
+      "id": "REQ-45",
+      "text": "Integrate the Advanced Contact Lookup module into the existing app navigation/UI so it is immediately usable in production without disrupting existing Home page verification tabs and without modifying any immutable frontend paths.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-advanced-contact-search"
+        ],
+        "quotes": [
+          "para integração imediata no projeto"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The module is reachable from the current UI (e.g., as a new Home tab or a dedicated section) without breaking existing Message/Email/Phone/Crypto tabs.",
+        "Existing Home page functionality (analysis tabs, results rendering, install button, consent gate) continues to work unchanged.",
+        "No files under `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or `frontend/src/components/ui` are modified."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any frontend immutable paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Keep the backend as a single Motoko actor in `backend/main.mo`; only introduce `backend/migration.mo` if a state migration is strictly required (not expected for this request).",
-    "Preserve existing AntiFraud branding and generated icon asset paths referenced by the manifest/service worker unless explicitly required for production correctness."
+    "Frontend must not modify immutable paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, `frontend/src/components/ui`.",
+    "Do not introduce non-supported technologies (no external databases, no WebSockets, no third-party auth providers).",
+    "Keep antifraud analysis for this module frontend-only (no new canister calls for analysis).",
+    "Preserve existing PWA/WebAPK installability behavior; any service worker changes must not regress installation prompting or caching of the app shell."
   ],
   "nonGoals": [
-    "Build or publish native Android/iOS applications, app store submissions, signing/provisioning, or any Google Play / Apple App Store distribution work.",
-    "Introduce new backend services, external databases, or third-party authentication providers beyond Internet Identity.",
-    "Redesign unrelated UI/UX or add new product features beyond production consolidation, i18n completeness, and verification documentation."
+    "Building native Android/iOS apps or preparing App Store / Play Store submissions.",
+    "Adding paid/subscription features, push notifications, SMS/WhatsApp integrations, or real-time messaging.",
+    "Introducing new backend canisters or external databases to store lookup results.",
+    "Guaranteeing the accuracy or completeness of public contact information beyond what the cited sources provide."
   ],
   "imageRequirements": {
     "required": [],

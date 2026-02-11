@@ -1,45 +1,33 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T23:21:38.596Z",
-  "summary": "REQ-35, REQ-36, and REQ-37 appear implemented via production manifest/service-worker updates, finalized PWA install capture/trigger logic, and InstallButton i18n wiring. REQ-38 is not fully met because several locales are described as falling back to English rather than having complete translations. REQ-39 is partially met (new English checklist exists), but required items like an explicit reference to PWA_WEBAPK_ANDROID_TEST.md and a final pass/fail sign-off section are not evidenced in the truncated document content.",
+  "generatedAt": "2026-02-11T00:03:07.377Z",
+  "summary": "Diff adds an Advanced Contact Lookup module (single input + Search), integrates existing frontend antifraud analysis for phone/email, adds a same-origin public-info lookup dataset with source metadata, implements offline best-effort caching (localStorage + SW precache), and surfaces it via a new Home tab. Main gaps are around i18n: some new user-facing strings are hardcoded (not sourced from the existing i18n dictionary) and translations appear to fall back to English for non-PT/EN languages rather than providing full PT/EN/ES/FR/ZH/AR/RU coverage.",
   "missing_requirements": [
     {
-      "id": "REQ-38",
-      "requirement": "Complete and integrate full multilingual translation set for EN, ES, FR, ZH, AR, RU with no missing UI keys and complete institutional page content per language.",
-      "reason": "The diff evidence indicates French/Chinese/Arabic/Russian are using English fallback rather than complete locale objects derived from Portuguese, which violates the requirement for complete translations (and implies potential missing keys/content in those locales).",
+      "id": "REQ-44",
+      "requirement": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
+      "reason": "New validation/error strings are hardcoded in a utility instead of coming from the existing i18n dictionary, and the translation file summary indicates non-PT/EN languages fall back to English rather than having full translations.",
       "evidence": [
-        "frontend-file-summaries.txt (describes: \"French/Chinese/Arabic/Russian using English as fallback\")",
-        "frontend/src/i18n/translations.ts (truncated; does not demonstrate complete fr/zh/ar/ru content)"
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "requirement": "Verification checklist must include a reference/link to existing frontend/PWA_WEBAPK_ANDROID_TEST.md and end with a clear pass/fail sign-off section.",
-      "reason": "The newly added checklist file is truncated and the shown portion does not include a reference/link to frontend/PWA_WEBAPK_ANDROID_TEST.md, nor does it show a final pass/fail sign-off section. Because only truncated content is available, these required elements are not evidenced as implemented.",
-      "evidence": [
-        "frontend/PRODUCTION_BUILD_VERIFICATION.md (truncated; no visible link to PWA_WEBAPK_ANDROID_TEST.md and no visible sign-off section)"
+        "frontend/src/utils/contactInputHeuristics.ts (hardcoded messages per language)",
+        "frontend/src/i18n/translations.ts (summary: \"with other languages using English as fallback\")"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Checklist includes caffeine.ai-specific footer/UTM validation items (\"Built with love using caffeine.ai\", UTM parameters, app identifier based on hostname).",
-      "reason": "REQ-39 requires branding checks for \"AntiFraud / by HCoragem\" and other critical flows, but does not request adding/validating caffeine.ai attribution details or UTM parameter behavior.",
-      "evidence": [
-        "frontend/PRODUCTION_BUILD_VERIFICATION.md (section \"Footer Attribution\" with caffeine.ai/UTM items)"
-      ]
-    }
-  ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
-    "frontend/public/manifest.webmanifest",
+    "frontend/public/data/public-contact-lookup.json",
     "frontend/public/service-worker.js",
-    "frontend/src/components/InstallButton.tsx",
+    "frontend/src/components/AdvancedContactLookup.tsx",
+    "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+    "frontend/src/hooks/useAdvancedContactLookupCache.ts",
+    "frontend/src/hooks/useOfflineStatus.ts",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/pwa/install.ts",
+    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/utils/contactInputHeuristics.ts",
+    "frontend/src/utils/publicContactLookup.ts",
     "project_state.json"
   ]
 }

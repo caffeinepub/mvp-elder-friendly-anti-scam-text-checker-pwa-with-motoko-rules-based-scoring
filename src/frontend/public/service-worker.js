@@ -1,89 +1,57 @@
-const CACHE_VERSION = 'v1';
-const CACHE_NAME = `antifraud-production-${CACHE_VERSION}`;
+// Minimal service worker with app shell precaching and network-first strategy
+// Extended to include Advanced Contact Lookup public data resources
+
+const CACHE_NAME = 'antifraud-v2';
 const APP_SHELL = [
   '/',
-  '/manifest.webmanifest',
+  '/index.html',
+  '/assets/generated/antifraud-logo-icon.dim_256x256.png',
   '/assets/generated/antifraud-pwa-icon.dim_192x192.png',
-  '/assets/generated/antifraud-pwa-icon.dim_512x512.png'
+  '/assets/generated/antifraud-pwa-icon.dim_512x512.png',
+  '/data/public-contact-lookup.json'
 ];
 
-// Install event - precache app shell
+// Install event: precache app shell and public data
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(APP_SHELL);
+    })
   );
   self.skipWaiting();
 });
 
-// Activate event - cleanup old caches
+// Activate event: cleanup old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(k => k.startsWith('antifraud-') && k !== CACHE_NAME)
-          .map(k => caches.delete(k))
-      )
-    )
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+    })
   );
   self.clients.claim();
 });
 
-// Fetch event - network first with cache fallback for SPA navigation
+// Fetch event: network-first with cache fallback
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // For navigation requests (HTML pages), use network-first with app shell fallback
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          // Clone and cache successful responses
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, responseClone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cached app shell for SPA routing
-          return caches.match('/').then(cachedResponse => {
-            return cachedResponse || new Response('Offline - App not available', {
-              status: 503,
-              statusText: 'Service Unavailable'
-            });
-          });
-        })
-    );
-    return;
-  }
-
-  // For static assets (manifest, icons), use cache-first
-  if (APP_SHELL.includes(url.pathname)) {
-    event.respondWith(
-      caches.match(request).then(cachedResponse => {
-        return cachedResponse || fetch(request).then(response => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, responseClone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // For all other requests, use network-first with cache fallback
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        // Cache successful responses
-        if (response.ok && request.method === 'GET') {
+    fetch(event.request)
+      .then((response) => {
+        // Clone and cache successful responses
+        if (response && response.status === 200) {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, responseClone));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
         return response;
       })
-      .catch(() => caches.match(request))
+      .catch(() => {
+        // Network failed, try cache
+        return caches.match(event.request);
+      })
   );
 });

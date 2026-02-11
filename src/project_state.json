@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
-  "summary": "Projeto AntiFraud com PASSO 5 e PASSO 6 validados; todos os módulos (conteúdos PT verbatim + traduções, motor antifraude 100% frontend, pesquisa pública de contactos, branding, consentimento, PWA/WebAPK) considerados completos e integrados. Próximo estágio: preparar e gerar um build final real de produção LIVE, consolidando manifest/service worker definitivos e implementando validações no código antes do deployment.",
+  "projectStateVersion": 21,
+  "summary": "Projeto AntiFraud publicado LIVE com build final de produção consolidado e validado (PWA/WebAPK Android confirmado, motor antifraude 100% frontend, pesquisa pública, branding, consentimento e traduções). Próximo desenvolvimento: criar/integração imediata de um módulo avançado de pesquisa de contactos (telefone/email) com resultados detalhados, integração antifraude, fonte+data, i18n e suporte PWA/offline parcial.",
   "architectural_notes": [
     "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
     "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
@@ -20,7 +20,7 @@
     "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida.",
     "WebAPK/instalação PWA pode falhar por limitação do ambiente de deploy (domínio draft/test), não por código: exige HTTPS estável, start_url/scope acessíveis e SW/rotas com resposta 200 para o Chrome disparar prompt nativo."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-when-the-app-is-installable-beforeinstallprompt-available-and-not-already-installed-show-a-prominent-install-prompt-on-the-home-page-that-asks-the-user-whether-they-want-to-install-the-app-now-the-prompt-must-offer-clear-actions-e-g-install-now-and-not-now-and-must-not-repeatedly-nag-the-user-after-dismissal-persist-dismissal-choice-locally-with-a-reasonable-cooldown",
@@ -277,6 +277,54 @@
         "REQ-39"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-a-production-ready-advanced-contact-lookup-module-in-the-frontend-that-accepts-either-a-phone-number-or-an-email-address-in-a-single-input-performs-basic-validation-and-runs-a-lookup-when-the-user-presses-a-dedicated-search-button",
+      "title": "Implement a production-ready “Advanced Contact Lookup” module in the frontend that accepts either a phone number or an email address in a single input, performs basic validation, and runs a lookup when the user presses a dedicated “Search” button.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-the-advanced-contact-lookup-results-with-the-existing-100-frontend-antifraud-engine-so-each-searched-contact-returns-a-structured-risk-outcome-low-medium-high-plus-a-user-readable-description-explanation-and-recommendation-in-the-currently-selected-ui-language",
+      "title": "Integrate the Advanced Contact Lookup results with the existing 100% frontend antifraud engine so each searched contact returns a structured risk outcome (Low/Medium/High) plus a user-readable description/explanation and recommendation in the currently selected UI language.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-public-information-lookup-layer-for-phone-email-that-returns-only-legally-safe-non-sensitive-publicly-presented-information-and-always-includes-a-source-name-b-source-url-when-applicable-and-c-as-of-date-for-the-returned-information",
+      "title": "Implement a public-information lookup layer for phone/email that returns only legally safe, non-sensitive, publicly presented information and always includes (a) source name, (b) source URL (when applicable), and (c) “as of” date for the returned information.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-advanced-contact-lookup-module-compatible-with-pwa-webapk-usage-by-enabling-offline-partial-behavior-the-module-s-static-resources-and-any-same-origin-lookup-resources-must-be-cacheable-and-previously-viewed-lookup-results-should-remain-available-when-offline-best-effort",
+      "title": "Make the Advanced Contact Lookup module compatible with PWA/WebAPK usage by enabling offline partial behavior: the module’s static resources and any same-origin lookup resources must be cacheable, and previously viewed lookup results should remain available when offline (best-effort).",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-full-multilingual-support-for-all-new-advanced-contact-lookup-ui-text-across-pt-en-es-fr-zh-ar-ru-using-the-existing-i18n-system-do-not-hardcode-user-facing-strings-in-components",
+      "title": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-the-advanced-contact-lookup-module-into-the-existing-app-navigation-ui-so-it-is-immediately-usable-in-production-without-disrupting-existing-home-page-verification-tabs-and-without-modifying-any-immutable-frontend-paths",
+      "title": "Integrate the Advanced Contact Lookup module into the existing app navigation/UI so it is immediately usable in production without disrupting existing Home page verification tabs and without modifying any immutable frontend paths.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -417,6 +465,12 @@
       "summary": "Preparar e gerar build final real de produção (LIVE): consolidar código/UI/branding, implementar validações no código (rotas, consentimento, antifraude 100% frontend, pesquisa pública, traduções, PWA/WebAPK), e consolidar manifest + service worker definitivos (não temporários) para garantir instalação PWA/WebAPK no Android Chrome.",
       "reqIds": [],
       "status": "in_progress"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Gerar e integrar o módulo avançado de pesquisa de contactos para produção: pesquisa por telefone/email com validação básica; resultados detalhados (nome quando disponível, risco Baixo/Médio/Alto, descrição, fonte e data); integração com o motor antifraude 100% frontend no mesmo painel; consulta a fontes públicas gratuitas (API/mock) com garantia de legalidade; compatível com PWA/WebAPK e com cache/offline parcial via service worker; totalmente localizado (PT/EN/ES/FR/ZH/AR/RU).",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "projectName": "AntiFraud",

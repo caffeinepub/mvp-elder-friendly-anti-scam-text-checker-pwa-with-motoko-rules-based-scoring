@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-consolidate-the-pwa-production-configuration-by-replacing-the-current-temporary-test-manifest-and-service-worker-with-the-final-production-versions-while-preserving-the-existing-antifraud-branding-and-icon-paths",
-      "featureTitle": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
+      "featureId": "feature-implement-a-production-ready-advanced-contact-lookup-module-in-the-frontend-that-accepts-either-a-phone-number-or-an-email-address-in-a-single-input-performs-basic-validation-and-runs-a-lookup-when-the-user-presses-a-dedicated-search-button",
+      "featureTitle": "Implement a production-ready “Advanced Contact Lookup” module in the frontend that accepts either a phone number or an email address in a single input, performs basic validation, and runs a lookup when the user presses a dedicated “Search” button.",
       "files": [
-        "frontend/public/manifest.webmanifest",
-        "frontend/public/service-worker.js"
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/src/utils/contactInputHeuristics.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,15 +18,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-35"
+        "REQ-40"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-replace-the-current-temporary-pwa-install-prompt-capture-implementation-with-the-finalized-production-setuppwainstall-triggerpwainstall-implementation-ensuring-it-captures-beforeinstallprompt-clears-state-on-appinstalled-and-returns-whether-installation-was-accepted",
-      "featureTitle": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
+      "featureId": "feature-integrate-the-advanced-contact-lookup-results-with-the-existing-100-frontend-antifraud-engine-so-each-searched-contact-returns-a-structured-risk-outcome-low-medium-high-plus-a-user-readable-description-explanation-and-recommendation-in-the-currently-selected-ui-language",
+      "featureTitle": "Integrate the Advanced Contact Lookup results with the existing 100% frontend antifraud engine so each searched contact returns a structured risk outcome (Low/Medium/High) plus a user-readable description/explanation and recommendation in the currently selected UI language.",
       "files": [
-        "frontend/src/pwa/install.ts"
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/components/AdvancedContactLookupResultCard.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,15 +38,59 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-36"
+        "REQ-41"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-install-cta-fully-production-ready-by-removing-hardcoded-portuguese-strings-from-the-install-button-and-fallback-alert-and-wiring-all-install-cta-user-facing-text-through-i18n-across-all-supported-languages",
-      "featureTitle": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
+      "featureId": "feature-implement-a-public-information-lookup-layer-for-phone-email-that-returns-only-legally-safe-non-sensitive-publicly-presented-information-and-always-includes-a-source-name-b-source-url-when-applicable-and-c-as-of-date-for-the-returned-information",
+      "featureTitle": "Implement a public-information lookup layer for phone/email that returns only legally safe, non-sensitive, publicly presented information and always includes (a) source name, (b) source URL (when applicable), and (c) “as of” date for the returned information.",
       "files": [
-        "frontend/src/components/InstallButton.tsx",
+        "frontend/public/data/public-contact-lookup.json",
+        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+        "frontend/src/utils/publicContactLookup.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-42"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-advanced-contact-lookup-module-compatible-with-pwa-webapk-usage-by-enabling-offline-partial-behavior-the-module-s-static-resources-and-any-same-origin-lookup-resources-must-be-cacheable-and-previously-viewed-lookup-results-should-remain-available-when-offline-best-effort",
+      "featureTitle": "Make the Advanced Contact Lookup module compatible with PWA/WebAPK usage by enabling offline partial behavior: the module’s static resources and any same-origin lookup resources must be cacheable, and previously viewed lookup results should remain available when offline (best-effort).",
+      "files": [
+        "frontend/public/service-worker.js",
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/hooks/useAdvancedContactLookupCache.ts",
+        "frontend/src/hooks/useOfflineStatus.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-43"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-full-multilingual-support-for-all-new-advanced-contact-lookup-ui-text-across-pt-en-es-fr-zh-ar-ru-using-the-existing-i18n-system-do-not-hardcode-user-facing-strings-in-components",
+      "featureTitle": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
+      "files": [
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
         "frontend/src/i18n/translations.ts"
       ],
       "components": [
@@ -56,15 +102,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-37"
+        "REQ-44"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-complete-and-integrate-the-full-multilingual-translation-set-derived-from-the-official-portuguese-source-for-en-es-fr-zh-ar-and-ru-covering-navigation-consent-modal-pwa-install-ui-analysis-results-including-transparency-sections-and-all-institutional-page-content",
-      "featureTitle": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
+      "featureId": "feature-integrate-the-advanced-contact-lookup-module-into-the-existing-app-navigation-ui-so-it-is-immediately-usable-in-production-without-disrupting-existing-home-page-verification-tabs-and-without-modifying-any-immutable-frontend-paths",
+      "featureTitle": "Integrate the Advanced Contact Lookup module into the existing app navigation/UI so it is immediately usable in production without disrupting existing Home page verification tabs and without modifying any immutable frontend paths.",
       "files": [
-        "frontend/src/i18n/translations.ts"
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/pages/HomePage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -75,26 +122,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-38"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-developer-facing-production-verification-checklist-report-document-that-makes-the-final-build-audit-repeatable-covering-critical-flows-routes-consent-gate-branding-antifraud-engine-frontend-only-public-contact-lookup-behavior-translations-and-pwa-webapk-installation-validation",
-      "featureTitle": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
-      "files": [
-        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-39"
+        "REQ-45"
       ],
       "confidence": "high"
     }

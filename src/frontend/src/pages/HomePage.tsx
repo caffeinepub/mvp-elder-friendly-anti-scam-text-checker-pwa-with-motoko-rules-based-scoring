@@ -10,6 +10,7 @@ import { Shield, AlertTriangle } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import { InstallButton } from '@/components/InstallButton';
 import { StructuredAnalysisResultCard } from '@/components/StructuredAnalysisResultCard';
+import { AdvancedContactLookup } from '@/components/AdvancedContactLookup';
 import { 
   analyzeMessage, 
   analyzeEmail, 
@@ -116,11 +117,12 @@ export function HomePage() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="message">{t.tabMessage}</TabsTrigger>
                 <TabsTrigger value="email">{t.tabEmail}</TabsTrigger>
                 <TabsTrigger value="phone">{t.tabPhone}</TabsTrigger>
                 <TabsTrigger value="crypto">{t.tabCrypto}</TabsTrigger>
+                <TabsTrigger value="lookup">{t.tabAdvancedLookup}</TabsTrigger>
               </TabsList>
 
               {/* Message Tab */}
@@ -217,6 +219,11 @@ export function HomePage() {
                   {t.buttonCheck}
                 </Button>
                 {cryptoResult && <StructuredAnalysisResultCard result={cryptoResult} />}
+              </TabsContent>
+
+              {/* Advanced Contact Lookup Tab */}
+              <TabsContent value="lookup" className="space-y-4 mt-6">
+                <AdvancedContactLookup />
               </TabsContent>
             </Tabs>
           </CardContent>
