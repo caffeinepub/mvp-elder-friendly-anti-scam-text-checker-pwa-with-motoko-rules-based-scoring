@@ -1,8 +1,10 @@
 // Result card component for Advanced Contact Lookup
-// Combines antifraud analysis with public information section
+// Combines antifraud analysis with public information section and report action
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
@@ -13,26 +15,33 @@ import {
   Info,
   Calendar,
   FileText,
-  WifiOff
+  WifiOff,
+  Flag
 } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
 import type { PublicContactInfo } from '@/utils/publicContactLookup';
+import { ReportSubmissionDialog } from './ReportSubmissionDialog';
 
 interface AdvancedContactLookupResultCardProps {
   antifraudResult: StructuredAnalysisResult;
   publicInfo?: PublicContactInfo;
   isOffline?: boolean;
   fromCache?: boolean;
+  searchedContact?: string;
+  contactType?: 'phone' | 'email';
 }
 
 export function AdvancedContactLookupResultCard({ 
   antifraudResult, 
   publicInfo,
   isOffline = false,
-  fromCache = false
+  fromCache = false,
+  searchedContact,
+  contactType
 }: AdvancedContactLookupResultCardProps) {
   const { t } = useI18n();
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -146,6 +155,21 @@ export function AdvancedContactLookupResultCard({
               {antifraudResult.collaborativeBasis.statement}
             </p>
           </div>
+
+          <Separator className="my-4" />
+
+          {/* Report Action */}
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setReportDialogOpen(true)}
+              disabled={!searchedContact || !contactType}
+            >
+              <Flag className="h-4 w-4 mr-2" />
+              {t.reportSuspiciousContactButton}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -243,6 +267,14 @@ export function AdvancedContactLookupResultCard({
           )}
         </CardContent>
       </Card>
+
+      {/* Report Dialog */}
+      <ReportSubmissionDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        prefilledContact={searchedContact}
+        contactType={contactType}
+      />
     </div>
   );
 }

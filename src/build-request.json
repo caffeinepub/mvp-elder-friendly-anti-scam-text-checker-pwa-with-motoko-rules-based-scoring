@@ -1,133 +1,113 @@
 {
   "kind": "build_request",
-  "title": "Add advanced contact lookup module (phone/email) with antifraud integration, public-source metadata, offline caching, and multilingual UI",
-  "priority": "normal",
+  "title": "Restart live integration: Advanced Contact Lookup + Anonymous Reporting (with PWA offline support and i18n)",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-40",
-      "text": "Implement a production-ready “Advanced Contact Lookup” module in the frontend that accepts either a phone number or an email address in a single input, performs basic validation, and runs a lookup when the user presses a dedicated “Search” button.",
+      "id": "REQ-46",
+      "text": "Integrate an in-context “Report suspicious contact” action into the Advanced Contact Lookup results panel so users can submit an anonymous, legally-safe report for the searched phone/email, using the existing report submission dialog flow.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-advanced-contact-search"
+          "msg-13"
         ],
         "quotes": [
-          "Confirmo — podes gerar o código completo do módulo avançado de pesquisa de contactos para integração imediata no projeto.\nSegue exatamente os requisitos: pesquisa de telefone/email, integração com motor antifraude, retorno de informações públicas com fonte e data, compatível com PWA/WebAPK e traduções multilíngues."
+          "Botão de denúncia\nPermite ao utilizador denunciar contactos suspeitos.\nGarantia de anonimato e legalidade.\nTags opcionais: Spam, Phishing, Golpe, Outro."
         ]
       },
       "acceptanceCriteria": [
-        "A new UI module exists in the app that provides one input that accepts either phone or email and a single “Search” action.",
-        "The module rejects empty input and displays a localized validation error.",
-        "The module detects whether the input is phone vs email (based on basic heuristics/format checks) and proceeds accordingly.",
-        "The module does not require Internet Identity login to be used (same accessibility level as existing Home analysis tabs)."
+        "When a user completes an Advanced Contact Lookup search, the results area provides a clear “Report suspicious contact” action.",
+        "Clicking the action opens a dialog that is prefilled with the searched contact value and the correct report type (phone or email).",
+        "The reporting flow does not require the user to authenticate and does not display or request any personally identifying information beyond the reported contact itself.",
+        "The dialog includes a short, user-facing anonymity/legal notice (English text in the EN locale; localized equivalents in other supported languages) stating that reports are anonymous and should only include public/non-sensitive information.",
+        "Submitting the report shows a clear success state and closes/reset the dialog after success (consistent with existing dialog behavior)."
       ]
     },
     {
-      "id": "REQ-41",
-      "text": "Integrate the Advanced Contact Lookup results with the existing 100% frontend antifraud engine so each searched contact returns a structured risk outcome (Low/Medium/High) plus a user-readable description/explanation and recommendation in the currently selected UI language.",
+      "id": "REQ-47",
+      "text": "Restrict the report “tag/category” choices shown for Advanced Contact Lookup reporting to exactly: Spam, Phishing, Scam, Other, while preserving the underlying compatibility with existing report category types.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-advanced-contact-search"
+          "msg-13"
         ],
         "quotes": [
-          "integração com motor antifraude"
+          "Tags opcionais: Spam, Phishing, Golpe, Outro."
         ]
       },
       "acceptanceCriteria": [
-        "For phone searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
-        "For email searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
-        "The risk level and explanation/recommendation render in the same results panel as the public lookup information.",
-        "Risk output follows the app’s existing structured results conventions (Low/Medium/High and localized text)."
+        "In the Advanced Contact Lookup reporting dialog, the selectable tag/category list shown to the user is limited to: Spam, Phishing, Scam, Other.",
+        "The selected tag is submitted using the existing report category model (mapping to existing categories where applicable).",
+        "If the user does not select a tag, the submission still works by defaulting to “Other” (or an equivalent safe default), without blocking submission."
       ]
     },
     {
-      "id": "REQ-42",
-      "text": "Implement a public-information lookup layer for phone/email that returns only legally safe, non-sensitive, publicly presented information and always includes (a) source name, (b) source URL (when applicable), and (c) “as of” date for the returned information.",
+      "id": "REQ-48",
+      "text": "Ensure Advanced Contact Lookup results remain available offline on a best-effort basis by leveraging the existing local cache and service worker caching behavior, without breaking PWA installability.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-advanced-contact-search"
+          "msg-13"
         ],
         "quotes": [
-          "Retorno de informações públicas com fonte e data",
-          "Consulta a fontes públicas gratuitas\nAPI/serviço mock ou gratuito para informações legais e públicas sobre números/email.\nGarantia de legalidade total e indicação de fonte e data."
+          "PWA / WebAPK\nService worker cacheando resultados (offline parcial)."
         ]
       },
       "acceptanceCriteria": [
-        "Search results include a “Public information” section with at least: display name (only when available), summary/details text, source, and date.",
-        "If no public info is found, the UI shows a localized “No public information found” state while still showing antifraud analysis results.",
-        "All returned public info is explicitly presented as public-source information with clear attribution (source + date) visible to the user.",
-        "The implementation does not require any new external paid services, API keys, or third-party authentication providers."
+        "When offline, previously searched contacts that exist in the local cache can still be displayed in the Advanced Contact Lookup results UI.",
+        "The service worker precache includes the public lookup dataset (`/data/public-contact-lookup.json`) and continues to use a network-first strategy with cache fallback for same-origin requests, without introducing install prompt regressions.",
+        "No new service worker console errors are introduced in production mode.",
+        "PWA install CTA remains functional after these changes."
       ]
     },
     {
-      "id": "REQ-43",
-      "text": "Make the Advanced Contact Lookup module compatible with PWA/WebAPK usage by enabling offline partial behavior: the module’s static resources and any same-origin lookup resources must be cacheable, and previously viewed lookup results should remain available when offline (best-effort).",
+      "id": "REQ-49",
+      "text": "Add/verify multilingual i18n coverage for all user-facing text introduced or changed by the Advanced Contact Lookup reporting flow across PT/EN/ES/FR/ZH/AR/RU, and ensure English is used for EN user-facing strings.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-advanced-contact-search"
+          "msg-13"
         ],
         "quotes": [
-          "PWA e offline\nResultados cacheáveis no service worker (offline parcial).\nCompatível com WebAPK e instalação nativa."
+          "Traduções multilíngues\nEN/ES/FR/ZH/AR/RU aplicadas em todos os textos e botões."
         ]
       },
       "acceptanceCriteria": [
-        "When the app is installed as a PWA and the device is offline, the Advanced Contact Lookup UI still loads (app shell works) and the module does not crash.",
-        "Previously viewed lookup results are available offline (best-effort), with a localized indicator if the app is offline and cannot refresh data.",
-        "`frontend/public/service-worker.js` continues to use a network-first strategy for general requests and does not regress installability/WebAPK behavior.",
-        "Offline behavior does not introduce new backend dependencies."
+        "All new labels/buttons/help text related to reporting-from-lookup render via the existing i18n system (no hardcoded strings in components).",
+        "EN locale strings are written in English.",
+        "No missing-key placeholders (undefined/fallback fragments) appear in any supported language for the reporting-from-lookup flow."
       ]
     },
     {
-      "id": "REQ-44",
-      "text": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
+      "id": "REQ-50",
+      "text": "Update the production verification checklist to include explicit test steps for Advanced Contact Lookup (phone/email) and the anonymous reporting flow (including tag selection), alongside existing antifraud engine, consent gate, and PWA/WebAPK checks.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-advanced-contact-search"
+          "msg-13"
         ],
         "quotes": [
-          "traduções multilíngues"
+          "Testes finais integrados\nPesquisa de contactos públicos validada.\nDenúncias testadas.\nMotor antifraude, PWA/WebAPK e consentimento confirmados."
         ]
       },
       "acceptanceCriteria": [
-        "All new labels/buttons/errors/empty-states in the Advanced Contact Lookup module are sourced from the i18n dictionary.",
-        "The module displays correct translations for PT/EN/ES/FR/ZH/AR/RU when switching languages via the existing language selector.",
-        "No new Advanced Contact Lookup user-facing strings are left hardcoded in Portuguese or English inside React components."
-      ]
-    },
-    {
-      "id": "REQ-45",
-      "text": "Integrate the Advanced Contact Lookup module into the existing app navigation/UI so it is immediately usable in production without disrupting existing Home page verification tabs and without modifying any immutable frontend paths.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-advanced-contact-search"
-        ],
-        "quotes": [
-          "para integração imediata no projeto"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The module is reachable from the current UI (e.g., as a new Home tab or a dedicated section) without breaking existing Message/Email/Phone/Crypto tabs.",
-        "Existing Home page functionality (analysis tabs, results rendering, install button, consent gate) continues to work unchanged.",
-        "No files under `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or `frontend/src/components/ui` are modified."
+        "`frontend/PRODUCTION_BUILD_VERIFICATION.md` includes a new checklist subsection covering: (1) Advanced Contact Lookup search behavior, (2) offline cached lookup behavior, and (3) submitting a report from lookup results with tags Spam/Phishing/Scam/Other.",
+        "Checklist steps are concrete and repeatable (what to click/type, expected UI states)."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not modify immutable paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, `frontend/src/components/ui`.",
-    "Do not introduce non-supported technologies (no external databases, no WebSockets, no third-party auth providers).",
-    "Keep antifraud analysis for this module frontend-only (no new canister calls for analysis).",
-    "Preserve existing PWA/WebAPK installability behavior; any service worker changes must not regress installation prompting or caching of the app shell."
+    "Do not modify any files under frontend immutablePaths (e.g., `frontend/src/main.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/components/ui/*`).",
+    "Preserve existing AntiFraud / by HCoragem branding and avoid unintended visual/layout changes outside the Advanced Contact Lookup + reporting surfaces.",
+    "Keep antifraud risk evaluation for contact lookup 100% frontend (no new backend/canister calls for analysis logic).",
+    "Respect the current PWA install flow implementation (`setupPWAInstall()` / `triggerPWAInstall()`) and do not add alternative install prompt logic.",
+    "Backend remains single-actor; do not introduce new backend services or databases."
   ],
   "nonGoals": [
-    "Building native Android/iOS apps or preparing App Store / Play Store submissions.",
-    "Adding paid/subscription features, push notifications, SMS/WhatsApp integrations, or real-time messaging.",
-    "Introducing new backend canisters or external databases to store lookup results.",
-    "Guaranteeing the accuracy or completeness of public contact information beyond what the cited sources provide."
+    "Building or distributing native Android/iOS apps (App Store / Google Play).",
+    "Adding third-party auth providers beyond Internet Identity.",
+    "Implementing real-time features (WebSockets/chat/push notifications).",
+    "Expanding report categories beyond the four user-requested tags for the Advanced Contact Lookup reporting UX."
   ],
   "imageRequirements": {
     "required": [],

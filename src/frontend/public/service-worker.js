@@ -1,57 +1,76 @@
-// Minimal service worker with app shell precaching and network-first strategy
-// Extended to include Advanced Contact Lookup public data resources
+// Minimal service worker with app shell precaching and Advanced Contact Lookup data
+// Network-first strategy with cache fallback for offline support
 
-const CACHE_NAME = 'antifraud-v2';
-const APP_SHELL = [
+const CACHE_NAME = 'antifraud-v1';
+const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/assets/generated/antifraud-logo-icon.dim_256x256.png',
   '/assets/generated/antifraud-pwa-icon.dim_192x192.png',
   '/assets/generated/antifraud-pwa-icon.dim_512x512.png',
-  '/data/public-contact-lookup.json'
+  '/data/public-contact-lookup.json',
 ];
 
-// Install event: precache app shell and public data
+// Install event: precache essential resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_SHELL);
+      return cache.addAll(PRECACHE_URLS).catch((err) => {
+        console.error('Precache failed:', err);
+      });
     })
   );
   self.skipWaiting();
 });
 
-// Activate event: cleanup old caches
+// Activate event: clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
       );
     })
   );
   self.clients.claim();
 });
 
-// Fetch event: network-first with cache fallback
+// Fetch event: network-first with cache fallback (same-origin GET only)
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Only cache same-origin GET requests
+  if (request.method !== 'GET' || url.origin !== self.location.origin) {
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then((response) => {
-        // Clone and cache successful responses
-        if (response && response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
+        // Clone response before caching
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseToCache);
+        });
         return response;
       })
       .catch(() => {
         // Network failed, try cache
-        return caches.match(event.request);
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // No cache available, return offline page or error
+          return new Response('Offline', {
+            status: 503,
+            statusText: 'Service Unavailable',
+          });
+        });
       })
   );
 });

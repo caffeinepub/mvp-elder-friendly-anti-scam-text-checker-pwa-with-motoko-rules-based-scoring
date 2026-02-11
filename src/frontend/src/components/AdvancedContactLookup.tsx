@@ -1,5 +1,5 @@
 // Advanced Contact Lookup module component
-// Single input for phone/email with antifraud analysis and public info lookup
+// Single input for phone/email with antifraud analysis, public info lookup, and reporting capability
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,8 @@ export function AdvancedContactLookup() {
     antifraudResult: any;
     publicInfo?: any;
     fromCache?: boolean;
+    searchedContact?: string;
+    contactType?: 'phone' | 'email';
   } | null>(null);
 
   const handleSearch = async () => {
@@ -49,7 +51,9 @@ export function AdvancedContactLookup() {
         setResult({
           antifraudResult: cached.antifraudResult,
           publicInfo: cached.publicInfo,
-          fromCache: true
+          fromCache: true,
+          searchedContact: validation.normalized,
+          contactType: validation.type as 'phone' | 'email',
         });
         return;
       } else {
@@ -78,7 +82,9 @@ export function AdvancedContactLookup() {
       const resultData = {
         antifraudResult,
         publicInfo: publicLookup.found ? publicLookup.info : undefined,
-        fromCache: false
+        fromCache: false,
+        searchedContact: validation.normalized,
+        contactType: validation.type as 'phone' | 'email',
       };
 
       setResult(resultData);
@@ -149,6 +155,8 @@ export function AdvancedContactLookup() {
           publicInfo={result.publicInfo}
           isOffline={isOffline}
           fromCache={result.fromCache}
+          searchedContact={result.searchedContact}
+          contactType={result.contactType}
         />
       )}
     </div>

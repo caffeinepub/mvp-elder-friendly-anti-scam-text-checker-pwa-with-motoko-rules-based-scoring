@@ -1,13 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add a production-ready Advanced Contact Lookup module that lets users search by phone or email, see public-source metadata with attribution/date, and view antifraud risk analysis, with offline-friendly behavior and full multilingual UI.
+**Goal:** Add an in-context anonymous “Report suspicious contact” action to Advanced Contact Lookup results, with limited tag choices, offline-friendly lookup behavior, full i18n coverage, and updated production verification steps.
 
 **Planned changes:**
-- Add a new “Advanced Contact Lookup” UI module with a single input (phone or email), basic validation, input-type detection, and a dedicated “Search” button.
-- Integrate results with the existing frontend-only antifraud engine to show a structured Low/Medium/High risk outcome plus localized explanation and recommendation.
-- Implement a public-information lookup layer that returns only legally safe public metadata and always displays source name, source URL (when applicable), and “as of” date; show a localized “No public information found” state when applicable.
-- Enable PWA/WebAPK-compatible offline partial behavior: cache module static/same-origin resources and keep previously viewed lookup results available offline (best-effort) with an offline indicator when refresh isn’t possible.
-- Add i18n entries for all new UI text across PT/EN/ES/FR/ZH/AR/RU and integrate the module into the existing navigation/UI without disrupting existing Home verification tabs.
+- Add a clear “Report suspicious contact” action within the Advanced Contact Lookup results panel that opens the existing report submission dialog prefilled with the searched phone/email and correct report type, without requiring authentication.
+- In the lookup-triggered reporting dialog, restrict user-selectable tags to: Spam, Phishing, Scam, Other; map selections to the existing report category model and default safely when no tag is selected.
+- Ensure previously searched Advanced Contact Lookup results can be displayed offline on a best-effort basis using existing local cache, and confirm the service worker precaches `/data/public-contact-lookup.json` while keeping current network-first with cache fallback behavior and PWA installability intact.
+- Add/verify i18n strings (PT/EN/ES/FR/ZH/AR/RU) for all user-facing text introduced/changed in the reporting-from-lookup flow, including an anonymity/legal notice (English in EN).
+- Update `frontend/PRODUCTION_BUILD_VERIFICATION.md` with concrete, repeatable checklist steps for lookup (phone/email), offline cached lookup, and submitting an anonymous report from lookup results with the four tags.
 
-**User-visible outcome:** Users can open an Advanced Contact Lookup area, enter a phone number or email, press Search, and see public-source information (with attribution and date) plus a localized antifraud risk assessment; previously viewed results remain accessible when offline.
+**User-visible outcome:** Users can search a phone/email in Advanced Contact Lookup, optionally report it anonymously from the results with one of four tags, see appropriate localized UI text, and still view previously searched results when offline (when available in cache), with updated production test steps documenting the flow.

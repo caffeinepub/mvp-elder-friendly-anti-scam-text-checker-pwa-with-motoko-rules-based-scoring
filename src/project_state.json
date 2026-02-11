@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
-  "summary": "Projeto AntiFraud publicado LIVE com build final de produção consolidado e validado (PWA/WebAPK Android confirmado, motor antifraude 100% frontend, pesquisa pública, branding, consentimento e traduções). Próximo desenvolvimento: criar/integração imediata de um módulo avançado de pesquisa de contactos (telefone/email) com resultados detalhados, integração antifraude, fonte+data, i18n e suporte PWA/offline parcial.",
+  "projectStateVersion": 23,
+  "summary": "Projeto AntiFraud LIVE com build de produção validado; foco imediato: integrar no ambiente live o módulo avançado de pesquisa de contactos (telefone/email) com resultados detalhados (nome quando disponível, risco, descrição, fonte+data), integração com motor antifraude 100% frontend, suporte PWA/WebAPK (cache/offline parcial) e i18n — agora incluindo também uma funcionalidade de denúncia anónima/legítima para contactos suspeitos (com tags).",
   "architectural_notes": [
     "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
     "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
@@ -18,9 +18,10 @@
     "Falha/erro no processo de rebuild final (AI hiccup); necessário tentar novamente em etapas.",
     "Fluxo atual de instalação PWA/CTA pode não disparar beforeinstallprompt corretamente e/ou não resultar em WebAPK real (apenas atalho), com ausência do app em Configurações > Apps e no app drawer.",
     "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida.",
-    "WebAPK/instalação PWA pode falhar por limitação do ambiente de deploy (domínio draft/test), não por código: exige HTTPS estável, start_url/scope acessíveis e SW/rotas com resposta 200 para o Chrome disparar prompt nativo."
+    "WebAPK/instalação PWA pode falhar por limitação do ambiente de deploy (domínio draft/test), não por código: exige HTTPS estável, start_url/scope acessíveis e SW/rotas com resposta 200 para o Chrome disparar prompt nativo.",
+    "Falha interna do sistema de build/integração (internal AI error) interrompeu a integração do módulo live; necessário reiniciar o processo de integração."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-when-the-app-is-installable-beforeinstallprompt-available-and-not-already-installed-show-a-prominent-install-prompt-on-the-home-page-that-asks-the-user-whether-they-want-to-install-the-app-now-the-prompt-must-offer-clear-actions-e-g-install-now-and-not-now-and-must-not-repeatedly-nag-the-user-after-dismissal-persist-dismissal-choice-locally-with-a-reasonable-cooldown",
@@ -325,6 +326,46 @@
         "REQ-45"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-integrate-an-in-context-report-suspicious-contact-action-into-the-advanced-contact-lookup-results-panel-so-users-can-submit-an-anonymous-legally-safe-report-for-the-searched-phone-email-using-the-existing-report-submission-dialog-flow",
+      "title": "Integrate an in-context “Report suspicious contact” action into the Advanced Contact Lookup results panel so users can submit an anonymous, legally-safe report for the searched phone/email, using the existing report submission dialog flow.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restrict-the-report-tag-category-choices-shown-for-advanced-contact-lookup-reporting-to-exactly-spam-phishing-scam-other-while-preserving-the-underlying-compatibility-with-existing-report-category-types",
+      "title": "Restrict the report “tag/category” choices shown for Advanced Contact Lookup reporting to exactly: Spam, Phishing, Scam, Other, while preserving the underlying compatibility with existing report category types.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-advanced-contact-lookup-results-remain-available-offline-on-a-best-effort-basis-by-leveraging-the-existing-local-cache-and-service-worker-caching-behavior-without-breaking-pwa-installability",
+      "title": "Ensure Advanced Contact Lookup results remain available offline on a best-effort basis by leveraging the existing local cache and service worker caching behavior, without breaking PWA installability.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-verify-multilingual-i18n-coverage-for-all-user-facing-text-introduced-or-changed-by-the-advanced-contact-lookup-reporting-flow-across-pt-en-es-fr-zh-ar-ru-and-ensure-english-is-used-for-en-user-facing-strings",
+      "title": "Add/verify multilingual i18n coverage for all user-facing text introduced or changed by the Advanced Contact Lookup reporting flow across PT/EN/ES/FR/ZH/AR/RU, and ensure English is used for EN user-facing strings.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-production-verification-checklist-to-include-explicit-test-steps-for-advanced-contact-lookup-phone-email-and-the-anonymous-reporting-flow-including-tag-selection-alongside-existing-antifraud-engine-consent-gate-and-pwa-webapk-checks",
+      "title": "Update the production verification checklist to include explicit test steps for Advanced Contact Lookup (phone/email) and the anonymous reporting flow (including tag selection), alongside existing antifraud engine, consent gate, and PWA/WebAPK checks.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -471,6 +512,12 @@
       "summary": "Gerar e integrar o módulo avançado de pesquisa de contactos para produção: pesquisa por telefone/email com validação básica; resultados detalhados (nome quando disponível, risco Baixo/Médio/Alto, descrição, fonte e data); integração com o motor antifraude 100% frontend no mesmo painel; consulta a fontes públicas gratuitas (API/mock) com garantia de legalidade; compatível com PWA/WebAPK e com cache/offline parcial via service worker; totalmente localizado (PT/EN/ES/FR/ZH/AR/RU).",
       "reqIds": [],
       "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Adicionar e integrar no build LIVE a funcionalidade de denúncia (report) para contactos suspeitos/alto risco no módulo de pesquisa: denúncia anónima e legalmente segura, com tags opcionais (Spam, Phishing, Golpe, Outro), totalmente integrada com o painel de resultados, i18n (PT/EN/ES/FR/ZH/AR/RU) e compatível com PWA/offline parcial.",
+      "reqIds": [],
+      "status": "in_progress"
     }
   ],
   "projectName": "AntiFraud",

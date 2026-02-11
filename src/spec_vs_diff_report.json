@@ -1,33 +1,47 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T00:03:07.377Z",
-  "summary": "Diff adds an Advanced Contact Lookup module (single input + Search), integrates existing frontend antifraud analysis for phone/email, adds a same-origin public-info lookup dataset with source metadata, implements offline best-effort caching (localStorage + SW precache), and surfaces it via a new Home tab. Main gaps are around i18n: some new user-facing strings are hardcoded (not sourced from the existing i18n dictionary) and translations appear to fall back to English for non-PT/EN languages rather than providing full PT/EN/ES/FR/ZH/AR/RU coverage.",
+  "generatedAt": "2026-02-11T00:26:05.984Z",
+  "summary": "Diff adds an Advanced Contact Lookup reporting UI (result-card action + dialog), offline cache usage in lookup, service worker precache for the public dataset, new i18n keys, and updates the production verification checklist. However, report submission appears to be implemented as a simulated localStorage-only flow rather than using the existing report submission dialog/submission mechanism, and category mapping to the existing report category model is not evidenced.",
   "missing_requirements": [
     {
-      "id": "REQ-44",
-      "requirement": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
-      "reason": "New validation/error strings are hardcoded in a utility instead of coming from the existing i18n dictionary, and the translation file summary indicates non-PT/EN languages fall back to English rather than having full translations.",
+      "id": "REQ-46",
+      "requirement": "Use the existing report submission dialog flow to submit an anonymous report from Advanced Contact Lookup results.",
+      "reason": "The diff introduces a new hook that explicitly simulates submission and stores reports in localStorage instead of using an existing report submission mechanism/flow. This does not match the requirement to use the existing report submission dialog flow.",
       "evidence": [
-        "frontend/src/utils/contactInputHeuristics.ts (hardcoded messages per language)",
-        "frontend/src/i18n/translations.ts (summary: \"with other languages using English as fallback\")"
+        "frontend/src/hooks/useSubmitLookupReport.ts",
+        "frontend/src/components/ReportSubmissionDialog.tsx"
+      ]
+    },
+    {
+      "id": "REQ-47",
+      "requirement": "Submit the selected tag using the existing report category model (mapping to existing categories where applicable), while showing only Spam/Phishing/Scam/Other.",
+      "reason": "The dialog collects a string category ('Spam'|'Phishing'|'Scam'|'Other') and passes it through to submission, but the diff summary provides no evidence of mapping to the app’s existing report category types/model for compatibility.",
+      "evidence": [
+        "frontend/src/components/ReportSubmissionDialog.tsx",
+        "frontend/src/hooks/useSubmitLookupReport.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
+  "hallucinated_features": [
+    {
+      "description": "Simulated report submission with artificial delay and persistence to localStorage under 'anonymous_reports'.",
+      "reason": "Not requested by the BuildRequest; the requirement calls for using the existing reporting flow, not a demo/localStorage-backed submission implementation.",
+      "evidence": [
+        "frontend/src/hooks/useSubmitLookupReport.ts"
+      ]
+    }
+  ],
   "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/public/data/public-contact-lookup.json",
+    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
     "frontend/public/service-worker.js",
     "frontend/src/components/AdvancedContactLookup.tsx",
     "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-    "frontend/src/hooks/useAdvancedContactLookupCache.ts",
-    "frontend/src/hooks/useOfflineStatus.ts",
+    "frontend/src/components/ReportSubmissionDialog.tsx",
+    "frontend/src/hooks/useSubmitLookupReport.ts",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/utils/contactInputHeuristics.ts",
-    "frontend/src/utils/publicContactLookup.ts",
     "project_state.json"
   ]
 }

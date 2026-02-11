@@ -1,264 +1,175 @@
 # Production Build Verification Checklist
 
-This document provides a comprehensive checklist for verifying that the AntiFraud production build is ready for live deployment.
+This document provides a comprehensive checklist for verifying the production build of AntiFraud / by HCoragem before deployment.
 
-## 1. SPA Navigation & Routes
+## 1. SPA Navigation & Routing
 
-### Route Navigation
-- [ ] Home route (`/`) loads correctly
-- [ ] Mission route (`/mission`) loads correctly
-- [ ] How It Works route (`/how-it-works`) loads correctly
-- [ ] Terms route (`/terms`) loads correctly
-- [ ] Privacy route (`/privacy`) loads correctly
-- [ ] Documentation route (`/documentation`) loads correctly
+- [ ] Navigate to `/` (home page) - should display verification interface with 5 tabs
+- [ ] Navigate to `/mission` - should display mission page content
+- [ ] Navigate to `/how-it-works` - should display how it works page
+- [ ] Navigate to `/terms` - should display terms and conditions
+- [ ] Navigate to `/privacy` - should display privacy policy
+- [ ] Navigate to `/documentation` - should display documentation page with PDF generation
+- [ ] Test browser back/forward buttons - navigation should work correctly
+- [ ] Refresh page on each route - should stay on the same route (no 404)
+- [ ] Test deep links (e.g., share `/mission` URL) - should load correctly
 
-### Route Aliases
-- [ ] `/institucional` redirects to `/mission`
-- [ ] `/institucional/mission` redirects to `/mission`
-- [ ] Trailing slashes are handled correctly (e.g., `/mission/` → `/mission`)
+## 2. Consent Gate Modal
 
-### 404 Fallback
-- [ ] Unknown routes redirect to home page
-- [ ] Deep links work correctly (refresh on any route returns to app shell)
-- [ ] Static 404.html redirects known SPA routes back to the app
+- [ ] On first visit, consent modal should appear and block interaction
+- [ ] Modal should require both checkboxes to be checked before "Accept" button is enabled
+- [ ] "View Terms" button should navigate to `/terms` (modal stays open)
+- [ ] "View Privacy" button should navigate to `/privacy` (modal stays open)
+- [ ] After accepting, modal should close and not appear again
+- [ ] ESC key should not close the modal
+- [ ] Clicking outside modal should not close it
+- [ ] Clear localStorage and refresh - modal should appear again
 
-## 2. Consent Gate
+## 3. Branding & Visual Identity
 
-### Blocking Behavior
-- [ ] Consent modal appears on first visit
-- [ ] App content is blocked (dimmed/non-interactive) until consent is given
-- [ ] Both checkboxes (Cookies + Terms/Privacy) must be checked to enable Accept button
-- [ ] ESC key does not close the modal
-- [ ] Clicking outside the modal does not close it
+- [ ] Page title in browser tab shows "AntiFraud / by HCoragem"
+- [ ] Header displays AntiFraud logo image (not text fallback)
+- [ ] Footer displays "by HCoragem" with current year (not hardcoded 2024/2025)
+- [ ] Footer includes "Built with love using caffeine.ai" with UTM tracking
+- [ ] PWA icons (192x192 and 512x512) are visible in manifest
+- [ ] Favicon displays correctly in browser tab
 
-### In-Modal Navigation
-- [ ] "View Terms" button navigates to `/terms` route
-- [ ] "View Privacy" button navigates to `/privacy` route
-- [ ] Navigation within modal works without closing it
-
-### Persistence
-- [ ] Consent acceptance is stored in localStorage
-- [ ] Consent persists across page refreshes
-- [ ] Consent persists across browser sessions
-
-## 3. Branding
-
-### Global Branding
-- [ ] App title is "AntiFraud / by HCoragem" in browser tab
-- [ ] Header displays "AntiFraud" logo/text
-- [ ] Footer displays "by HCoragem"
-- [ ] No references to old/test branding remain
-
-### Footer Attribution
-- [ ] Footer includes "Built with love using caffeine.ai" (or love icon)
-- [ ] caffeine.ai link includes correct UTM parameters
-- [ ] UTM parameters use `window.location.hostname` as app identifier
-- [ ] Link opens in new tab
-
-## 4. Antifraud Analysis
+## 4. Antifraud Analysis (Frontend-Only)
 
 ### Message Analysis
-- [ ] Message input accepts text
-- [ ] Analysis returns risk level (Low/Medium/High)
-- [ ] Explanation is provided in current language
-- [ ] Recommendation is provided in current language
-- [ ] Transparency section shows public sources
-- [ ] Transparency section shows collaborative basis statement
+- [ ] Enter a message with urgency keywords (e.g., "URGENT! Send money now!")
+- [ ] Should return High risk with explanation citing urgency patterns
+- [ ] Result should include public sources (clickable links)
+- [ ] Result should include collaborative basis statement
 
 ### Email Analysis
-- [ ] Email input validates format
-- [ ] Analysis returns structured result
-- [ ] Transparency sections are present
+- [ ] Enter a suspicious email (e.g., "admin@paypa1.com")
+- [ ] Should detect typosquatting or suspicious patterns
+- [ ] Result should show risk level with explanation
 
 ### Phone Analysis
-- [ ] Phone input accepts various formats
-- [ ] Analysis returns structured result
-- [ ] Collaborative database lookup works
-- [ ] Empty state message shown when no reports exist
-- [ ] Transparency sections are present
+- [ ] Enter a phone number (e.g., "+351912345678")
+- [ ] Should analyze format and patterns
+- [ ] Result should show risk assessment
 
 ### Crypto Analysis
-- [ ] Crypto address input accepts hex addresses
-- [ ] Analysis returns structured result
-- [ ] Collaborative database lookup works
-- [ ] Transparency sections are present
+- [ ] Enter a crypto address (e.g., "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb")
+- [ ] Should validate format
+- [ ] Result should show risk assessment
 
-## 5. Public Contact Lookup
+## 5. Advanced Contact Lookup
 
-### Phone Lookup
-- [ ] Query returns report count when records exist
-- [ ] Query returns null when no records exist
-- [ ] Empty state displays localized message
-- [ ] Error state displays informational alert
+### Basic Search
+- [ ] Navigate to "Pesquisa" (Search) tab
+- [ ] Enter a valid phone number (e.g., "+351912345678")
+- [ ] Should display antifraud analysis result
+- [ ] Should display public information section (or "no public info" message)
+- [ ] Enter a valid email address (e.g., "test@example.com")
+- [ ] Should display antifraud analysis result
+- [ ] Should display public information section
 
-### Crypto Lookup
-- [ ] Query returns report count when records exist
-- [ ] Query returns null when no records exist
-- [ ] Empty state displays localized message
-- [ ] Error state displays informational alert
+### Offline Cached Behavior
+- [ ] Perform a search for a contact (phone or email)
+- [ ] Open browser DevTools → Network tab → Enable "Offline" mode
+- [ ] Search for the same contact again
+- [ ] Should display cached result with "Cached result (offline)" indicator
+- [ ] Try searching for a different contact (not cached)
+- [ ] Should display error: "No internet connection and no cached results"
+- [ ] Disable offline mode and verify online search works again
 
-## 6. Multilingual Support
+### Report Submission from Lookup
+- [ ] Perform a contact lookup (phone or email)
+- [ ] Click "Report Suspicious Contact" button in results
+- [ ] Dialog should open with prefilled contact value (read-only)
+- [ ] Dialog should display anonymity notice in current language
+- [ ] Category dropdown should show exactly 4 options: Spam, Phishing, Scam, Other
+- [ ] Leave category unselected and submit - should succeed (defaults to "Other")
+- [ ] Select "Spam" category and add description, then submit
+- [ ] Should show success message and close dialog after brief delay
+- [ ] Select "Phishing" category and submit without description - should succeed
+- [ ] Select "Scam" category and submit - should succeed
+- [ ] Select "Other" category and submit - should succeed
+- [ ] Cancel button should close dialog without submitting
 
-### Language Selector
-- [ ] Language selector is visible in header
-- [ ] All 7 languages are available (PT/EN/ES/FR/ZH/AR/RU)
-- [ ] Language selection persists in sessionStorage
+## 6. Multilingual Support (i18n)
 
-### UI Translation Smoke Tests
-
-#### Portuguese (PT)
-- [ ] Navigation labels are in Portuguese
-- [ ] Home page content is in Portuguese
-- [ ] Consent modal is in Portuguese
-- [ ] Analysis results are in Portuguese
-- [ ] Institutional pages are in Portuguese
-
-#### English (EN)
-- [ ] Navigation labels are in English
-- [ ] Home page content is in English
-- [ ] Consent modal is in English
-- [ ] Analysis results are in English
-- [ ] Institutional pages are in English
-
-#### Spanish (ES)
-- [ ] Navigation labels are in Spanish
-- [ ] Home page content is in Spanish
-- [ ] Consent modal is in Spanish
-- [ ] Analysis results are in Spanish
-- [ ] Institutional pages are in Spanish
-
-#### French (FR)
-- [ ] Navigation labels are in French
-- [ ] Home page content is in French
-- [ ] Consent modal is in French
-- [ ] Analysis results are in French
-- [ ] Institutional pages are in French
-
-#### Chinese (ZH)
-- [ ] Navigation labels are in Chinese
-- [ ] Home page content is in Chinese
-- [ ] Consent modal is in Chinese
-- [ ] Analysis results are in Chinese
-- [ ] Institutional pages are in Chinese
-
-#### Arabic (AR)
-- [ ] Navigation labels are in Arabic
-- [ ] Home page content is in Arabic
-- [ ] Consent modal is in Arabic
-- [ ] Analysis results are in Arabic
-- [ ] Institutional pages are in Arabic
-
-#### Russian (RU)
-- [ ] Navigation labels are in Russian
-- [ ] Home page content is in Russian
-- [ ] Consent modal is in Russian
-- [ ] Analysis results are in Russian
-- [ ] Institutional pages are in Russian
-
-### No Missing Keys
-- [ ] No undefined/missing text appears in any language
-- [ ] No fallback to Portuguese when other language is selected
+- [ ] Change language to English (EN) - all UI text should be in English
+- [ ] Change language to Spanish (ES) - all UI text should be in Spanish
+- [ ] Change language to French (FR) - all UI text should be in French
+- [ ] Change language to Chinese (ZH) - all UI text should be in Chinese
+- [ ] Change language to Arabic (AR) - all UI text should be in Arabic
+- [ ] Change language to Russian (RU) - all UI text should be in Russian
+- [ ] Change back to Portuguese (PT) - all UI text should be in Portuguese
+- [ ] Verify report dialog labels are translated in each language
+- [ ] Verify anonymity notice is translated in each language
+- [ ] Verify category options (Spam/Phishing/Scam/Other) are translated
+- [ ] No missing translation keys (no "undefined" or placeholder text)
 
 ## 7. PWA Installation
 
-### Manifest Detection
-- [ ] Browser detects manifest.webmanifest
-- [ ] Manifest name is "AntiFraud"
-- [ ] Manifest description is production-ready (not test-only)
-- [ ] Manifest icons reference correct generated assets
+- [ ] Open application in Chrome/Edge on desktop
+- [ ] Check if install prompt appears (may require user interaction)
+- [ ] Click "Download AntiFraud App for free" button
+- [ ] Should trigger browser install prompt
+- [ ] Install the PWA
+- [ ] Open installed PWA - should work as standalone app
+- [ ] Verify PWA icon displays correctly
+- [ ] Verify PWA name is "AntiFraud / by HCoragem"
 
-### Service Worker
-- [ ] Service worker registers successfully in production mode
-- [ ] Service worker uses production cache name (not "antifraud-test")
-- [ ] Service worker caches app shell correctly
-- [ ] Service worker handles navigation requests correctly
-- [ ] No console errors related to service worker
-
-### Install Prompt
-- [ ] `beforeinstallprompt` event is captured
-- [ ] Install button is visible when app is installable
-- [ ] Clicking install button triggers native prompt
-- [ ] Install button label is localized correctly
-- [ ] Non-eligible message is localized correctly
-
-### Android WebAPK Validation
-For detailed Android Chrome WebAPK testing, refer to: `frontend/PWA_WEBAPK_ANDROID_TEST.md`
-
-- [ ] App installs as WebAPK on Android Chrome
-- [ ] App icon appears on home screen
-- [ ] App opens in standalone mode (no browser UI)
-- [ ] `appinstalled` event fires correctly
+### Android WebAPK Test
+- [ ] Follow detailed steps in `PWA_WEBAPK_ANDROID_TEST.md`
+- [ ] Verify WebAPK installation on Android Chrome
+- [ ] Confirm standalone mode and icon display
 
 ## 8. Authentication (Internet Identity)
 
-### Login Flow
-- [ ] Login button is visible when not authenticated
-- [ ] Clicking login opens Internet Identity
-- [ ] Successful login updates UI to show user profile
-- [ ] User principal is stored correctly
-
-### User Profile
-- [ ] First-time users are prompted for name
-- [ ] User profile is saved to backend
-- [ ] User profile persists across sessions
-- [ ] Profile name is displayed in header
-
-### Logout Flow
-- [ ] Logout button is visible when authenticated
-- [ ] Clicking logout clears identity
-- [ ] Logout clears all cached data
-- [ ] UI updates to show login button
+- [ ] Click "Login" button
+- [ ] Should redirect to Internet Identity
+- [ ] Complete authentication flow
+- [ ] Should return to app with authenticated state
+- [ ] User profile menu should appear with principal
+- [ ] Click "Logout"
+- [ ] Should clear authentication and return to anonymous state
+- [ ] Verify cached data is cleared on logout
 
 ## 9. Production Readiness
 
-### Performance
-- [ ] App loads in under 3 seconds on 3G
-- [ ] No unnecessary console logs in production
-- [ ] No console errors or warnings
-- [ ] Assets are minified and optimized
+### Console Checks
+- [ ] Open browser DevTools → Console
+- [ ] No critical errors (red messages)
+- [ ] Service worker should register successfully
+- [ ] No CORS errors
+- [ ] No missing resource errors (404s)
 
-### Security
-- [ ] App is served over HTTPS
-- [ ] No sensitive data in localStorage
-- [ ] No API keys or secrets in frontend code
+### Performance
+- [ ] Page load time is acceptable (< 3 seconds on good connection)
+- [ ] Interactions are responsive (no lag)
+- [ ] Animations are smooth
 
 ### Accessibility
-- [ ] All interactive elements are keyboard accessible
-- [ ] Focus states are visible
-- [ ] Color contrast meets AA standards
-- [ ] Screen reader labels are present
+- [ ] Tab navigation works through all interactive elements
+- [ ] Focus indicators are visible
+- [ ] Screen reader can access all content (test with NVDA/JAWS if available)
 
-### Browser Compatibility
-- [ ] Works in Chrome (latest)
-- [ ] Works in Firefox (latest)
-- [ ] Works in Safari (latest)
-- [ ] Works in Edge (latest)
-- [ ] Works on mobile browsers (iOS Safari, Chrome Android)
+### Mobile Responsiveness
+- [ ] Test on mobile viewport (DevTools responsive mode)
+- [ ] All content is readable and accessible
+- [ ] Touch targets are appropriately sized
+- [ ] Mobile menu works correctly
 
-## Pass/Fail Sign-Off
+## 10. Final Sign-Off
 
-### Final Verification
+- [ ] All checklist items above are verified and passing
+- [ ] No critical bugs or issues identified
+- [ ] Application is ready for production deployment
 
-- [ ] All critical items above are checked and passing
-- [ ] No blocking issues remain
-- [ ] Build is ready for live deployment
+**Verified by:** ___________________________  
+**Date:** ___________________________  
+**Build Version:** ___________________________  
 
-### Sign-Off
-
-**Verified by:** _________________________
-
-**Date:** _________________________
-
-**Build Version:** _________________________
-
-**Deployment Status:** 
-- [ ] ✅ PASS - Ready for production
-- [ ] ❌ FAIL - Issues must be resolved before deployment
+**Status:** [ ] PASS / [ ] FAIL
 
 **Notes:**
-
 _____________________________________________
-
 _____________________________________________
-
 _____________________________________________

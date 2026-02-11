@@ -1,160 +1,122 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Advanced Contact Lookup (phone/email) with frontend antifraud, public-source attribution, offline caching, and multilingual UI",
+  "title": "Advanced Contact Lookup: Anonymous Reporting Integration, Offline PWA Cache Hardening, and i18n Coverage",
   "requirements": [
     {
-      "id": "REQ-40",
-      "summary": "Add an Advanced Contact Lookup UI module with a single phone/email input, basic validation, type detection, and a dedicated Search action (no login required).",
+      "id": "REQ-46",
+      "summary": "Add an in-context anonymous “Report suspicious contact” action to Advanced Contact Lookup results that opens the existing report dialog prefilled with the searched contact (phone/email) and includes an anonymity/legal notice.",
       "acceptanceCriteria": [
-        "A new UI module exists in the app that provides one input that accepts either phone or email and a single “Search” action.",
-        "The module rejects empty input and displays a localized validation error.",
-        "The module detects whether the input is phone vs email (based on basic heuristics/format checks) and proceeds accordingly.",
-        "The module does not require Internet Identity login to be used (same accessibility level as existing Home analysis tabs)."
+        "When a user completes an Advanced Contact Lookup search, the results area provides a clear “Report suspicious contact” action.",
+        "Clicking the action opens a dialog that is prefilled with the searched contact value and the correct report type (phone or email).",
+        "The reporting flow does not require the user to authenticate and does not display or request any personally identifying information beyond the reported contact itself.",
+        "The dialog includes a short, user-facing anonymity/legal notice (English text in the EN locale; localized equivalents in other supported languages) stating that reports are anonymous and should only include public/non-sensitive information.",
+        "Submitting the report shows a clear success state and closes/reset the dialog after success (consistent with existing dialog behavior)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/AdvancedContactLookup.tsx",
-          "operation": "create",
-          "description": "Create the Advanced Contact Lookup module UI (single input + Search button + results area), using shadcn-ui components for consistent inputs, buttons, alerts, tabs layout parity. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/contactInputHeuristics.ts",
-          "operation": "create",
-          "description": "Implement basic frontend-only heuristics/format checks to detect phone vs email, normalize inputs, and provide validation helpers used by Advanced Contact Lookup."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Wire Advanced Contact Lookup into the existing Home verification tabs as an additional tab/section without disrupting Message/Email/Phone/Crypto tabs or requiring authentication."
-        }
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "summary": "Compute and render antifraud risk (Low/Medium/High) for phone/email searches using existing frontend-only antifraud logic with localized explanation and recommendation.",
-      "acceptanceCriteria": [
-        "For phone searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
-        "For email searches, the module computes risk using the existing frontend-only antifraud logic (no new backend calls for the antifraud analysis).",
-        "The risk level and explanation/recommendation render in the same results panel as the public lookup information.",
-        "Risk output follows the app’s existing structured results conventions (Low/Medium/High and localized text)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-          "operation": "create",
-          "description": "Create a results card that composes the existing StructuredAnalysisResultCard for risk output and adds a Public information section beneath it (single combined panel). Use shadcn-ui Card/Alert styling conventions for consistency. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
-          "operation": "modify",
-          "description": "Integrate antifraud computation for detected phone/email by reusing the existing structuredFraudAnalysis helpers and pass the localized StructuredAnalysisResult into the shared results UI."
-        }
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "summary": "Add a public-information lookup layer (legally safe, non-sensitive) with mandatory attribution (source name, source URL when applicable, and as-of date) and a localized 'no public info' state.",
-      "acceptanceCriteria": [
-        "Search results include a “Public information” section with at least: display name (only when available), summary/details text, source, and date.",
-        "If no public info is found, the UI shows a localized “No public information found” state while still showing antifraud analysis results.",
-        "All returned public info is explicitly presented as public-source information with clear attribution (source + date) visible to the user.",
-        "The implementation does not require any new external paid services, API keys, or third-party authentication providers."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/data/public-contact-lookup.json",
-          "operation": "create",
-          "description": "Add a same-origin, free/mock public-source dataset for phone/email lookups containing only legally safe public metadata and including source name, optional source URL, and as-of date per entry (no secrets, no API keys)."
-        },
-        {
-          "path": "frontend/src/utils/publicContactLookup.ts",
-          "operation": "create",
-          "description": "Implement a frontend-only public-info lookup helper that loads and searches the same-origin dataset and returns a normalized, attributed Public information payload (or a not-found result)."
+          "description": "Track the last successful Advanced Contact Lookup normalized contact value + detected type (phone/email) and pass it to the results panel so the reporting action can prefill the report dialog without re-asking for input. Keep antifraud analysis fully frontend-only as currently implemented."
         },
         {
           "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
           "operation": "modify",
-          "description": "Render the Public information section with display name (when present), summary/details, source attribution (name + URL when applicable), and 'as of' date; include a localized empty-state when not found."
+          "description": "Add a clearly visible “Report suspicious contact” action within the results UI and wire it to open the existing ReportSubmissionDialog in a lookup-specific mode. Use shadcn-ui Button (and optionally DialogTrigger patterns if needed) to match existing UI style; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "operation": "modify",
+          "description": "Extend the existing report submission dialog flow to support a lookup-prefilled mode (prefilled value + forced report type phone/email, plus a short anonymity/legal notice section rendered via i18n). Ensure this mode does not request additional user-identifying fields beyond the reported contact. Use existing shadcn-ui Dialog/Select/Input/Textarea primitives already used by the component; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useSubmitLookupReport.ts",
+          "operation": "create",
+          "description": "Create a small frontend hook/helper to submit an anonymous report from the lookup flow using the app’s existing report submission mechanism (same canister/actor flow already used elsewhere), without introducing any authentication requirement. Keep the public flow anonymous/guest-safe."
         }
       ]
     },
     {
-      "id": "REQ-43",
-      "summary": "Ensure PWA/WebAPK offline partial behavior: app shell loads offline, same-origin lookup resources are cacheable, and previously viewed Advanced Contact Lookup results remain available offline (best-effort) without changing the network-first strategy.",
+      "id": "REQ-47",
+      "summary": "Limit Advanced Contact Lookup reporting tag choices to Spam/Phishing/Scam/Other with safe defaults while keeping compatibility with existing report category types.",
       "acceptanceCriteria": [
-        "When the app is installed as a PWA and the device is offline, the Advanced Contact Lookup UI still loads (app shell works) and the module does not crash.",
-        "Previously viewed lookup results are available offline (best-effort), with a localized indicator if the app is offline and cannot refresh data.",
-        "`frontend/public/service-worker.js` continues to use a network-first strategy for general requests and does not regress installability/WebAPK behavior.",
-        "Offline behavior does not introduce new backend dependencies."
+        "In the Advanced Contact Lookup reporting dialog, the selectable tag/category list shown to the user is limited to: Spam, Phishing, Scam, Other.",
+        "The selected tag is submitted using the existing report category model (mapping to existing categories where applicable).",
+        "If the user does not select a tag, the submission still works by defaulting to “Other” (or an equivalent safe default), without blocking submission."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "operation": "modify",
+          "description": "Add lookup-specific configuration to restrict category UI options to exactly Spam/Phishing/Scam/Other while preserving the underlying mapping to the existing ReportCategory union. In lookup mode, allow category to be omitted and default it to Other at submit time (no validation block). Use the existing shadcn-ui Select UI; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+          "operation": "modify",
+          "description": "When invoking ReportSubmissionDialog from Advanced Contact Lookup, pass the lookup-mode configuration so only the four requested tag options are shown and the safe default behavior is enabled."
+        }
+      ]
+    },
+    {
+      "id": "REQ-48",
+      "summary": "Harden offline behavior for Advanced Contact Lookup using existing local cache and service worker caching (including precaching the public dataset) without impacting PWA installability.",
+      "acceptanceCriteria": [
+        "When offline, previously searched contacts that exist in the local cache can still be displayed in the Advanced Contact Lookup results UI.",
+        "The service worker precache includes the public lookup dataset (`/data/public-contact-lookup.json`) and continues to use a network-first strategy with cache fallback for same-origin requests, without introducing install prompt regressions.",
+        "No new service worker console errors are introduced in production mode.",
+        "PWA install CTA remains functional after these changes."
       ],
       "file_operations": [
         {
           "path": "frontend/public/service-worker.js",
           "operation": "modify",
-          "description": "Extend the existing precache list to include same-origin Advanced Contact Lookup resources (e.g., frontend/public/data/public-contact-lookup.json) while keeping the current network-first fetch strategy for general requests unchanged to preserve installability/WebAPK behavior."
-        },
-        {
-          "path": "frontend/src/hooks/useOfflineStatus.ts",
-          "operation": "create",
-          "description": "Add a small hook that tracks online/offline status via browser events for UI indicators within the Advanced Contact Lookup module."
-        },
-        {
-          "path": "frontend/src/hooks/useAdvancedContactLookupCache.ts",
-          "operation": "create",
-          "description": "Implement best-effort offline persistence of previously viewed Advanced Contact Lookup results using localStorage (keyed by normalized query and including attribution and risk output) so results can be displayed when offline."
+          "description": "Keep `/data/public-contact-lookup.json` in the precache list and refine the network-first-with-cache-fallback fetch handling to be explicitly safe for same-origin GET requests (avoid caching non-GET or cross-origin requests) to reduce production console errors and preserve PWA installability."
         },
         {
           "path": "frontend/src/components/AdvancedContactLookup.tsx",
           "operation": "modify",
-          "description": "Use offline status + cached history to show previously viewed results when offline, and display a localized offline indicator when the app cannot refresh public lookup data."
+          "description": "Verify and (if needed) adjust the offline path so cached results are surfaced consistently when offline (best-effort), relying on the existing localStorage-backed cache hook and without changing the PWA install flow."
         }
       ]
     },
     {
-      "id": "REQ-44",
-      "summary": "Add i18n coverage for all new Advanced Contact Lookup UI strings across PT/EN/ES/FR/ZH/AR/RU with no hardcoded user-facing text.",
+      "id": "REQ-49",
+      "summary": "Add/verify i18n coverage for all user-facing text introduced/changed by reporting-from-lookup across PT/EN/ES/FR/ZH/AR/RU, ensuring EN strings are in English.",
       "acceptanceCriteria": [
-        "All new labels/buttons/errors/empty-states in the Advanced Contact Lookup module are sourced from the i18n dictionary.",
-        "The module displays correct translations for PT/EN/ES/FR/ZH/AR/RU when switching languages via the existing language selector.",
-        "No new Advanced Contact Lookup user-facing strings are left hardcoded in Portuguese or English inside React components."
+        "All new labels/buttons/help text related to reporting-from-lookup render via the existing i18n system (no hardcoded strings in components).",
+        "EN locale strings are written in English.",
+        "No missing-key placeholders (undefined/fallback fragments) appear in any supported language for the reporting-from-lookup flow."
       ],
       "file_operations": [
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add translation keys for the Advanced Contact Lookup module (tab title, input label/placeholder, Search button, validation errors, 'Public information' labels, 'No public information found', offline indicator text) across PT/EN/ES/FR/ZH/AR/RU using the existing dictionary structure."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
-          "operation": "modify",
-          "description": "Replace any new user-facing strings with i18n dictionary keys from the existing I18nProvider (no hardcoded labels/errors/empty-states)."
+          "description": "Add translation keys for: the lookup report CTA label, the anonymity/legal notice text, and any lookup-mode dialog labels/help text (including any adjusted field labels/placeholders). Ensure all supported locales (PT/EN/ES/FR/ZH/AR/RU) define these keys and EN values are English."
         },
         {
           "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
           "operation": "modify",
-          "description": "Ensure all new Public information section labels and empty/offline states are sourced from i18n (including attribution labels and date labeling)."
+          "description": "Replace any new user-facing strings for the lookup report action with i18n keys from the existing I18nProvider (no hardcoded labels)."
+        },
+        {
+          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "operation": "modify",
+          "description": "Render the anonymity/legal notice and any lookup-mode-specific labels via i18n keys (no hardcoded strings) while preserving existing dialog behavior and styling. Use existing shadcn-ui Dialog and form primitives; verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-45",
-      "summary": "Integrate Advanced Contact Lookup into the existing Home UI navigation so it is production-usable without breaking existing verification tabs and without modifying immutable frontend paths.",
+      "id": "REQ-50",
+      "summary": "Update production verification checklist with explicit steps for Advanced Contact Lookup (phone/email), offline cached behavior, and anonymous report submission from lookup with tag selection.",
       "acceptanceCriteria": [
-        "The module is reachable from the current UI (e.g., as a new Home tab or a dedicated section) without breaking existing Message/Email/Phone/Crypto tabs.",
-        "Existing Home page functionality (analysis tabs, results rendering, install button, consent gate) continues to work unchanged.",
-        "No files under `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or `frontend/src/components/ui` are modified."
+        "`frontend/PRODUCTION_BUILD_VERIFICATION.md` includes a new checklist subsection covering: (1) Advanced Contact Lookup search behavior, (2) offline cached lookup behavior, and (3) submitting a report from lookup results with tags Spam/Phishing/Scam/Other.",
+        "Checklist steps are concrete and repeatable (what to click/type, expected UI states)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/PRODUCTION_BUILD_VERIFICATION.md",
           "operation": "modify",
-          "description": "Add a new Home tab entry for Advanced Contact Lookup and render the module in a new TabsContent section while keeping existing tab values/flows intact and not touching immutable paths (no changes under frontend/src/components/ui, useInternetIdentity/useActor, or main.tsx)."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
-          "operation": "modify",
-          "description": "Ensure the module behaves like existing Home analysis tabs (no auth gating, works with consent gate flow already handled at app level) and is safe to ship without additional route changes."
+          "description": "Add a new checklist subsection describing repeatable test steps for: (1) Advanced Contact Lookup searches for both phone and email, (2) offline behavior using previously cached lookup results, and (3) opening the report dialog from lookup results, selecting each allowed tag (Spam/Phishing/Scam/Other), and verifying success/close behavior."
         }
       ]
     }
