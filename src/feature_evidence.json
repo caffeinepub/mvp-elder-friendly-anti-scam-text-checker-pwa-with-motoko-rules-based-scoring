@@ -2,13 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-integrate-an-in-context-report-suspicious-contact-action-into-the-advanced-contact-lookup-results-panel-so-users-can-submit-an-anonymous-legally-safe-report-for-the-searched-phone-email-using-the-existing-report-submission-dialog-flow",
-      "featureTitle": "Integrate an in-context “Report suspicious contact” action into the Advanced Contact Lookup results panel so users can submit an anonymous, legally-safe report for the searched phone/email, using the existing report submission dialog flow.",
+      "featureId": "feature-add-a-new-dedicated-frontend-page-for-the-international-contact-lookup-module-route-ui-and-make-it-accessible-from-the-main-navigation-menu",
+      "featureTitle": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
       "files": [
-        "frontend/src/components/AdvancedContactLookup.tsx",
-        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-        "frontend/src/components/ReportSubmissionDialog.tsx",
-        "frontend/src/hooks/useSubmitLookupReport.ts"
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/components/InternationalContactSearchResult.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/InternationalContactSearchPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,19 +16,20 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-46"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-restrict-the-report-tag-category-choices-shown-for-advanced-contact-lookup-reporting-to-exactly-spam-phishing-scam-other-while-preserving-the-underlying-compatibility-with-existing-report-category-types",
-      "featureTitle": "Restrict the report “tag/category” choices shown for Advanced Contact Lookup reporting to exactly: Spam, Phishing, Scam, Other, while preserving the underlying compatibility with existing report category types.",
+      "featureId": "feature-extend-the-frontend-routing-to-include-the-new-international-lookup-page-without-breaking-existing-routes-consent-gate-behavior-and-spa-fallback-routing",
+      "featureTitle": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
       "files": [
-        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-        "frontend/src/components/ReportSubmissionDialog.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/pages/InternationalContactSearchPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,19 +37,21 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-47"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-advanced-contact-lookup-results-remain-available-offline-on-a-best-effort-basis-by-leveraging-the-existing-local-cache-and-service-worker-caching-behavior-without-breaking-pwa-installability",
-      "featureTitle": "Ensure Advanced Contact Lookup results remain available offline on a best-effort basis by leveraging the existing local cache and service worker caching behavior, without breaking PWA installability.",
+      "featureId": "feature-integrate-extend-the-existing-antifraud-heuristics-engine-logic-to-compute-an-international-risk-score-using-automatic-phone-normalization-country-code-country-detection-by-prefix-for-phone-numbers-and-public-source-signals-reports-alerts-returned-by-providers-producing-low-medium-high-risk-status",
+      "featureTitle": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
       "files": [
-        "frontend/public/service-worker.js",
-        "frontend/src/components/AdvancedContactLookup.tsx"
+        "frontend/src/components/InternationalContactSearchResult.tsx",
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/pages/InternationalContactSearchPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -56,20 +59,20 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-48"
+        "REQ-5"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-verify-multilingual-i18n-coverage-for-all-user-facing-text-introduced-or-changed-by-the-advanced-contact-lookup-reporting-flow-across-pt-en-es-fr-zh-ar-ru-and-ensure-english-is-used-for-en-user-facing-strings",
-      "featureTitle": "Add/verify multilingual i18n coverage for all user-facing text introduced or changed by the Advanced Contact Lookup reporting flow across PT/EN/ES/FR/ZH/AR/RU, and ensure English is used for EN user-facing strings.",
+      "featureId": "feature-update-the-frontend-canister-interface-bindings-to-include-the-new-backend-method-s-and-wire-the-new-international-lookup-page-ui-to-call-the-backend-and-render-the-returned-structured-result",
+      "featureTitle": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
       "files": [
-        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-        "frontend/src/components/ReportSubmissionDialog.tsx",
-        "frontend/src/i18n/translations.ts"
+        "frontend/src/hooks/useInternationalContactLookup.ts",
+        "frontend/src/pages/InternationalContactSearchPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -77,18 +80,20 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-49"
+        "REQ-6"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-production-verification-checklist-to-include-explicit-test-steps-for-advanced-contact-lookup-phone-email-and-the-anonymous-reporting-flow-including-tag-selection-alongside-existing-antifraud-engine-consent-gate-and-pwa-webapk-checks",
-      "featureTitle": "Update the production verification checklist to include explicit test steps for Advanced Contact Lookup (phone/email) and the anonymous reporting flow (including tag selection), alongside existing antifraud engine, consent gate, and PWA/WebAPK checks.",
+      "featureId": "feature-remove-any-visible-caffeine-branding-from-the-application-ui-and-metadata-wherever-it-currently-appears",
+      "featureTitle": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
       "files": [
-        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
+        "frontend/src/i18n/translations.ts",
+        "frontend/src/utils/seo.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -96,10 +101,31 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-50"
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-footer-data-source-images-logos-clickable-with-embedded-attribution-source-links-while-preserving-correct-static-asset-paths-and-16x16-mobile-visibility",
+      "featureTitle": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
+      "files": [
+        "frontend/src/components/Footer.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
       ],
       "confidence": "high"
     }

@@ -1,7 +1,8 @@
-// Report submission dialog for anonymous reporting from Advanced Contact Lookup
-// Supports prefilled contact value with limited category options (Spam/Phishing/Scam/Other)
+// Report submission dialog component for anonymous/authenticated reporting
+// Prefills contact value, limited category options, optional description
+// Shows anonymity notice and success/error states using shadcn-ui Dialog
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,9 +22,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Info, Shield } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useSubmitLookupReport } from '@/hooks/useSubmitLookupReport';
+import { useSubmitLookupReport, type ReportCategory } from '@/hooks/useSubmitLookupReport';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 
 interface ReportSubmissionDialogProps {
   open: boolean;
@@ -32,8 +34,6 @@ interface ReportSubmissionDialogProps {
   contactType?: 'phone' | 'email';
 }
 
-type ReportCategory = 'Spam' | 'Phishing' | 'Scam' | 'Other';
-
 export function ReportSubmissionDialog({
   open,
   onOpenChange,
@@ -41,144 +41,146 @@ export function ReportSubmissionDialog({
   contactType,
 }: ReportSubmissionDialogProps) {
   const { t } = useI18n();
-  const { submitReport, isSubmitting, error: submitError, success } = useSubmitLookupReport();
+  const { identity } = useInternetIdentity();
+  const { submitReport, isSubmitting, error, success, resetState } = useSubmitLookupReport();
 
-  const [category, setCategory] = useState<ReportCategory | ''>('');
+  const [category, setCategory] = useState<ReportCategory>('Spam');
   const [description, setDescription] = useState('');
+
+  const isAuthenticated = !!identity;
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      setCategory('Spam');
+      setDescription('');
+      resetState();
+    }
+  }, [open, resetState]);
 
   const handleSubmit = async () => {
     if (!prefilledContact || !contactType) return;
 
-    // Default to "Other" if no category selected
-    const finalCategory = category || 'Other';
-
-    const result = await submitReport({
-      contact: prefilledContact,
-      type: contactType,
-      category: finalCategory,
-      description: description.trim(),
+    await submitReport({
+      contactValue: prefilledContact,
+      contactType,
+      category,
+      description: description.trim() || undefined,
     });
-
-    if (result.success) {
-      // Reset form and close after brief delay
-      setTimeout(() => {
-        setCategory('');
-        setDescription('');
-        onOpenChange(false);
-      }, 1500);
-    }
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!isSubmitting) {
-      if (!newOpen) {
-        // Reset form when closing
-        setCategory('');
-        setDescription('');
-      }
-      onOpenChange(newOpen);
-    }
+  const handleClose = () => {
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{t.reportDialogTitle}</DialogTitle>
-          <DialogDescription>{t.reportDialogDescription}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            {t.reportDialogTitle}
+          </DialogTitle>
+          <DialogDescription>
+            {t.reportDialogDescription}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Anonymity Notice */}
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-sm">
-              {t.reportAnonymityNotice}
-            </AlertDescription>
-          </Alert>
-
-          {/* Prefilled Contact (read-only display) */}
-          <div className="space-y-2">
-            <Label>{t.reportContactLabel}</Label>
-            <div className="px-3 py-2 bg-muted rounded-md text-sm font-mono">
-              {prefilledContact}
-            </div>
-          </div>
-
-          {/* Category Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="category">{t.reportCategoryLabel}</Label>
-            <Select
-              value={category}
-              onValueChange={(value) => setCategory(value as ReportCategory)}
-              disabled={isSubmitting}
-            >
-              <SelectTrigger id="category">
-                <SelectValue placeholder={t.reportCategoryPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Spam">{t.reportCategorySpam}</SelectItem>
-                <SelectItem value="Phishing">{t.reportCategoryPhishing}</SelectItem>
-                <SelectItem value="Scam">{t.reportCategoryScam}</SelectItem>
-                <SelectItem value="Other">{t.reportCategoryOther}</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {t.reportCategoryOptionalNote}
-            </p>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">{t.reportDescriptionLabel}</Label>
-            <Textarea
-              id="description"
-              placeholder={t.reportDescriptionPlaceholder}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isSubmitting}
-              rows={4}
-              className="resize-none"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t.reportDescriptionNote}
-            </p>
-          </div>
-
-          {/* Error Alert */}
-          {submitError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{submitError}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Success Alert */}
-          {success && (
+        {success ? (
+          <div className="space-y-4 py-4">
             <Alert className="border-success bg-success/10">
-              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CheckCircle className="h-4 w-4 text-success" />
               <AlertDescription className="text-success">
                 {t.reportSuccessMessage}
               </AlertDescription>
             </Alert>
-          )}
-        </div>
+            <Button onClick={handleClose} className="w-full">
+              {t.reportCancelButton}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4 py-4">
+            {/* Anonymity Notice */}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                {isAuthenticated 
+                  ? 'O seu reporte será submetido com autenticação (identidade protegida por hash).'
+                  : t.reportAnonymityNotice}
+              </AlertDescription>
+            </Alert>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            {t.reportCancelButton}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !prefilledContact}
-          >
-            {isSubmitting ? t.reportSubmittingButton : t.reportSubmitButton}
-          </Button>
-        </DialogFooter>
+            {/* Contact (read-only) */}
+            <div className="space-y-2">
+              <Label>{t.reportContactLabel}</Label>
+              <div className="px-3 py-2 bg-muted rounded-md text-sm">
+                {prefilledContact || 'Nenhum contacto'}
+              </div>
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category">{t.reportCategoryLabel}</Label>
+              <Select value={category} onValueChange={(value) => setCategory(value as ReportCategory)}>
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Spam">{t.reportCategorySpam}</SelectItem>
+                  <SelectItem value="Phishing">{t.reportCategoryPhishing}</SelectItem>
+                  <SelectItem value="Scam">{t.reportCategoryScam}</SelectItem>
+                  <SelectItem value="Other">{t.reportCategoryOther}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description (optional) */}
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                {t.reportDescriptionLabel}
+                <span className="text-muted-foreground ml-1">(opcional)</span>
+              </Label>
+              <Textarea
+                id="description"
+                placeholder={t.reportDescriptionPlaceholder}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                maxLength={500}
+                disabled={isSubmitting}
+              />
+              <div className="text-xs text-muted-foreground text-right">
+                {description.length}/500
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+
+        {!success && (
+          <DialogFooter>
+            <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+              {t.reportCancelButton}
+            </Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting || !prefilledContact}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t.reportSubmittingButton}
+                </>
+              ) : (
+                t.reportSubmitButton
+              )}
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

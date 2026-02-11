@@ -1,122 +1,165 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Advanced Contact Lookup: Anonymous Reporting Integration, Offline PWA Cache Hardening, and i18n Coverage",
+  "title": "International Contact Lookup frontend page + navigation + localized, source-attributed results",
   "requirements": [
     {
-      "id": "REQ-46",
-      "summary": "Add an in-context anonymous “Report suspicious contact” action to Advanced Contact Lookup results that opens the existing report dialog prefilled with the searched contact (phone/email) and includes an anonymity/legal notice.",
+      "id": "REQ-1",
+      "summary": "Create a dedicated “International Contact Search” page with a single input, lookup CTA, and structured, source-attributed results; add it to the main navigation.",
       "acceptanceCriteria": [
-        "When a user completes an Advanced Contact Lookup search, the results area provides a clear “Report suspicious contact” action.",
-        "Clicking the action opens a dialog that is prefilled with the searched contact value and the correct report type (phone or email).",
-        "The reporting flow does not require the user to authenticate and does not display or request any personally identifying information beyond the reported contact itself.",
-        "The dialog includes a short, user-facing anonymity/legal notice (English text in the EN locale; localized equivalents in other supported languages) stating that reports are anonymous and should only include public/non-sensitive information.",
-        "Submitting the report shows a clear success state and closes/reset the dialog after success (consistent with existing dialog behavior)."
+        "A new route exists (e.g., `/international-contact-search`) and renders a dedicated page for international contact lookups.",
+        "The page is reachable from the main menu (desktop + mobile nav) via a new navigation item.",
+        "The page contains a single input that accepts phone number, email, or other contact identifiers (at minimum: phone + email), with a clear call-to-action to run the lookup.",
+        "The page renders a structured, detailed result view (not just a single risk label), including: risk status (low/medium/high), detected origin country (when applicable), a list of public sources with clickable links, and any public alert/report history returned by the backend.",
+        "All user-facing strings added for this page are localized via `frontend/src/i18n/translations.ts` (add keys; do not hardcode strings)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
-          "operation": "modify",
-          "description": "Track the last successful Advanced Contact Lookup normalized contact value + detected type (phone/email) and pass it to the results panel so the reporting action can prefill the report dialog without re-asking for input. Keep antifraud analysis fully frontend-only as currently implemented."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-          "operation": "modify",
-          "description": "Add a clearly visible “Report suspicious contact” action within the results UI and wire it to open the existing ReportSubmissionDialog in a lookup-specific mode. Use shadcn-ui Button (and optionally DialogTrigger patterns if needed) to match existing UI style; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
-          "operation": "modify",
-          "description": "Extend the existing report submission dialog flow to support a lookup-prefilled mode (prefilled value + forced report type phone/email, plus a short anonymity/legal notice section rendered via i18n). Ensure this mode does not request additional user-identifying fields beyond the reported contact. Use existing shadcn-ui Dialog/Select/Input/Textarea primitives already used by the component; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useSubmitLookupReport.ts",
+          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
           "operation": "create",
-          "description": "Create a small frontend hook/helper to submit an anonymous report from the lookup flow using the app’s existing report submission mechanism (same canister/actor flow already used elsewhere), without introducing any authentication requirement. Keep the public flow anonymous/guest-safe."
+          "description": "Create the dedicated International Contact Search page UI. Use shadcn-ui components (e.g., Card/Input/Button/Alert/Separator/Badge) to provide the single contact input (phone/email at minimum), a clear lookup CTA, and a structured results view that can render risk level, numeric score, optional origin country, findings list with per-field source attribution links, and public alerts history. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/InternationalContactSearchResult.tsx",
+          "operation": "create",
+          "description": "Add a reusable result renderer for the International Contact Search page that presents a detailed, structured result (risk status, numeric score, contributing factors/explanation, origin country when present, findings with label/value/notes, and public alerts), ensuring every provided source URL is rendered as a clickable link with safe external-link attributes. Use shadcn-ui primitives for consistent styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Add a new navigation item (desktop + mobile) pointing to `/international-contact-search` using a localized label from `frontend/src/i18n/translations.ts`, ensuring it appears in the main menu and highlights correctly for the active route."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add new localization keys (in English per build request preference) for: navigation label, page title/description, input label/placeholder, CTA, loading/error/empty states, result section labels (risk level, risk score, origin country, findings, alerts, limitations/unavailable providers), and link labels. Do not hardcode strings in the new page/components."
         }
       ]
     },
     {
-      "id": "REQ-47",
-      "summary": "Limit Advanced Contact Lookup reporting tag choices to Spam/Phishing/Scam/Other with safe defaults while keeping compatibility with existing report category types.",
+      "id": "REQ-2",
+      "summary": "Wire the new international lookup page into SPA routing while preserving existing aliases, home redirect behavior, and the consent gate interaction block.",
       "acceptanceCriteria": [
-        "In the Advanced Contact Lookup reporting dialog, the selectable tag/category list shown to the user is limited to: Spam, Phishing, Scam, Other.",
-        "The selected tag is submitted using the existing report category model (mapping to existing categories where applicable).",
-        "If the user does not select a tag, the submission still works by defaulting to “Other” (or an equivalent safe default), without blocking submission."
+        "`frontend/src/App.tsx` includes a route mapping for the new page in the switch block and preserves existing redirects/aliases.",
+        "Unknown routes still redirect to the existing home page behavior.",
+        "ConsentGateModal still blocks interaction until accepted, including on the new page."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add lookup-specific configuration to restrict category UI options to exactly Spam/Phishing/Scam/Other while preserving the underlying mapping to the existing ReportCategory union. In lookup mode, allow category to be omitted and default it to Other at submit time (no validation block). Use the existing shadcn-ui Select UI; verify the component's usage instructions before implementing."
+          "description": "Register the `/international-contact-search` route in the existing switch-based routing, keeping current legacy alias behavior and the default unknown-route fallback to Home. Ensure the new page is rendered inside the existing ConsentGateModal/pointer-events blocking wrapper so consent gating behavior remains unchanged."
         },
         {
-          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
           "operation": "modify",
-          "description": "When invoking ReportSubmissionDialog from Advanced Contact Lookup, pass the lookup-mode configuration so only the four requested tag options are shown and the safe default behavior is enabled."
+          "description": "Ensure the page content is compatible with the global consent gate behavior (no special casing needed); rely on the existing App-level interaction block and avoid any direct DOM interaction that could bypass the gate."
         }
       ]
     },
     {
-      "id": "REQ-48",
-      "summary": "Harden offline behavior for Advanced Contact Lookup using existing local cache and service worker caching (including precaching the public dataset) without impacting PWA installability.",
+      "id": "REQ-5",
+      "summary": "On the new page, display backend-provided international scoring outputs (risk level + numeric score) and a human-readable explanation of key contributing factors, with clickable source links.",
       "acceptanceCriteria": [
-        "When offline, previously searched contacts that exist in the local cache can still be displayed in the Advanced Contact Lookup results UI.",
-        "The service worker precache includes the public lookup dataset (`/data/public-contact-lookup.json`) and continues to use a network-first strategy with cache fallback for same-origin requests, without introducing install prompt regressions.",
-        "No new service worker console errors are introduced in production mode.",
-        "PWA install CTA remains functional after these changes."
+        "For phone inputs, the system normalizes into a consistent international format (E.164-style string with leading `+` when possible) before scoring and display.",
+        "For phone inputs, the system derives an origin country signal (at minimum: ISO country code or country name) based on prefix mapping and includes it in the structured result.",
+        "The backend’s final risk score and risk level incorporate: (a) heuristic signals (format anomalies, suspicious patterns) and (b) public-source/provider signals (presence on abuse lists, known alerts, etc.).",
+        "The frontend displays both the risk level (low/medium/high) and the numeric risk score along with a human-readable explanation of the main contributing factors.",
+        "The result rendering includes clickable links for every referenced source."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/service-worker.js",
+          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
           "operation": "modify",
-          "description": "Keep `/data/public-contact-lookup.json` in the precache list and refine the network-first-with-cache-fallback fetch handling to be explicitly safe for same-origin GET requests (avoid caching non-GET or cross-origin requests) to reduce production console errors and preserve PWA installability."
+          "description": "Use existing contact detection/normalization utilities to normalize user input for display and backend calls (phone/email at minimum). For phone numbers, prefer displaying an E.164-style normalized string (leading `+` when possible) and surface origin country if present in the backend result."
         },
         {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
+          "path": "frontend/src/components/InternationalContactSearchResult.tsx",
           "operation": "modify",
-          "description": "Verify and (if needed) adjust the offline path so cached results are surfaced consistently when offline (best-effort), relying on the existing localStorage-backed cache hook and without changing the PWA install flow."
+          "description": "Render risk level (low/medium/high) and numeric risk score prominently, and show a human-readable explanation/contributing factors section derived from backend-provided fields (and/or safely fall back to a generic explanation when unavailable). Ensure all referenced sources are clickable external links."
+        },
+        {
+          "path": "frontend/src/utils/contactInputHeuristics.ts",
+          "operation": "modify",
+          "description": "Extend/adjust phone normalization logic (if needed) to support E.164-style output for international numbers (leading `+` when possible) for the new international lookup flow, without breaking the existing Advanced Contact Lookup behavior."
+        },
+        {
+          "path": "frontend/src/i18n/translations.ts",
+          "operation": "modify",
+          "description": "Add localized strings (in English per build request preference) for risk/explanation labels and any contributing-factor messaging used by the international scoring UI."
         }
       ]
     },
     {
-      "id": "REQ-49",
-      "summary": "Add/verify i18n coverage for all user-facing text introduced/changed by reporting-from-lookup across PT/EN/ES/FR/ZH/AR/RU, ensuring EN strings are in English.",
+      "id": "REQ-6",
+      "summary": "Update frontend canister interface bindings for the new backend method(s) and wire the new page to call the backend using existing actor creation, with resilient loading/error handling.",
       "acceptanceCriteria": [
-        "All new labels/buttons/help text related to reporting-from-lookup render via the existing i18n system (no hardcoded strings in components).",
-        "EN locale strings are written in English.",
-        "No missing-key placeholders (undefined/fallback fragments) appear in any supported language for the reporting-from-lookup flow."
+        "Frontend Candid/IDL typings used by the app are updated to include the new backend method(s) (without editing any files listed under `frontend/immutablePaths`).",
+        "The new page calls the backend method using the existing actor creation approach (compose with existing hooks; do not modify immutable hooks).",
+        "The UI shows loading and error states and never crashes on partial provider failures (backend returns structured ‘unavailable provider’ notes; frontend renders them)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/backend.idl.ts",
+          "operation": "modify",
+          "description": "Update the IDL service definition to include the new international contact lookup backend capability and any required related methods used by the new page. Keep the definitions aligned with the app’s actor creation approach and avoid touching any immutable paths."
+        },
+        {
+          "path": "frontend/src/backend.d.ts",
+          "operation": "modify",
+          "description": "Update/align TypeScript types (as used by the frontend) to include the structured international contact lookup result shape and the new method signature(s), matching the backend’s candid-exposed contract so the new page can be fully typed."
+        },
+        {
+          "path": "frontend/src/hooks/useInternationalContactLookup.ts",
+          "operation": "create",
+          "description": "Create a small hook that composes with the existing `useActor` hook to call the new backend lookup capability, returning typed loading/error/data states and shielding the UI from partial failures by normalizing missing fields into safe defaults."
+        },
+        {
+          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
+          "operation": "modify",
+          "description": "Wire the page to call the backend via `useInternationalContactLookup` (which uses the existing `useActor`), and implement loading + error + empty states. Ensure provider unavailability/partial failures are rendered as non-fatal notes rather than crashing the UI."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Remove any user-visible “Caffeine” branding from UI and metadata.",
+      "acceptanceCriteria": [
+        "No user-visible UI text contains the string “Caffeine”.",
+        "App title/metadata shown in the browser tab and/or in-app headings does not include “Caffeine”.",
+        "Existing desired branding (e.g., 'AntiFraud / by HCoragem') remains intact unless it currently includes 'Caffeine'."
       ],
       "file_operations": [
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add translation keys for: the lookup report CTA label, the anonymity/legal notice text, and any lookup-mode dialog labels/help text (including any adjusted field labels/placeholders). Ensure all supported locales (PT/EN/ES/FR/ZH/AR/RU) define these keys and EN values are English."
+          "description": "Audit and update any user-facing translation strings that might include “Caffeine” (directly or indirectly) and ensure new strings added for the international module do not introduce “Caffeine” branding."
         },
         {
-          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Replace any new user-facing strings for the lookup report action with i18n keys from the existing I18nProvider (no hardcoded labels)."
+          "description": "Verify and, if necessary, adjust the HTML title and meta description so the browser tab/metadata does not include “Caffeine” while preserving desired branding ('AntiFraud / by HCoragem')."
         },
         {
-          "path": "frontend/src/components/ReportSubmissionDialog.tsx",
+          "path": "frontend/src/utils/seo.ts",
           "operation": "modify",
-          "description": "Render the anonymity/legal notice and any lookup-mode-specific labels via i18n keys (no hardcoded strings) while preserving existing dialog behavior and styling. Use existing shadcn-ui Dialog and form primitives; verify the component's usage instructions before implementing."
+          "description": "Verify runtime SEO title construction does not introduce “Caffeine” anywhere and continues to use the desired branding."
         }
       ]
     },
     {
-      "id": "REQ-50",
-      "summary": "Update production verification checklist with explicit steps for Advanced Contact Lookup (phone/email), offline cached behavior, and anonymous report submission from lookup with tag selection.",
+      "id": "REQ-8",
+      "summary": "Make footer provider/data-source images clickable with proper attribution links while keeping absolute asset paths and 16x16 mobile sizing.",
       "acceptanceCriteria": [
-        "`frontend/PRODUCTION_BUILD_VERIFICATION.md` includes a new checklist subsection covering: (1) Advanced Contact Lookup search behavior, (2) offline cached lookup behavior, and (3) submitting a report from lookup results with tags Spam/Phishing/Scam/Other.",
-        "Checklist steps are concrete and repeatable (what to click/type, expected UI states)."
+        "Each footer logo/image is wrapped in an accessible clickable link (`<a>` with `href`, `target=\"_blank\"`, and `rel=\"noreferrer\"`/`noopener`), pointing to the official source/attribution URL for that logo or provider.",
+        "Footer icons continue to load from absolute `/assets/...` paths (no relative imports) and render at exactly 16x16 pixels on mobile without 404s.",
+        "Footer layout remains responsive and readable on mobile and desktop after adding links."
       ],
       "file_operations": [
         {
-          "path": "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+          "path": "frontend/src/components/Footer.tsx",
           "operation": "modify",
-          "description": "Add a new checklist subsection describing repeatable test steps for: (1) Advanced Contact Lookup searches for both phone and email, (2) offline behavior using previously cached lookup results, and (3) opening the report dialog from lookup results, selecting each allowed tag (Spam/Phishing/Scam/Other), and verifying success/close behavior."
+          "description": "Wrap each footer logo/image (e.g., ICP, HaveIBeenPwned, PhishTank) in accessible external links to their official attribution/source pages using `<a href target=\"_blank\" rel=\"noreferrer noopener\">`. Preserve absolute `/assets/generated/...` paths (including: `/assets/generated/icp-logo-icon.dim_16x16.png`, `/assets/generated/haveibeenpwned-icon.dim_16x16.png`, `/assets/generated/phishtank-icon.dim_16x16.png`) and ensure icons remain exactly 16x16 on mobile."
         }
       ]
     }

@@ -89,8 +89,59 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface ExtendedContactDetails {
+    content: string;
+    contactType: LookupProvider;
+    details: ContactDetails;
+}
+export interface FieldSource {
+    value: string;
+    sourceUrl: string;
+}
+export type LookupProvider = {
+    __kind__: "numLookup";
+    numLookup: null;
+} | {
+    __kind__: "custom";
+    custom: string;
+} | {
+    __kind__: "google";
+    google: null;
+} | {
+    __kind__: "amazon";
+    amazon: null;
+};
+export interface ProviderConfig {
+    endpoint?: string;
+    name: LookupProvider;
+    enabled: boolean;
+    apiKey?: string;
+}
+export interface ContactDetails {
+    id: string;
+    verified: string;
+    country: string;
+    validationSource?: FieldSource;
+    type: string;
+    trustScore: string;
+    riskScoreDescription: string;
+    trustScoreSource?: FieldSource;
+    countryValidationSource?: FieldSource;
+    address?: string;
+    reports: string;
+    reportsSource?: FieldSource;
+    adjustedRiskScore?: string;
+    riskLevel: string;
+    riskScore: string;
+    adjustedRiskScoreSource?: FieldSource;
+}
 export interface UserProfile {
     name: string;
+}
+export enum TargetType {
+    email = "email",
+    crypto = "crypto",
+    phoneNumber = "phoneNumber"
 }
 export enum UserRole {
     admin = "admin",
@@ -100,17 +151,23 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearCryptoReports(address: string): Promise<void>;
+    clearPhoneReports(phone: string): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCryptoReports(address: string): Promise<bigint | null>;
+    getLookupDetails(key: string): Promise<ExtendedContactDetails | null>;
     getPhoneReports(phone: string): Promise<bigint | null>;
+    getProviderConfig(name: string): Promise<ProviderConfig | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserRole(user: Principal): Promise<UserRole>;
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
+    report(targetType: TargetType, target: string, category: string | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setProviderConfig(name: string, config: ProviderConfig): Promise<void>;
 }
-import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { ContactDetails as _ContactDetails, ExtendedContactDetails as _ExtendedContactDetails, FieldSource as _FieldSource, LookupProvider as _LookupProvider, ProviderConfig as _ProviderConfig, TargetType as _TargetType, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -138,6 +195,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async clearCryptoReports(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearCryptoReports(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearCryptoReports(arg0);
+            return result;
+        }
+    }
+    async clearPhoneReports(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearPhoneReports(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearPhoneReports(arg0);
             return result;
         }
     }
@@ -183,6 +268,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getLookupDetails(arg0: string): Promise<ExtendedContactDetails | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getLookupDetails(arg0);
+                return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getLookupDetails(arg0);
+            return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getPhoneReports(arg0: string): Promise<bigint | null> {
         if (this.processError) {
             try {
@@ -195,6 +294,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getPhoneReports(arg0);
             return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getProviderConfig(arg0: string): Promise<ProviderConfig | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getProviderConfig(arg0);
+                return from_candid_opt_n16(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getProviderConfig(arg0);
+            return from_candid_opt_n16(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
@@ -253,6 +366,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async report(arg0: TargetType, arg1: string, arg2: string | null): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.report(to_candid_TargetType_n19(this._uploadFile, this._downloadFile, arg0), arg1, to_candid_opt_n21(this._uploadFile, this._downloadFile, arg2));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.report(to_candid_TargetType_n19(this._uploadFile, this._downloadFile, arg0), arg1, to_candid_opt_n21(this._uploadFile, this._downloadFile, arg2));
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -267,15 +394,175 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async setProviderConfig(arg0: string, arg1: ProviderConfig): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setProviderConfig(arg0, to_candid_ProviderConfig_n22(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setProviderConfig(arg0, to_candid_ProviderConfig_n22(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+}
+function from_candid_ContactDetails_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ContactDetails): ContactDetails {
+    return from_candid_record_n13(_uploadFile, _downloadFile, value);
+}
+function from_candid_ExtendedContactDetails_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExtendedContactDetails): ExtendedContactDetails {
+    return from_candid_record_n9(_uploadFile, _downloadFile, value);
+}
+function from_candid_LookupProvider_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _LookupProvider): LookupProvider {
+    return from_candid_variant_n11(_uploadFile, _downloadFile, value);
+}
+function from_candid_ProviderConfig_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ProviderConfig): ProviderConfig {
+    return from_candid_record_n18(_uploadFile, _downloadFile, value);
 }
 function from_candid_UserRole_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
     return from_candid_variant_n5(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_FieldSource]): FieldSource | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_ProviderConfig]): ProviderConfig | null {
+    return value.length === 0 ? null : from_candid_ProviderConfig_n17(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_ExtendedContactDetails]): ExtendedContactDetails | null {
+    return value.length === 0 ? null : from_candid_ExtendedContactDetails_n8(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: string;
+    verified: string;
+    country: string;
+    validationSource: [] | [_FieldSource];
+    type: string;
+    trustScore: string;
+    riskScoreDescription: string;
+    trustScoreSource: [] | [_FieldSource];
+    countryValidationSource: [] | [_FieldSource];
+    address: [] | [string];
+    reports: string;
+    reportsSource: [] | [_FieldSource];
+    adjustedRiskScore: [] | [string];
+    riskLevel: string;
+    riskScore: string;
+    adjustedRiskScoreSource: [] | [_FieldSource];
+}): {
+    id: string;
+    verified: string;
+    country: string;
+    validationSource?: FieldSource;
+    type: string;
+    trustScore: string;
+    riskScoreDescription: string;
+    trustScoreSource?: FieldSource;
+    countryValidationSource?: FieldSource;
+    address?: string;
+    reports: string;
+    reportsSource?: FieldSource;
+    adjustedRiskScore?: string;
+    riskLevel: string;
+    riskScore: string;
+    adjustedRiskScoreSource?: FieldSource;
+} {
+    return {
+        id: value.id,
+        verified: value.verified,
+        country: value.country,
+        validationSource: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.validationSource)),
+        type: value.type,
+        trustScore: value.trustScore,
+        riskScoreDescription: value.riskScoreDescription,
+        trustScoreSource: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.trustScoreSource)),
+        countryValidationSource: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.countryValidationSource)),
+        address: record_opt_to_undefined(from_candid_opt_n15(_uploadFile, _downloadFile, value.address)),
+        reports: value.reports,
+        reportsSource: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.reportsSource)),
+        adjustedRiskScore: record_opt_to_undefined(from_candid_opt_n15(_uploadFile, _downloadFile, value.adjustedRiskScore)),
+        riskLevel: value.riskLevel,
+        riskScore: value.riskScore,
+        adjustedRiskScoreSource: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.adjustedRiskScoreSource))
+    };
+}
+function from_candid_record_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    endpoint: [] | [string];
+    name: _LookupProvider;
+    enabled: boolean;
+    apiKey: [] | [string];
+}): {
+    endpoint?: string;
+    name: LookupProvider;
+    enabled: boolean;
+    apiKey?: string;
+} {
+    return {
+        endpoint: record_opt_to_undefined(from_candid_opt_n15(_uploadFile, _downloadFile, value.endpoint)),
+        name: from_candid_LookupProvider_n10(_uploadFile, _downloadFile, value.name),
+        enabled: value.enabled,
+        apiKey: record_opt_to_undefined(from_candid_opt_n15(_uploadFile, _downloadFile, value.apiKey))
+    };
+}
+function from_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    content: string;
+    contactType: _LookupProvider;
+    details: _ContactDetails;
+}): {
+    content: string;
+    contactType: LookupProvider;
+    details: ContactDetails;
+} {
+    return {
+        content: value.content,
+        contactType: from_candid_LookupProvider_n10(_uploadFile, _downloadFile, value.contactType),
+        details: from_candid_ContactDetails_n12(_uploadFile, _downloadFile, value.details)
+    };
+}
+function from_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    numLookup: null;
+} | {
+    custom: string;
+} | {
+    google: null;
+} | {
+    amazon: null;
+}): {
+    __kind__: "numLookup";
+    numLookup: null;
+} | {
+    __kind__: "custom";
+    custom: string;
+} | {
+    __kind__: "google";
+    google: null;
+} | {
+    __kind__: "amazon";
+    amazon: null;
+} {
+    return "numLookup" in value ? {
+        __kind__: "numLookup",
+        numLookup: value.numLookup
+    } : "custom" in value ? {
+        __kind__: "custom",
+        custom: value.custom
+    } : "google" in value ? {
+        __kind__: "google",
+        google: value.google
+    } : "amazon" in value ? {
+        __kind__: "amazon",
+        amazon: value.amazon
+    } : value;
 }
 function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
@@ -286,8 +573,38 @@ function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
+function to_candid_LookupProvider_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: LookupProvider): _LookupProvider {
+    return to_candid_variant_n25(_uploadFile, _downloadFile, value);
+}
+function to_candid_ProviderConfig_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ProviderConfig): _ProviderConfig {
+    return to_candid_record_n23(_uploadFile, _downloadFile, value);
+}
+function to_candid_TargetType_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TargetType): _TargetType {
+    return to_candid_variant_n20(_uploadFile, _downloadFile, value);
+}
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_opt_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
+    return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    endpoint?: string;
+    name: LookupProvider;
+    enabled: boolean;
+    apiKey?: string;
+}): {
+    endpoint: [] | [string];
+    name: _LookupProvider;
+    enabled: boolean;
+    apiKey: [] | [string];
+} {
+    return {
+        endpoint: value.endpoint ? candid_some(value.endpoint) : candid_none(),
+        name: to_candid_LookupProvider_n24(_uploadFile, _downloadFile, value.name),
+        enabled: value.enabled,
+        apiKey: value.apiKey ? candid_some(value.apiKey) : candid_none()
+    };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     admin: null;
@@ -302,6 +619,52 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         user: null
     } : value == UserRole.guest ? {
         guest: null
+    } : value;
+}
+function to_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TargetType): {
+    email: null;
+} | {
+    crypto: null;
+} | {
+    phoneNumber: null;
+} {
+    return value == TargetType.email ? {
+        email: null
+    } : value == TargetType.crypto ? {
+        crypto: null
+    } : value == TargetType.phoneNumber ? {
+        phoneNumber: null
+    } : value;
+}
+function to_candid_variant_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    __kind__: "numLookup";
+    numLookup: null;
+} | {
+    __kind__: "custom";
+    custom: string;
+} | {
+    __kind__: "google";
+    google: null;
+} | {
+    __kind__: "amazon";
+    amazon: null;
+}): {
+    numLookup: null;
+} | {
+    custom: string;
+} | {
+    google: null;
+} | {
+    amazon: null;
+} {
+    return value.__kind__ === "numLookup" ? {
+        numLookup: value.numLookup
+    } : value.__kind__ === "custom" ? {
+        custom: value.custom
+    } : value.__kind__ === "google" ? {
+        google: value.google
+    } : value.__kind__ === "amazon" ? {
+        amazon: value.amazon
     } : value;
 }
 export interface CreateActorOptions {

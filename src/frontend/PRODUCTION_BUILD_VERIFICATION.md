@@ -2,6 +2,20 @@
 
 This document provides a comprehensive checklist for verifying the production build of AntiFraud / by HCoragem before deployment.
 
+## 0. Clean Restart Preflight
+
+**Execute these steps before starting verification to ensure a clean, from-scratch production verification run:**
+
+- [ ] Clear all build artifacts: `rm -rf frontend/dist frontend/.vite`
+- [ ] Open browser DevTools → Application → Service Workers → Unregister all service workers
+- [ ] Open browser DevTools → Application → Storage → Clear site data (all caches, localStorage, sessionStorage)
+- [ ] Clear relevant localStorage keys manually if needed: `localStorage.clear()`
+- [ ] Close all browser tabs for the application
+- [ ] Restart browser (optional but recommended for complete clean state)
+- [ ] Run production build: `cd frontend && npm run build` (or equivalent build command)
+- [ ] Serve production build and open in fresh browser tab
+- [ ] Verify no cached state from previous sessions affects verification
+
 ## 1. SPA Navigation & Routing
 
 - [ ] Navigate to `/` (home page) - should display verification interface with 5 tabs

@@ -1,13 +1,13 @@
 /**
  * SEO utility for setting document title and meta description at runtime
- * for SPA routes, ensuring AntiFraud / by HCoragem branding
+ * Ensures consistent branding across all pages
  */
 
-export function setSeoMetadata(title: string, description?: string): void {
-  // Set document title with branding
+export function setSEO(title: string, description?: string) {
+  // Set document title with AntiFraud branding
   document.title = `${title} | AntiFraud / by HCoragem`;
 
-  // Update or create meta description
+  // Update meta description if provided
   if (description) {
     let metaDescription = document.querySelector('meta[name="description"]');
     

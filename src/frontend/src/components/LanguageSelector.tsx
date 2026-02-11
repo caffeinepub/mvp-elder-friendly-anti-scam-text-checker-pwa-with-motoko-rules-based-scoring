@@ -12,11 +12,6 @@ import { Language } from '@/i18n/translations';
 const languages: { code: Language; name: string; nativeName: string }[] = [
   { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
   { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español' },
-  { code: 'fr', name: 'French', nativeName: 'Français' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文' },
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
 ];
 
 export function LanguageSelector() {

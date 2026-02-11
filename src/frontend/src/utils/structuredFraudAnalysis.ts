@@ -1,9 +1,12 @@
 // Frontend-only structured fraud analysis engine
-// Implements deterministic heuristic rules for message/email/phone/crypto analysis
+// Implements deterministic heuristic rules with professional scoring (0-100)
 // Returns structured results with transparency citations and collaborative-basis references
 // Supports full localization with critical-keyword High-risk overrides for all languages
 
-import { normalizeText, containsAnyKeyword } from './antifraudTextNormalize';
+import { normalizeText, containsAnyKeyword, findMatchingKeywords, findMatchingPhrasePatterns } from './antifraudTextNormalize';
+import { HIGH_RISK_PHRASE_PATTERNS, MEDIUM_RISK_PHRASE_PATTERNS } from './highRiskPhrases';
+import { computeRiskScore, scoreToRiskLevel, type RiskFactors } from './riskScoring';
+import { riskConfig } from './riskWeights';
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
@@ -19,6 +22,7 @@ export interface CollaborativeBasis {
 
 export interface StructuredAnalysisResult {
   risk: RiskLevel;
+  riskScore: number; // 0-100 aggregated score
   explanation: string;
   recommendation: string;
   sources: PublicSource[];
@@ -29,9 +33,9 @@ export interface StructuredAnalysisResult {
 interface AnalysisTemplates {
   emptyInput: { explanation: string; recommendation: string };
   invalidFormat: { explanation: string; recommendation: string };
-  highRisk: (indicators: string) => { explanation: string; recommendation: string };
-  mediumRisk: (indicators: string) => { explanation: string; recommendation: string };
-  lowRisk: (indicators: string) => { explanation: string; recommendation: string };
+  highRisk: (indicators: string, score: number) => { explanation: string; recommendation: string };
+  mediumRisk: (indicators: string, score: number) => { explanation: string; recommendation: string };
+  lowRisk: (indicators: string, score: number) => { explanation: string; recommendation: string };
   noIndicators: { explanation: string; recommendation: string };
   criticalKeywordTrigger: string;
   collaborativeBasisStatement: string;
@@ -60,6 +64,11 @@ interface IndicatorLabels {
   knownScamAddress: string;
   newAddress: string;
   highValueTarget: string;
+  highRiskPhrases: string;
+  mediumRiskPhrases: string;
+  internalReports: string;
+  publicSourcePresence: string;
+  highReportFrequency: string;
 }
 
 // Portuguese templates
@@ -72,24 +81,24 @@ const PT_TEMPLATES: AnalysisTemplates = {
     explanation: 'Formato inválido.',
     recommendation: 'Por favor, verifique o formato do conteúdo.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `Risco elevado detectado com indicadores: ${indicators}. Comum em tentativas de phishing e fraude.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `Risco elevado detectado (Score: ${score}/100) com indicadores: ${indicators}. Comum em tentativas de phishing e fraude.`,
     recommendation: 'Não responda, não clique em links e não partilhe informações pessoais. Elimine esta mensagem e bloqueie o remetente.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `Padrões suspeitos encontrados: ${indicators}. Tenha cautela.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `Padrões suspeitos encontrados (Score: ${score}/100): ${indicators}. Tenha cautela.`,
     recommendation: 'Verifique a identidade do remetente através de canais oficiais antes de tomar qualquer ação. Não clique em links nem partilhe dados sensíveis.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `Indicadores menores detectados: ${indicators}, mas o risco geral é baixo.` : 'Nenhum indicador de risco significativo detectado.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `Indicadores menores detectados (Score: ${score}/100): ${indicators}, mas o risco geral é baixo.` : `Nenhum indicador de risco significativo detectado (Score: ${score}/100).`,
     recommendation: 'O conteúdo parece seguro, mas sempre verifique a identidade do remetente para pedidos importantes.'
   }),
   noIndicators: {
     explanation: 'Nenhum indicador de risco significativo detectado.',
     recommendation: 'O conteúdo parece seguro, mas sempre verifique a identidade do remetente para pedidos importantes.'
   },
-  criticalKeywordTrigger: 'palavras-chave críticas de alto risco detectadas',
-  collaborativeBasisStatement: 'Esta análise é calculada localmente no seu dispositivo usando heurísticas determinísticas. Não consulta reportes da comunidade a menos que você execute uma pesquisa separada na base colaborativa.'
+  criticalKeywordTrigger: 'frases críticas de alto risco detectadas',
+  collaborativeBasisStatement: 'Esta análise é calculada localmente no seu dispositivo usando heurísticas determinísticas e motor de scoring profissional. Não consulta reportes da comunidade a menos que você execute uma pesquisa separada na base colaborativa.'
 };
 
 const PT_LABELS: IndicatorLabels = {
@@ -113,7 +122,12 @@ const PT_LABELS: IndicatorLabels = {
   invalidCryptoFormat: 'formato de endereço inválido',
   knownScamAddress: 'endereço conhecido em fraudes',
   newAddress: 'endereço novo sem histórico',
-  highValueTarget: 'alvo de alto valor'
+  highValueTarget: 'alvo de alto valor',
+  highRiskPhrases: 'frases de alto risco',
+  mediumRiskPhrases: 'frases de risco médio',
+  internalReports: 'denúncias internas',
+  publicSourcePresence: 'presença em fontes públicas',
+  highReportFrequency: 'frequência elevada de denúncias'
 };
 
 // English templates
@@ -126,24 +140,24 @@ const EN_TEMPLATES: AnalysisTemplates = {
     explanation: 'Invalid format.',
     recommendation: 'Please verify the content format.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `High risk detected with indicators: ${indicators}. Common in phishing and scam attempts.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `High risk detected (Score: ${score}/100) with indicators: ${indicators}. Common in phishing and scam attempts.`,
     recommendation: 'Do not respond, click links, or share any personal information. Delete this message and block the sender.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `Suspicious patterns found: ${indicators}. Exercise caution.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `Suspicious patterns found (Score: ${score}/100): ${indicators}. Exercise caution.`,
     recommendation: 'Verify sender identity through official channels before taking any action. Do not click links or share sensitive data.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `Minor indicators detected: ${indicators}, but overall risk is low.` : 'No significant risk indicators detected.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `Minor indicators detected (Score: ${score}/100): ${indicators}, but overall risk is low.` : `No significant risk indicators detected (Score: ${score}/100).`,
     recommendation: 'Content appears safe, but always verify sender identity for important requests.'
   }),
   noIndicators: {
     explanation: 'No significant risk indicators detected.',
     recommendation: 'Content appears safe, but always verify sender identity for important requests.'
   },
-  criticalKeywordTrigger: 'critical high-risk keywords detected',
-  collaborativeBasisStatement: 'This analysis is computed locally on your device using deterministic heuristics. It does not check community reports unless you perform a separate lookup in the collaborative database.'
+  criticalKeywordTrigger: 'critical high-risk phrases detected',
+  collaborativeBasisStatement: 'This analysis is computed locally on your device using deterministic heuristics and professional scoring engine. It does not check community reports unless you perform a separate lookup in the collaborative database.'
 };
 
 const EN_LABELS: IndicatorLabels = {
@@ -167,7 +181,12 @@ const EN_LABELS: IndicatorLabels = {
   invalidCryptoFormat: 'invalid address format',
   knownScamAddress: 'known scam address',
   newAddress: 'new address with no history',
-  highValueTarget: 'high-value target'
+  highValueTarget: 'high-value target',
+  highRiskPhrases: 'high-risk phrases',
+  mediumRiskPhrases: 'medium-risk phrases',
+  internalReports: 'internal reports',
+  publicSourcePresence: 'public source presence',
+  highReportFrequency: 'high report frequency'
 };
 
 // Spanish templates
@@ -180,24 +199,24 @@ const ES_TEMPLATES: AnalysisTemplates = {
     explanation: 'Formato inválido.',
     recommendation: 'Por favor, verifique el formato del contenido.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `Riesgo alto detectado con indicadores: ${indicators}. Común en intentos de phishing y fraude.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `Riesgo alto detectado (Puntuación: ${score}/100) con indicadores: ${indicators}. Común en intentos de phishing y fraude.`,
     recommendation: 'No responda, no haga clic en enlaces ni comparta información personal. Elimine este mensaje y bloquee al remitente.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `Patrones sospechosos encontrados: ${indicators}. Tenga precaución.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `Patrones sospechosos encontrados (Puntuación: ${score}/100): ${indicators}. Tenga precaución.`,
     recommendation: 'Verifique la identidad del remitente a través de canales oficiales antes de tomar cualquier acción. No haga clic en enlaces ni comparta datos sensibles.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `Indicadores menores detectados: ${indicators}, pero el riesgo general es bajo.` : 'No se detectaron indicadores de riesgo significativos.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `Indicadores menores detectados (Puntuación: ${score}/100): ${indicators}, pero el riesgo general es bajo.` : `No se detectaron indicadores de riesgo significativos (Puntuación: ${score}/100).`,
     recommendation: 'El contenido parece seguro, pero siempre verifique la identidad del remitente para solicitudes importantes.'
   }),
   noIndicators: {
     explanation: 'No se detectaron indicadores de riesgo significativos.',
     recommendation: 'El contenido parece seguro, pero siempre verifique la identidad del remitente para solicitudes importantes.'
   },
-  criticalKeywordTrigger: 'palabras clave críticas de alto riesgo detectadas',
-  collaborativeBasisStatement: 'Este análisis se calcula localmente en su dispositivo utilizando heurísticas determinísticas. No consulta informes de la comunidad a menos que realice una búsqueda separada en la base de datos colaborativa.'
+  criticalKeywordTrigger: 'frases críticas de alto riesgo detectadas',
+  collaborativeBasisStatement: 'Este análisis se calcula localmente en su dispositivo utilizando heurísticas determinísticas y motor de puntuación profesional. No consulta informes de la comunidad a menos que realice una búsqueda separada en la base de datos colaborativa.'
 };
 
 const ES_LABELS: IndicatorLabels = {
@@ -221,7 +240,12 @@ const ES_LABELS: IndicatorLabels = {
   invalidCryptoFormat: 'formato de dirección inválido',
   knownScamAddress: 'dirección conocida en fraudes',
   newAddress: 'dirección nueva sin historial',
-  highValueTarget: 'objetivo de alto valor'
+  highValueTarget: 'objetivo de alto valor',
+  highRiskPhrases: 'frases de alto riesgo',
+  mediumRiskPhrases: 'frases de riesgo medio',
+  internalReports: 'informes internos',
+  publicSourcePresence: 'presencia en fuentes públicas',
+  highReportFrequency: 'alta frecuencia de informes'
 };
 
 // French templates
@@ -234,24 +258,24 @@ const FR_TEMPLATES: AnalysisTemplates = {
     explanation: 'Format invalide.',
     recommendation: 'Veuillez vérifier le format du contenu.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `Risque élevé détecté avec indicateurs: ${indicators}. Courant dans les tentatives de phishing et de fraude.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `Risque élevé détecté (Score: ${score}/100) avec indicateurs: ${indicators}. Courant dans les tentatives de phishing et de fraude.`,
     recommendation: 'Ne répondez pas, ne cliquez pas sur les liens et ne partagez aucune information personnelle. Supprimez ce message et bloquez l\'expéditeur.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `Modèles suspects trouvés: ${indicators}. Soyez prudent.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `Modèles suspects trouvés (Score: ${score}/100): ${indicators}. Soyez prudent.`,
     recommendation: 'Vérifiez l\'identité de l\'expéditeur via des canaux officiels avant toute action. Ne cliquez pas sur les liens et ne partagez pas de données sensibles.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `Indicateurs mineurs détectés: ${indicators}, mais le risque global est faible.` : 'Aucun indicateur de risque significatif détecté.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `Indicateurs mineurs détectés (Score: ${score}/100): ${indicators}, mais le risque global est faible.` : `Aucun indicateur de risque significatif détecté (Score: ${score}/100).`,
     recommendation: 'Le contenu semble sûr, mais vérifiez toujours l\'identité de l\'expéditeur pour les demandes importantes.'
   }),
   noIndicators: {
     explanation: 'Aucun indicateur de risque significatif détecté.',
     recommendation: 'Le contenu semble sûr, mais vérifiez toujours l\'identité de l\'expéditeur pour les demandes importantes.'
   },
-  criticalKeywordTrigger: 'mots-clés critiques à haut risque détectés',
-  collaborativeBasisStatement: 'Cette analyse est calculée localement sur votre appareil à l\'aide d\'heuristiques déterministes. Elle ne consulte pas les rapports de la communauté sauf si vous effectuez une recherche séparée dans la base de données collaborative.'
+  criticalKeywordTrigger: 'phrases critiques à haut risque détectées',
+  collaborativeBasisStatement: 'Cette analyse est calculée localement sur votre appareil à l\'aide d\'heuristiques déterministes et d\'un moteur de notation professionnel. Elle ne consulte pas les rapports de la communauté sauf si vous effectuez une recherche séparée dans la base de données collaborative.'
 };
 
 const FR_LABELS: IndicatorLabels = {
@@ -275,7 +299,12 @@ const FR_LABELS: IndicatorLabels = {
   invalidCryptoFormat: 'format d\'adresse invalide',
   knownScamAddress: 'adresse connue dans les fraudes',
   newAddress: 'nouvelle adresse sans historique',
-  highValueTarget: 'cible de grande valeur'
+  highValueTarget: 'cible de grande valeur',
+  highRiskPhrases: 'phrases à haut risque',
+  mediumRiskPhrases: 'phrases à risque moyen',
+  internalReports: 'rapports internes',
+  publicSourcePresence: 'présence dans les sources publiques',
+  highReportFrequency: 'fréquence élevée de rapports'
 };
 
 // Chinese templates
@@ -288,24 +317,24 @@ const ZH_TEMPLATES: AnalysisTemplates = {
     explanation: '格式无效。',
     recommendation: '请验证内容格式。'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `检测到高风险，指标：${indicators}。常见于网络钓鱼和诈骗尝试。`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `检测到高风险（评分：${score}/100），指标：${indicators}。常见于网络钓鱼和诈骗尝试。`,
     recommendation: '不要回复、点击链接或分享任何个人信息。删除此消息并屏蔽发件人。'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `发现可疑模式：${indicators}。请谨慎。`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `发现可疑模式（评分：${score}/100）：${indicators}。请谨慎。`,
     recommendation: '在采取任何行动之前，通过官方渠道验证发件人身份。不要点击链接或分享敏感数据。'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `检测到轻微指标：${indicators}，但总体风险较低。` : '未检测到重大风险指标。',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `检测到轻微指标（评分：${score}/100）：${indicators}，但总体风险较低。` : `未检测到重大风险指标（评分：${score}/100）。`,
     recommendation: '内容似乎安全，但对于重要请求，请始终验证发件人身份。'
   }),
   noIndicators: {
     explanation: '未检测到重大风险指标。',
     recommendation: '内容似乎安全，但对于重要请求，请始终验证发件人身份。'
   },
-  criticalKeywordTrigger: '检测到关键高风险关键词',
-  collaborativeBasisStatement: '此分析使用确定性启发式方法在您的设备上本地计算。除非您在协作数据库中执行单独的查找，否则它不会检查社区报告。'
+  criticalKeywordTrigger: '检测到关键高风险短语',
+  collaborativeBasisStatement: '此分析使用确定性启发式方法和专业评分引擎在您的设备上本地计算。除非您在协作数据库中执行单独的查找，否则它不会检查社区报告。'
 };
 
 const ZH_LABELS: IndicatorLabels = {
@@ -329,7 +358,12 @@ const ZH_LABELS: IndicatorLabels = {
   invalidCryptoFormat: '无效地址格式',
   knownScamAddress: '已知诈骗地址',
   newAddress: '无历史记录的新地址',
-  highValueTarget: '高价值目标'
+  highValueTarget: '高价值目标',
+  highRiskPhrases: '高风险短语',
+  mediumRiskPhrases: '中等风险短语',
+  internalReports: '内部报告',
+  publicSourcePresence: '公共来源存在',
+  highReportFrequency: '高报告频率'
 };
 
 // Arabic templates
@@ -342,24 +376,24 @@ const AR_TEMPLATES: AnalysisTemplates = {
     explanation: 'تنسيق غير صالح.',
     recommendation: 'يرجى التحقق من تنسيق المحتوى.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `تم اكتشاف مخاطر عالية مع المؤشرات: ${indicators}. شائع في محاولات التصيد الاحتيالي والاحتيال.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `تم اكتشاف مخاطر عالية (النتيجة: ${score}/100) مع المؤشرات: ${indicators}. شائع في محاولات التصيد الاحتيالي والاحتيال.`,
     recommendation: 'لا ترد، لا تنقر على الروابط، ولا تشارك أي معلومات شخصية. احذف هذه الرسالة واحظر المرسل.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `تم العثور على أنماط مشبوهة: ${indicators}. توخ الحذر.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `تم العثور على أنماط مشبوهة (النتيجة: ${score}/100): ${indicators}. توخ الحذر.`,
     recommendation: 'تحقق من هوية المرسل عبر القنوات الرسمية قبل اتخاذ أي إجراء. لا تنقر على الروابط ولا تشارك البيانات الحساسة.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `تم اكتشاف مؤشرات طفيفة: ${indicators}، لكن المخاطر الإجمالية منخفضة.` : 'لم يتم اكتشاف مؤشرات مخاطر كبيرة.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `تم اكتشاف مؤشرات طفيفة (النتيجة: ${score}/100): ${indicators}، لكن المخاطر الإجمالية منخفضة.` : `لم يتم اكتشاف مؤشرات مخاطر كبيرة (النتيجة: ${score}/100).`,
     recommendation: 'يبدو المحتوى آمنًا، ولكن تحقق دائمًا من هوية المرسل للطلبات المهمة.'
   }),
   noIndicators: {
     explanation: 'لم يتم اكتشاف مؤشرات مخاطر كبيرة.',
     recommendation: 'يبدو المحتوى آمنًا، ولكن تحقق دائمًا من هوية المرسل للطلبات المهمة.'
   },
-  criticalKeywordTrigger: 'تم اكتشاف كلمات رئيسية حرجة عالية المخاطر',
-  collaborativeBasisStatement: 'يتم حساب هذا التحليل محليًا على جهازك باستخدام الاستدلالات الحتمية. لا يتحقق من تقارير المجتمع ما لم تقم بإجراء بحث منفصل في قاعدة البيانات التعاونية.'
+  criticalKeywordTrigger: 'تم اكتشاف عبارات حرجة عالية المخاطر',
+  collaborativeBasisStatement: 'يتم حساب هذا التحليل محليًا على جهازك باستخدام الاستدلالات الحتمية ومحرك التسجيل المهني. لا يتحقق من تقارير المجتمع ما لم تقم بإجراء بحث منفصل في قاعدة البيانات التعاونية.'
 };
 
 const AR_LABELS: IndicatorLabels = {
@@ -383,7 +417,12 @@ const AR_LABELS: IndicatorLabels = {
   invalidCryptoFormat: 'تنسيق عنوان غير صالح',
   knownScamAddress: 'عنوان معروف في الاحتيال',
   newAddress: 'عنوان جديد بدون سجل',
-  highValueTarget: 'هدف عالي القيمة'
+  highValueTarget: 'هدف عالي القيمة',
+  highRiskPhrases: 'عبارات عالية المخاطر',
+  mediumRiskPhrases: 'عبارات متوسطة المخاطر',
+  internalReports: 'تقارير داخلية',
+  publicSourcePresence: 'وجود في المصادر العامة',
+  highReportFrequency: 'تردد عالي للتقارير'
 };
 
 // Russian templates
@@ -396,24 +435,24 @@ const RU_TEMPLATES: AnalysisTemplates = {
     explanation: 'Неверный формат.',
     recommendation: 'Пожалуйста, проверьте формат контента.'
   },
-  highRisk: (indicators: string) => ({
-    explanation: `Обнаружен высокий риск с индикаторами: ${indicators}. Часто встречается в попытках фишинга и мошенничества.`,
+  highRisk: (indicators: string, score: number) => ({
+    explanation: `Обнаружен высокий риск (Оценка: ${score}/100) с индикаторами: ${indicators}. Часто встречается в попытках фишинга и мошенничества.`,
     recommendation: 'Не отвечайте, не переходите по ссылкам и не делитесь личной информацией. Удалите это сообщение и заблокируйте отправителя.'
   }),
-  mediumRisk: (indicators: string) => ({
-    explanation: `Обнаружены подозрительные шаблоны: ${indicators}. Будьте осторожны.`,
+  mediumRisk: (indicators: string, score: number) => ({
+    explanation: `Обнаружены подозрительные шаблоны (Оценка: ${score}/100): ${indicators}. Будьте осторожны.`,
     recommendation: 'Проверьте личность отправителя через официальные каналы перед любыми действиями. Не переходите по ссылкам и не делитесь конфиденциальными данными.'
   }),
-  lowRisk: (indicators: string) => ({
-    explanation: indicators ? `Обнаружены незначительные индикаторы: ${indicators}, но общий риск низкий.` : 'Значительных индикаторов риска не обнаружено.',
+  lowRisk: (indicators: string, score: number) => ({
+    explanation: indicators ? `Обнаружены незначительные индикаторы (Оценка: ${score}/100): ${indicators}, но общий риск низкий.` : `Значительных индикаторов риска не обнаружено (Оценка: ${score}/100).`,
     recommendation: 'Контент кажется безопасным, но всегда проверяйте личность отправителя для важных запросов.'
   }),
   noIndicators: {
     explanation: 'Значительных индикаторов риска не обнаружено.',
     recommendation: 'Контент кажется безопасным, но всегда проверяйте личность отправителя для важных запросов.'
   },
-  criticalKeywordTrigger: 'обнаружены критические ключевые слова высокого риска',
-  collaborativeBasisStatement: 'Этот анализ вычисляется локально на вашем устройстве с использованием детерминированных эвристик. Он не проверяет отчеты сообщества, если вы не выполните отдельный поиск в совместной базе данных.'
+  criticalKeywordTrigger: 'обнаружены критические фразы высокого риска',
+  collaborativeBasisStatement: 'Этот анализ вычисляется локально на вашем устройстве с использованием детерминированной эвристики и профессионального механизма оценки. Он не проверяет отчеты сообщества, если вы не выполните отдельный поиск в совместной базе данных.'
 };
 
 const RU_LABELS: IndicatorLabels = {
@@ -425,7 +464,7 @@ const RU_LABELS: IndicatorLabels = {
   cryptoAddresses: 'адреса криптовалют',
   excessivePunctuation: 'чрезмерная пунктуация',
   excessiveCapitalization: 'чрезмерные заглавные буквы',
-  disposableEmail: 'одноразовый почтовый сервис',
+  disposableEmail: 'одноразовая почтовая служба',
   suspiciousDomain: 'подозрительное расширение домена',
   typosquatting: 'возможная подделка домена',
   excessiveNumbers: 'чрезмерные числа',
@@ -435,486 +474,512 @@ const RU_LABELS: IndicatorLabels = {
   tooLong: 'номер слишком длинный',
   suspiciousPattern: 'подозрительный шаблон',
   invalidCryptoFormat: 'неверный формат адреса',
-  knownScamAddress: 'известный мошеннический адрес',
+  knownScamAddress: 'известный адрес мошенничества',
   newAddress: 'новый адрес без истории',
-  highValueTarget: 'цель высокой стоимости'
+  highValueTarget: 'цель высокой ценности',
+  highRiskPhrases: 'фразы высокого риска',
+  mediumRiskPhrases: 'фразы среднего риска',
+  internalReports: 'внутренние отчеты',
+  publicSourcePresence: 'присутствие в публичных источниках',
+  highReportFrequency: 'высокая частота отчетов'
 };
 
-// Template and label selectors with English fallback
-function getTemplates(language: string): AnalysisTemplates {
-  switch (language.toLowerCase()) {
-    case 'pt': return PT_TEMPLATES;
-    case 'en': return EN_TEMPLATES;
-    case 'es': return ES_TEMPLATES;
-    case 'fr': return FR_TEMPLATES;
-    case 'zh': return ZH_TEMPLATES;
-    case 'ar': return AR_TEMPLATES;
-    case 'ru': return RU_TEMPLATES;
-    default: return EN_TEMPLATES;
-  }
-}
-
-function getLabels(language: string): IndicatorLabels {
-  switch (language.toLowerCase()) {
-    case 'pt': return PT_LABELS;
-    case 'en': return EN_LABELS;
-    case 'es': return ES_LABELS;
-    case 'fr': return FR_LABELS;
-    case 'zh': return ZH_LABELS;
-    case 'ar': return AR_LABELS;
-    case 'ru': return RU_LABELS;
-    default: return EN_LABELS;
-  }
-}
-
-// Public sources for transparency (same for all languages, URLs are universal)
-function getPublicSources(): PublicSource[] {
-  return [
-    {
-      name: 'Federal Trade Commission (FTC) - Scam Alerts',
-      url: 'https://www.ftc.gov/news-events/topics/consumer-alerts/scam-alerts'
-    },
-    {
-      name: 'Anti-Phishing Working Group (APWG)',
-      url: 'https://apwg.org/'
-    },
-    {
-      name: 'Internet Crime Complaint Center (IC3)',
-      url: 'https://www.ic3.gov/'
-    }
-  ];
-}
-
-// Critical keywords that trigger High risk across all languages
-const CRITICAL_KEYWORDS_MULTILANG = {
-  pt: [
-    'urgente', 'imediato', 'bloqueado', 'suspenso', 'verificar agora',
-    'clique aqui', 'confirme seus dados', 'atualize suas informações',
-    'ganhe dinheiro', 'prêmio', 'loteria', 'herança', 'transferência',
-    'bitcoin', 'criptomoeda', 'investimento garantido', 'lucro rápido'
-  ],
-  en: [
-    'urgent', 'immediate', 'blocked', 'suspended', 'verify now',
-    'click here', 'confirm your details', 'update your information',
-    'make money', 'prize', 'lottery', 'inheritance', 'transfer',
-    'bitcoin', 'cryptocurrency', 'guaranteed investment', 'quick profit'
-  ],
-  es: [
-    'urgente', 'inmediato', 'bloqueado', 'suspendido', 'verificar ahora',
-    'haga clic aquí', 'confirme sus datos', 'actualice su información',
-    'ganar dinero', 'premio', 'lotería', 'herencia', 'transferencia',
-    'bitcoin', 'criptomoneda', 'inversión garantizada', 'ganancia rápida'
-  ],
-  fr: [
-    'urgent', 'immédiat', 'bloqué', 'suspendu', 'vérifier maintenant',
-    'cliquez ici', 'confirmez vos données', 'mettez à jour vos informations',
-    'gagner de l\'argent', 'prix', 'loterie', 'héritage', 'transfert',
-    'bitcoin', 'cryptomonnaie', 'investissement garanti', 'profit rapide'
-  ],
-  zh: [
-    '紧急', '立即', '已封锁', '已暂停', '立即验证',
-    '点击这里', '确认您的详细信息', '更新您的信息',
-    '赚钱', '奖品', '彩票', '遗产', '转账',
-    '比特币', '加密货币', '保证投资', '快速利润'
-  ],
-  ar: [
-    'عاجل', 'فوري', 'محظور', 'معلق', 'تحقق الآن',
-    'انقر هنا', 'أكد تفاصيلك', 'حدث معلوماتك',
-    'اكسب المال', 'جائزة', 'يانصيب', 'ميراث', 'تحويل',
-    'بيتكوين', 'عملة مشفرة', 'استثمار مضمون', 'ربح سريع'
-  ],
-  ru: [
-    'срочно', 'немедленно', 'заблокирован', 'приостановлен', 'проверить сейчас',
-    'нажмите здесь', 'подтвердите свои данные', 'обновите свою информацию',
-    'заработать деньги', 'приз', 'лотерея', 'наследство', 'перевод',
-    'биткоин', 'криптовалюта', 'гарантированная инвестиция', 'быстрая прибыль'
-  ]
+// Template and label maps
+const TEMPLATES_MAP: Record<string, AnalysisTemplates> = {
+  pt: PT_TEMPLATES,
+  en: EN_TEMPLATES,
+  es: ES_TEMPLATES,
+  fr: FR_TEMPLATES,
+  zh: ZH_TEMPLATES,
+  ar: AR_TEMPLATES,
+  ru: RU_TEMPLATES,
 };
 
-function getCriticalKeywords(language: string): string[] {
-  const lang = language.toLowerCase();
-  return CRITICAL_KEYWORDS_MULTILANG[lang as keyof typeof CRITICAL_KEYWORDS_MULTILANG] || CRITICAL_KEYWORDS_MULTILANG.en;
+const LABELS_MAP: Record<string, IndicatorLabels> = {
+  pt: PT_LABELS,
+  en: EN_LABELS,
+  es: ES_LABELS,
+  fr: FR_LABELS,
+  zh: ZH_LABELS,
+  ar: AR_LABELS,
+  ru: RU_LABELS,
+};
+
+// Get templates for language (fallback to English)
+function getTemplates(lang: string): AnalysisTemplates {
+  return TEMPLATES_MAP[lang] || EN_TEMPLATES;
 }
 
-// Message analysis
-export function analyzeMessage(message: string, language: string = 'pt'): StructuredAnalysisResult {
-  const templates = getTemplates(language);
-  const labels = getLabels(language);
-  const sources = getPublicSources();
-  const collaborativeBasis: CollaborativeBasis = {
-    statement: templates.collaborativeBasisStatement,
-    reference: 'local-heuristic-analysis'
-  };
+// Get labels for language (fallback to English)
+function getLabels(lang: string): IndicatorLabels {
+  return LABELS_MAP[lang] || EN_LABELS;
+}
+
+// Analyze message content
+export function analyzeMessage(
+  message: string,
+  lang: string = 'pt',
+  internalReportCount: number = 0,
+  hasPublicSourcePresence: boolean = false
+): StructuredAnalysisResult {
+  const templates = getTemplates(lang);
+  const labels = getLabels(lang);
 
   if (!message || message.trim().length === 0) {
     return {
       risk: 'Low',
+      riskScore: 0,
       ...templates.emptyInput,
-      sources,
-      collaborativeBasis
+      sources: [],
+      collaborativeBasis: { statement: templates.collaborativeBasisStatement },
     };
   }
 
-  const normalized = normalizeText(message);
   const indicators: string[] = [];
-  let score = 0;
+  const normalized = normalizeText(message);
 
-  // Critical keyword check (immediate High risk)
-  const criticalKeywords = getCriticalKeywords(language);
-  if (containsAnyKeyword(normalized, criticalKeywords)) {
-    return {
-      risk: 'High',
-      ...templates.highRisk(templates.criticalKeywordTrigger),
-      sources,
-      collaborativeBasis
-    };
+  // Check for high-risk phrase patterns
+  const highRiskMatches = findMatchingPhrasePatterns(message, HIGH_RISK_PHRASE_PATTERNS);
+  const hasHighRiskPhrases = highRiskMatches.length > 0;
+  if (hasHighRiskPhrases) {
+    indicators.push(labels.highRiskPhrases);
   }
 
-  // Urgency language
-  const urgencyWords = ['urgent', 'urgente', 'immediate', 'imediato', 'now', 'agora', 'quickly', 'rapidamente'];
-  const urgencyCount = urgencyWords.filter(word => normalized.includes(normalizeText(word))).length;
-  if (urgencyCount > 0) {
+  // Check for medium-risk phrase patterns
+  const mediumRiskMatches = findMatchingPhrasePatterns(message, MEDIUM_RISK_PHRASE_PATTERNS);
+  const hasMediumRiskPhrases = mediumRiskMatches.length > 0;
+  if (hasMediumRiskPhrases) {
+    indicators.push(labels.mediumRiskPhrases);
+  }
+
+  // Legacy urgency keywords
+  const urgencyKeywords = ['urgente', 'urgent', 'imediato', 'immediate', 'agora', 'now', 'rapido', 'quick'];
+  const urgencyMatches = findMatchingKeywords(message, urgencyKeywords);
+  if (urgencyMatches.length > 0) {
     indicators.push(labels.urgencyLanguage);
-    score += urgencyCount > 1 ? 3 : 2;
-    if (urgencyCount > 1) {
+    if (urgencyMatches.length >= 2) {
       indicators.push(labels.multipleUrgency);
     }
   }
 
-  // Financial requests
-  const financialWords = ['money', 'dinheiro', 'payment', 'pagamento', 'bank', 'banco', 'card', 'cartao', 'account', 'conta'];
-  if (containsAnyKeyword(normalized, financialWords)) {
+  // Financial keywords
+  const financialKeywords = ['dinheiro', 'money', 'transferencia', 'transfer', 'pagar', 'pay', 'pagamento', 'payment'];
+  if (containsAnyKeyword(message, financialKeywords)) {
     indicators.push(labels.financialRequests);
-    score += 3;
   }
 
-  // Credential requests
-  const credentialWords = ['password', 'senha', 'pin', 'code', 'codigo', 'verify', 'verificar', 'confirm', 'confirmar'];
-  if (containsAnyKeyword(normalized, credentialWords)) {
+  // Credential keywords
+  const credentialKeywords = ['senha', 'password', 'pin', 'codigo', 'code', 'login', 'acesso', 'access'];
+  if (containsAnyKeyword(message, credentialKeywords)) {
     indicators.push(labels.credentialRequests);
-    score += 3;
   }
 
   // Links
-  if (/https?:\/\/|www\./i.test(message)) {
+  if (/https?:\/\//.test(message)) {
     indicators.push(labels.containsLinks);
-    score += 2;
   }
 
   // Crypto addresses
-  if (/0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34}/.test(message)) {
+  if (/\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b|\b0x[a-fA-F0-9]{40}\b/.test(message)) {
     indicators.push(labels.cryptoAddresses);
-    score += 2;
   }
 
   // Excessive punctuation
-  const punctuationCount = (message.match(/[!?]{2,}/g) || []).length;
-  if (punctuationCount > 0) {
+  if ((message.match(/[!?]{2,}/g) || []).length > 0) {
     indicators.push(labels.excessivePunctuation);
-    score += 1;
   }
 
   // Excessive capitalization
-  const capsRatio = (message.match(/[A-Z]/g) || []).length / message.length;
-  if (capsRatio > 0.5 && message.length > 10) {
+  const upperCount = (message.match(/[A-Z]/g) || []).length;
+  if (upperCount > message.length * 0.5 && message.length > 10) {
     indicators.push(labels.excessiveCapitalization);
-    score += 1;
   }
 
-  // Determine risk level
-  let risk: RiskLevel;
-  if (score >= 6) {
-    risk = 'High';
-    return {
-      risk,
-      ...templates.highRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else if (score >= 3) {
-    risk = 'Medium';
-    return {
-      risk,
-      ...templates.mediumRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else {
-    risk = 'Low';
-    return {
-      risk,
-      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
-      sources,
-      collaborativeBasis
-    };
+  // Add internal reports indicator
+  if (internalReportCount > 0) {
+    indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
+
+  // Add public source presence indicator
+  if (hasPublicSourcePresence) {
+    indicators.push(labels.publicSourcePresence);
+  }
+
+  // Add high report frequency indicator
+  const isHighFrequency = internalReportCount >= riskConfig.thresholds.highFrequencyReportCount;
+  if (isHighFrequency) {
+    indicators.push(labels.highReportFrequency);
+  }
+
+  // Compute risk factors
+  const riskFactors: RiskFactors = {
+    hasHighRiskKeywords: hasHighRiskPhrases,
+    hasMediumRiskKeywords: hasMediumRiskPhrases,
+    internalReportCount,
+    hasExternalPublicSource: hasPublicSourcePresence,
+    isHighReportFrequency: isHighFrequency,
+  };
+
+  // Compute aggregated risk score
+  const riskScore = computeRiskScore(riskFactors);
+  const risk = scoreToRiskLevel(riskScore);
+
+  const indicatorText = indicators.join(', ');
+
+  let explanation: string;
+  let recommendation: string;
+
+  if (risk === 'High') {
+    const result = templates.highRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else if (risk === 'Medium') {
+    const result = templates.mediumRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else {
+    const result = templates.lowRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  }
+
+  return {
+    risk,
+    riskScore,
+    explanation,
+    recommendation,
+    sources: [
+      {
+        name: 'AntiFraud Heuristics Engine',
+        url: 'https://github.com/antifraud-project',
+      },
+    ],
+    collaborativeBasis: { statement: templates.collaborativeBasisStatement },
+  };
 }
 
-// Email analysis
-export function analyzeEmail(email: string, language: string = 'pt'): StructuredAnalysisResult {
-  const templates = getTemplates(language);
-  const labels = getLabels(language);
-  const sources = getPublicSources();
-  const collaborativeBasis: CollaborativeBasis = {
-    statement: templates.collaborativeBasisStatement,
-    reference: 'local-heuristic-analysis'
-  };
+// Analyze email address
+export function analyzeEmail(
+  email: string,
+  lang: string = 'pt',
+  internalReportCount: number = 0,
+  hasPublicSourcePresence: boolean = false
+): StructuredAnalysisResult {
+  const templates = getTemplates(lang);
+  const labels = getLabels(lang);
 
   if (!email || email.trim().length === 0) {
     return {
       risk: 'Low',
+      riskScore: 0,
       ...templates.emptyInput,
-      sources,
-      collaborativeBasis
+      sources: [],
+      collaborativeBasis: { statement: templates.collaborativeBasisStatement },
     };
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return {
-      risk: 'Low',
-      ...templates.invalidFormat,
-      sources,
-      collaborativeBasis
-    };
-  }
-
-  const normalized = normalizeText(email);
   const indicators: string[] = [];
-  let score = 0;
+  const normalized = normalizeText(email);
 
   // Disposable email services
   const disposableDomains = ['tempmail', 'guerrillamail', '10minutemail', 'throwaway', 'mailinator'];
-  if (containsAnyKeyword(normalized, disposableDomains)) {
+  if (containsAnyKeyword(email, disposableDomains)) {
     indicators.push(labels.disposableEmail);
-    score += 3;
   }
 
   // Suspicious TLDs
   const suspiciousTlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top'];
-  if (suspiciousTlds.some(tld => email.toLowerCase().endsWith(tld))) {
+  if (suspiciousTlds.some(tld => email.endsWith(tld))) {
     indicators.push(labels.suspiciousDomain);
-    score += 2;
   }
 
-  // Typosquatting patterns (common brand misspellings)
-  const typosquatPatterns = ['paypa1', 'g00gle', 'micros0ft', 'amaz0n', 'app1e'];
-  if (containsAnyKeyword(normalized, typosquatPatterns)) {
-    indicators.push(labels.typosquatting);
-    score += 4;
+  // Typosquatting detection (common brand variations)
+  const commonBrands = ['gmail', 'outlook', 'yahoo', 'hotmail', 'protonmail'];
+  const domain = email.split('@')[1] || '';
+  const domainNormalized = normalizeText(domain);
+  for (const brand of commonBrands) {
+    if (domainNormalized.includes(brand) && !domainNormalized.includes(`${brand}.com`)) {
+      indicators.push(labels.typosquatting);
+      break;
+    }
   }
 
   // Excessive numbers in local part
-  const localPart = email.split('@')[0];
+  const localPart = email.split('@')[0] || '';
   const numberCount = (localPart.match(/\d/g) || []).length;
-  if (numberCount > localPart.length * 0.5) {
+  if (numberCount > localPart.length * 0.5 && localPart.length > 5) {
     indicators.push(labels.excessiveNumbers);
-    score += 1;
   }
 
-  // Random character patterns
-  if (/[a-z]{10,}[0-9]{5,}/i.test(localPart) || /[0-9]{5,}[a-z]{10,}/i.test(localPart)) {
+  // Random pattern detection
+  if (localPart.length > 10 && !/[aeiou]/i.test(localPart)) {
     indicators.push(labels.randomPattern);
-    score += 1;
   }
 
-  // Determine risk level
-  let risk: RiskLevel;
-  if (score >= 5) {
-    risk = 'High';
-    return {
-      risk,
-      ...templates.highRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else if (score >= 2) {
-    risk = 'Medium';
-    return {
-      risk,
-      ...templates.mediumRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else {
-    risk = 'Low';
-    return {
-      risk,
-      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
-      sources,
-      collaborativeBasis
-    };
+  // Add internal reports indicator
+  if (internalReportCount > 0) {
+    indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
+
+  // Add public source presence indicator
+  if (hasPublicSourcePresence) {
+    indicators.push(labels.publicSourcePresence);
+  }
+
+  // Add high report frequency indicator
+  const isHighFrequency = internalReportCount >= riskConfig.thresholds.highFrequencyReportCount;
+  if (isHighFrequency) {
+    indicators.push(labels.highReportFrequency);
+  }
+
+  // Compute risk factors
+  const riskFactors: RiskFactors = {
+    hasHighRiskKeywords: indicators.includes(labels.typosquatting) || indicators.includes(labels.disposableEmail),
+    hasMediumRiskKeywords: indicators.includes(labels.suspiciousDomain) || indicators.includes(labels.randomPattern),
+    internalReportCount,
+    hasExternalPublicSource: hasPublicSourcePresence,
+    isHighReportFrequency: isHighFrequency,
+  };
+
+  // Compute aggregated risk score
+  const riskScore = computeRiskScore(riskFactors);
+  const risk = scoreToRiskLevel(riskScore);
+
+  const indicatorText = indicators.length > 0 ? indicators.join(', ') : '';
+
+  let explanation: string;
+  let recommendation: string;
+
+  if (risk === 'High') {
+    const result = templates.highRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else if (risk === 'Medium') {
+    const result = templates.mediumRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else {
+    const result = templates.lowRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  }
+
+  return {
+    risk,
+    riskScore,
+    explanation,
+    recommendation,
+    sources: [
+      {
+        name: 'AntiFraud Heuristics Engine',
+        url: 'https://github.com/antifraud-project',
+      },
+    ],
+    collaborativeBasis: { statement: templates.collaborativeBasisStatement },
+  };
 }
 
-// Phone analysis
-export function analyzePhone(phone: string, language: string = 'pt'): StructuredAnalysisResult {
-  const templates = getTemplates(language);
-  const labels = getLabels(language);
-  const sources = getPublicSources();
-  const collaborativeBasis: CollaborativeBasis = {
-    statement: templates.collaborativeBasisStatement,
-    reference: 'local-heuristic-analysis'
-  };
+// Analyze phone number
+export function analyzePhone(
+  phone: string,
+  lang: string = 'pt',
+  internalReportCount: number = 0,
+  hasPublicSourcePresence: boolean = false
+): StructuredAnalysisResult {
+  const templates = getTemplates(lang);
+  const labels = getLabels(lang);
 
   if (!phone || phone.trim().length === 0) {
     return {
       risk: 'Low',
+      riskScore: 0,
       ...templates.emptyInput,
-      sources,
-      collaborativeBasis
+      sources: [],
+      collaborativeBasis: { statement: templates.collaborativeBasisStatement },
     };
   }
 
-  const digitsOnly = phone.replace(/\D/g, '');
   const indicators: string[] = [];
-  let score = 0;
+  const digitsOnly = phone.replace(/\D/g, '');
 
-  // Basic format validation
+  // Invalid format
   if (digitsOnly.length === 0) {
-    indicators.push(labels.invalidPhoneFormat);
     return {
       risk: 'Low',
+      riskScore: 0,
       ...templates.invalidFormat,
-      sources,
-      collaborativeBasis
+      sources: [],
+      collaborativeBasis: { statement: templates.collaborativeBasisStatement },
     };
   }
 
-  // Length checks
-  if (digitsOnly.length < 7) {
+  // Too short
+  if (digitsOnly.length < 8) {
     indicators.push(labels.tooShort);
-    score += 2;
-  } else if (digitsOnly.length > 15) {
+  }
+
+  // Too long
+  if (digitsOnly.length > 15) {
     indicators.push(labels.tooLong);
-    score += 1;
   }
 
-  // Suspicious patterns
-  if (/^(.)\1+$/.test(digitsOnly)) {
+  // Suspicious patterns (all same digit, sequential)
+  if (/^(\d)\1+$/.test(digitsOnly)) {
     indicators.push(labels.suspiciousPattern);
-    score += 3;
   }
 
-  if (/^(012|123|234|345|456|567|678|789|987|876|765|654|543|432|321|210)/.test(digitsOnly)) {
-    indicators.push(labels.suspiciousPattern);
-    score += 2;
+  // Add internal reports indicator
+  if (internalReportCount > 0) {
+    indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
 
-  // Determine risk level
-  let risk: RiskLevel;
-  if (score >= 4) {
-    risk = 'High';
-    return {
-      risk,
-      ...templates.highRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else if (score >= 2) {
-    risk = 'Medium';
-    return {
-      risk,
-      ...templates.mediumRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
+  // Add public source presence indicator
+  if (hasPublicSourcePresence) {
+    indicators.push(labels.publicSourcePresence);
+  }
+
+  // Add high report frequency indicator
+  const isHighFrequency = internalReportCount >= riskConfig.thresholds.highFrequencyReportCount;
+  if (isHighFrequency) {
+    indicators.push(labels.highReportFrequency);
+  }
+
+  // Compute risk factors
+  const riskFactors: RiskFactors = {
+    hasHighRiskKeywords: indicators.includes(labels.suspiciousPattern),
+    hasMediumRiskKeywords: indicators.includes(labels.tooShort) || indicators.includes(labels.tooLong),
+    internalReportCount,
+    hasExternalPublicSource: hasPublicSourcePresence,
+    isHighReportFrequency: isHighFrequency,
+  };
+
+  // Compute aggregated risk score
+  const riskScore = computeRiskScore(riskFactors);
+  const risk = scoreToRiskLevel(riskScore);
+
+  const indicatorText = indicators.length > 0 ? indicators.join(', ') : '';
+
+  let explanation: string;
+  let recommendation: string;
+
+  if (risk === 'High') {
+    const result = templates.highRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else if (risk === 'Medium') {
+    const result = templates.mediumRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
   } else {
-    risk = 'Low';
-    return {
-      risk,
-      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
-      sources,
-      collaborativeBasis
-    };
+    const result = templates.lowRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
   }
+
+  return {
+    risk,
+    riskScore,
+    explanation,
+    recommendation,
+    sources: [
+      {
+        name: 'AntiFraud Heuristics Engine',
+        url: 'https://github.com/antifraud-project',
+      },
+    ],
+    collaborativeBasis: { statement: templates.collaborativeBasisStatement },
+  };
 }
 
-// Crypto analysis
-export function analyzeCrypto(address: string, language: string = 'pt'): StructuredAnalysisResult {
-  const templates = getTemplates(language);
-  const labels = getLabels(language);
-  const sources = getPublicSources();
-  const collaborativeBasis: CollaborativeBasis = {
-    statement: templates.collaborativeBasisStatement,
-    reference: 'local-heuristic-analysis'
-  };
+// Analyze crypto address
+export function analyzeCrypto(
+  address: string,
+  lang: string = 'pt',
+  internalReportCount: number = 0,
+  hasPublicSourcePresence: boolean = false
+): StructuredAnalysisResult {
+  const templates = getTemplates(lang);
+  const labels = getLabels(lang);
 
   if (!address || address.trim().length === 0) {
     return {
       risk: 'Low',
+      riskScore: 0,
       ...templates.emptyInput,
-      sources,
-      collaborativeBasis
+      sources: [],
+      collaborativeBasis: { statement: templates.collaborativeBasisStatement },
     };
   }
 
   const indicators: string[] = [];
-  let score = 0;
 
-  // Ethereum address validation
-  const ethRegex = /^0x[a-fA-F0-9]{40}$/;
-  // Bitcoin address validation (simplified)
-  const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  // Basic format validation
+  const isBitcoin = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+  const isEthereum = /^0x[a-fA-F0-9]{40}$/.test(address);
 
-  const isValidEth = ethRegex.test(address);
-  const isValidBtc = btcRegex.test(address);
-
-  if (!isValidEth && !isValidBtc) {
+  if (!isBitcoin && !isEthereum) {
     indicators.push(labels.invalidCryptoFormat);
-    return {
-      risk: 'Medium',
-      ...templates.invalidFormat,
-      sources,
-      collaborativeBasis
-    };
   }
 
-  // Known scam patterns (example patterns, not real addresses)
-  const knownScamPatterns = ['0x0000000000000000000000000000000000000000', '0xdead', '0xbeef'];
-  if (knownScamPatterns.some(pattern => address.toLowerCase().includes(pattern))) {
-    indicators.push(labels.knownScamAddress);
-    score += 5;
+  // Add internal reports indicator
+  if (internalReportCount > 0) {
+    indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
 
-  // New/unused address heuristic (all zeros or very simple pattern)
-  if (/^0x0+$/.test(address) || /^0x(.)\1+$/.test(address)) {
-    indicators.push(labels.newAddress);
-    score += 1;
+  // Add public source presence indicator
+  if (hasPublicSourcePresence) {
+    indicators.push(labels.publicSourcePresence);
   }
 
-  // High-value target indicator (this is a placeholder heuristic)
-  // In a real system, this would check against known exchange addresses
-  if (address.toLowerCase().startsWith('0xaaaa') || address.toLowerCase().startsWith('0xffff')) {
-    indicators.push(labels.highValueTarget);
-    score += 1;
+  // Add high report frequency indicator
+  const isHighFrequency = internalReportCount >= riskConfig.thresholds.highFrequencyReportCount;
+  if (isHighFrequency) {
+    indicators.push(labels.highReportFrequency);
   }
 
-  // Determine risk level
-  let risk: RiskLevel;
-  if (score >= 4) {
-    risk = 'High';
-    return {
-      risk,
-      ...templates.highRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
-  } else if (score >= 2) {
-    risk = 'Medium';
-    return {
-      risk,
-      ...templates.mediumRisk(indicators.join(', ')),
-      sources,
-      collaborativeBasis
-    };
+  // Compute risk factors
+  const riskFactors: RiskFactors = {
+    hasHighRiskKeywords: false,
+    hasMediumRiskKeywords: indicators.includes(labels.invalidCryptoFormat),
+    internalReportCount,
+    hasExternalPublicSource: hasPublicSourcePresence,
+    isHighReportFrequency: isHighFrequency,
+  };
+
+  // Compute aggregated risk score
+  const riskScore = computeRiskScore(riskFactors);
+  const risk = scoreToRiskLevel(riskScore);
+
+  const indicatorText = indicators.length > 0 ? indicators.join(', ') : '';
+
+  let explanation: string;
+  let recommendation: string;
+
+  if (risk === 'High') {
+    const result = templates.highRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
+  } else if (risk === 'Medium') {
+    const result = templates.mediumRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
   } else {
-    risk = 'Low';
-    return {
-      risk,
-      ...(indicators.length > 0 ? templates.lowRisk(indicators.join(', ')) : templates.noIndicators),
-      sources,
-      collaborativeBasis
-    };
+    const result = templates.lowRisk(indicatorText, riskScore);
+    explanation = result.explanation;
+    recommendation = result.recommendation;
   }
+
+  return {
+    risk,
+    riskScore,
+    explanation,
+    recommendation,
+    sources: [
+      {
+        name: 'AntiFraud Heuristics Engine',
+        url: 'https://github.com/antifraud-project',
+      },
+    ],
+    collaborativeBasis: { statement: templates.collaborativeBasisStatement },
+  };
 }

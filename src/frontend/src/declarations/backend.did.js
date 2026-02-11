@@ -14,14 +14,70 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const LookupProvider = IDL.Variant({
+  'numLookup' : IDL.Null,
+  'custom' : IDL.Text,
+  'google' : IDL.Null,
+  'amazon' : IDL.Null,
+});
+export const FieldSource = IDL.Record({
+  'value' : IDL.Text,
+  'sourceUrl' : IDL.Text,
+});
+export const ContactDetails = IDL.Record({
+  'id' : IDL.Text,
+  'verified' : IDL.Text,
+  'country' : IDL.Text,
+  'validationSource' : IDL.Opt(FieldSource),
+  'type' : IDL.Text,
+  'trustScore' : IDL.Text,
+  'riskScoreDescription' : IDL.Text,
+  'trustScoreSource' : IDL.Opt(FieldSource),
+  'countryValidationSource' : IDL.Opt(FieldSource),
+  'address' : IDL.Opt(IDL.Text),
+  'reports' : IDL.Text,
+  'reportsSource' : IDL.Opt(FieldSource),
+  'adjustedRiskScore' : IDL.Opt(IDL.Text),
+  'riskLevel' : IDL.Text,
+  'riskScore' : IDL.Text,
+  'adjustedRiskScoreSource' : IDL.Opt(FieldSource),
+});
+export const ExtendedContactDetails = IDL.Record({
+  'content' : IDL.Text,
+  'contactType' : LookupProvider,
+  'details' : ContactDetails,
+});
+export const ProviderConfig = IDL.Record({
+  'endpoint' : IDL.Opt(IDL.Text),
+  'name' : LookupProvider,
+  'enabled' : IDL.Bool,
+  'apiKey' : IDL.Opt(IDL.Text),
+});
+export const TargetType = IDL.Variant({
+  'email' : IDL.Null,
+  'crypto' : IDL.Null,
+  'phoneNumber' : IDL.Null,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'clearCryptoReports' : IDL.Func([IDL.Text], [], []),
+  'clearPhoneReports' : IDL.Func([IDL.Text], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCryptoReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+  'getLookupDetails' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(ExtendedContactDetails)],
+      ['query'],
+    ),
   'getPhoneReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+  'getProviderConfig' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(ProviderConfig)],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -30,7 +86,9 @@ export const idlService = IDL.Service({
   'getUserRole' : IDL.Func([IDL.Principal], [UserRole], ['query']),
   'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'report' : IDL.Func([TargetType, IDL.Text, IDL.Opt(IDL.Text)], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setProviderConfig' : IDL.Func([IDL.Text, ProviderConfig], [], []),
 });
 
 export const idlInitArgs = [];
@@ -42,14 +100,70 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const LookupProvider = IDL.Variant({
+    'numLookup' : IDL.Null,
+    'custom' : IDL.Text,
+    'google' : IDL.Null,
+    'amazon' : IDL.Null,
+  });
+  const FieldSource = IDL.Record({
+    'value' : IDL.Text,
+    'sourceUrl' : IDL.Text,
+  });
+  const ContactDetails = IDL.Record({
+    'id' : IDL.Text,
+    'verified' : IDL.Text,
+    'country' : IDL.Text,
+    'validationSource' : IDL.Opt(FieldSource),
+    'type' : IDL.Text,
+    'trustScore' : IDL.Text,
+    'riskScoreDescription' : IDL.Text,
+    'trustScoreSource' : IDL.Opt(FieldSource),
+    'countryValidationSource' : IDL.Opt(FieldSource),
+    'address' : IDL.Opt(IDL.Text),
+    'reports' : IDL.Text,
+    'reportsSource' : IDL.Opt(FieldSource),
+    'adjustedRiskScore' : IDL.Opt(IDL.Text),
+    'riskLevel' : IDL.Text,
+    'riskScore' : IDL.Text,
+    'adjustedRiskScoreSource' : IDL.Opt(FieldSource),
+  });
+  const ExtendedContactDetails = IDL.Record({
+    'content' : IDL.Text,
+    'contactType' : LookupProvider,
+    'details' : ContactDetails,
+  });
+  const ProviderConfig = IDL.Record({
+    'endpoint' : IDL.Opt(IDL.Text),
+    'name' : LookupProvider,
+    'enabled' : IDL.Bool,
+    'apiKey' : IDL.Opt(IDL.Text),
+  });
+  const TargetType = IDL.Variant({
+    'email' : IDL.Null,
+    'crypto' : IDL.Null,
+    'phoneNumber' : IDL.Null,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'clearCryptoReports' : IDL.Func([IDL.Text], [], []),
+    'clearPhoneReports' : IDL.Func([IDL.Text], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCryptoReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+    'getLookupDetails' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(ExtendedContactDetails)],
+        ['query'],
+      ),
     'getPhoneReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+    'getProviderConfig' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(ProviderConfig)],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -58,7 +172,9 @@ export const idlFactory = ({ IDL }) => {
     'getUserRole' : IDL.Func([IDL.Principal], [UserRole], ['query']),
     'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'report' : IDL.Func([TargetType, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setProviderConfig' : IDL.Func([IDL.Text, ProviderConfig], [], []),
   });
 };
 

@@ -1,105 +1,109 @@
 // Advanced Contact Lookup module component
-// Single input for phone/email with antifraud analysis, public info lookup, and reporting capability
+// Single input for phone/email with automatic type detection
+// Integrates professional scoring, public info lookup, and backend report aggregates
+// Supports offline mode with cached results
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Search, AlertTriangle } from 'lucide-react';
+import { Search, Loader2, AlertCircle } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
-import { validateContact } from '@/utils/contactInputHeuristics';
+import { detectContactType, normalizeContactInput } from '@/utils/contactInputHeuristics';
 import { analyzeEmail, analyzePhone } from '@/utils/structuredFraudAnalysis';
-import { lookupPublicContact } from '@/utils/publicContactLookup';
-import { AdvancedContactLookupResultCard } from './AdvancedContactLookupResultCard';
+import { checkPublicSourcePresence } from '@/utils/publicSourceProviders';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useAdvancedContactLookupCache } from '@/hooks/useAdvancedContactLookupCache';
+import { AdvancedContactLookupResultCard } from './AdvancedContactLookupResultCard';
+import { useActor } from '@/hooks/useActor';
 
 export function AdvancedContactLookup() {
   const { t, language } = useI18n();
+  const { actor } = useActor();
   const { isOffline } = useOfflineStatus();
-  const { addToCache, getCached } = useAdvancedContactLookupCache();
+  const { getCachedResult, cacheResult } = useAdvancedContactLookupCache();
 
   const [input, setInput] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState('');
-  const [result, setResult] = useState<{
-    antifraudResult: any;
-    publicInfo?: any;
-    fromCache?: boolean;
-    searchedContact?: string;
-    contactType?: 'phone' | 'email';
-  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
+  const [searchedContact, setSearchedContact] = useState<string | undefined>();
+  const [contactType, setContactType] = useState<'phone' | 'email' | undefined>();
 
   const handleSearch = async () => {
-    setError('');
+    setError(null);
     setResult(null);
+    setSearchedContact(undefined);
+    setContactType(undefined);
 
-    // Validate input
-    const validation = validateContact(input, language);
-    
-    if (!validation.isValid) {
-      setError(validation.error || t.advancedLookupInvalidInput);
+    if (!input.trim()) {
+      setError(t.advancedLookupInvalidInput || 'Please enter a phone number or email');
       return;
-    }
-
-    // Check if offline and we have cached result
-    if (isOffline) {
-      const cached = getCached(validation.normalized, validation.type as 'phone' | 'email');
-      if (cached) {
-        setResult({
-          antifraudResult: cached.antifraudResult,
-          publicInfo: cached.publicInfo,
-          fromCache: true,
-          searchedContact: validation.normalized,
-          contactType: validation.type as 'phone' | 'email',
-        });
-        return;
-      } else {
-        setError(t.advancedLookupOfflineNoCache);
-        return;
-      }
     }
 
     setIsSearching(true);
 
     try {
-      // Run antifraud analysis (frontend-only)
-      let antifraudResult;
-      if (validation.type === 'email') {
-        antifraudResult = analyzeEmail(validation.normalized, language);
-      } else if (validation.type === 'phone') {
-        antifraudResult = analyzePhone(validation.normalized, language);
+      // Detect contact type
+      const detectedType = detectContactType(input);
+      if (detectedType === 'unknown') {
+        setError(t.advancedLookupInvalidInput || 'Invalid format. Please enter a valid phone number or email.');
+        setIsSearching(false);
+        return;
       }
 
-      // Lookup public information
-      const publicLookup = await lookupPublicContact(
-        validation.normalized,
-        validation.type as 'phone' | 'email'
-      );
+      // Normalize input
+      const normalized = normalizeContactInput(input, detectedType);
+      setSearchedContact(normalized);
+      setContactType(detectedType);
 
-      const resultData = {
+      // Check cache first if offline
+      if (isOffline) {
+        const cached = getCachedResult(normalized, detectedType);
+        if (cached) {
+          setResult({ ...cached, fromCache: true });
+          setIsSearching(false);
+          return;
+        }
+      }
+
+      // Fetch internal report count from backend
+      let internalReportCount = 0;
+      if (actor) {
+        try {
+          if (detectedType === 'phone') {
+            const count = await actor.getPhoneReports(normalized);
+            internalReportCount = count ? Number(count) : 0;
+          }
+          // Email reports are tracked in authenticatedReports only
+          // Future: add getEmailReports query method
+        } catch (err) {
+          console.warn('Failed to fetch internal reports:', err);
+        }
+      }
+
+      // Check public source presence
+      const publicSourceResult = await checkPublicSourcePresence(normalized, detectedType);
+
+      // Run antifraud analysis with report aggregates
+      const antifraudResult = detectedType === 'phone'
+        ? analyzePhone(normalized, language, internalReportCount, publicSourceResult.found)
+        : analyzeEmail(normalized, language, internalReportCount, publicSourceResult.found);
+
+      const lookupResult = {
         antifraudResult,
-        publicInfo: publicLookup.found ? publicLookup.info : undefined,
+        publicInfo: publicSourceResult.info,
         fromCache: false,
-        searchedContact: validation.normalized,
-        contactType: validation.type as 'phone' | 'email',
       };
 
-      setResult(resultData);
+      setResult(lookupResult);
 
-      // Cache the result
-      addToCache({
-        query: validation.normalized,
-        type: validation.type as 'phone' | 'email',
-        timestamp: Date.now(),
-        antifraudResult,
-        publicInfo: publicLookup.found ? publicLookup.info : undefined
-      });
+      // Cache result for offline use
+      cacheResult(normalized, detectedType, lookupResult);
     } catch (err) {
-      console.error('Search error:', err);
-      setError(t.advancedLookupSearchError);
+      console.error('Lookup error:', err);
+      setError(t.advancedLookupSearchError || 'An error occurred during lookup');
     } finally {
       setIsSearching(false);
     }
@@ -112,40 +116,47 @@ export function AdvancedContactLookup() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">{t.advancedLookupTitle}</CardTitle>
-          <CardDescription>{t.advancedLookupDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="contact-input">{t.advancedLookupInputLabel}</Label>
+          <div className="flex gap-2">
             <Input
-              id="contact-input"
+              type="text"
               placeholder={t.advancedLookupInputPlaceholder}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isSearching}
+              className="flex-1"
             />
+            <Button
+              onClick={handleSearch}
+              disabled={isSearching || !input.trim()}
+              className="min-w-[100px]"
+            >
+              {isSearching ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t.advancedLookupSearching}
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4 mr-2" />
+                  {t.advancedLookupSearchButton}
+                </>
+              )}
+            </Button>
           </div>
 
           {error && (
             <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
-          <Button 
-            onClick={handleSearch} 
-            className="w-full"
-            disabled={isSearching || !input.trim()}
-          >
-            <Search className="h-4 w-4 mr-2" />
-            {isSearching ? t.advancedLookupSearching : t.advancedLookupSearchButton}
-          </Button>
         </CardContent>
       </Card>
 
@@ -155,8 +166,8 @@ export function AdvancedContactLookup() {
           publicInfo={result.publicInfo}
           isOffline={isOffline}
           fromCache={result.fromCache}
-          searchedContact={result.searchedContact}
-          contactType={result.contactType}
+          searchedContact={searchedContact}
+          contactType={contactType}
         />
       )}
     </div>

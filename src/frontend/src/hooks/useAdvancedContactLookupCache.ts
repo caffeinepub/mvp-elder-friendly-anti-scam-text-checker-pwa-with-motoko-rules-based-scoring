@@ -77,10 +77,24 @@ export function useAdvancedContactLookupCache() {
     localStorage.removeItem(CACHE_KEY);
   };
 
+  // Aliases for backward compatibility
+  const getCachedResult = getCached;
+  const cacheResult = (query: string, type: 'phone' | 'email', result: { antifraudResult: StructuredAnalysisResult; publicInfo?: PublicContactInfo; fromCache?: boolean }) => {
+    addToCache({
+      query,
+      type,
+      timestamp: Date.now(),
+      antifraudResult: result.antifraudResult,
+      publicInfo: result.publicInfo,
+    });
+  };
+
   return {
     cache,
     addToCache,
     getCached,
-    clearCache
+    clearCache,
+    getCachedResult,
+    cacheResult,
   };
 }

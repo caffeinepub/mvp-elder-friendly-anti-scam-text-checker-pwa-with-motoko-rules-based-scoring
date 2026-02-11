@@ -1,113 +1,180 @@
 {
   "kind": "build_request",
-  "title": "Restart live integration: Advanced Contact Lookup + Anonymous Reporting (with PWA offline support and i18n)",
-  "priority": "high",
+  "title": "International Contact Lookup module (secure backend intermediary + new page) with legal, source-referenced results",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-46",
-      "text": "Integrate an in-context “Report suspicious contact” action into the Advanced Contact Lookup results panel so users can submit an anonymous, legally-safe report for the searched phone/email, using the existing report submission dialog flow.",
+      "id": "REQ-1",
+      "text": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-13"
+          "msg-user-1"
         ],
         "quotes": [
-          "Botão de denúncia\nPermite ao utilizador denunciar contactos suspeitos.\nGarantia de anonimato e legalidade.\nTags opcionais: Spam, Phishing, Golpe, Outro."
+          "Iniciar build do módulo internacional e começamos a construir o módulo seguro, detalhado e legal, pronto para integração no frontend.",
+          "criar uma nova página dedicada chamada “Pesquisa Internacional de Contactos”, que depois poderá ser acessada a partir do menu principal."
         ]
       },
       "acceptanceCriteria": [
-        "When a user completes an Advanced Contact Lookup search, the results area provides a clear “Report suspicious contact” action.",
-        "Clicking the action opens a dialog that is prefilled with the searched contact value and the correct report type (phone or email).",
-        "The reporting flow does not require the user to authenticate and does not display or request any personally identifying information beyond the reported contact itself.",
-        "The dialog includes a short, user-facing anonymity/legal notice (English text in the EN locale; localized equivalents in other supported languages) stating that reports are anonymous and should only include public/non-sensitive information.",
-        "Submitting the report shows a clear success state and closes/reset the dialog after success (consistent with existing dialog behavior)."
+        "A new route exists (e.g., `/international-contact-search`) and renders a dedicated page for international contact lookups.",
+        "The page is reachable from the main menu (desktop + mobile nav) via a new navigation item.",
+        "The page contains a single input that accepts phone number, email, or other contact identifiers (at minimum: phone + email), with a clear call-to-action to run the lookup.",
+        "The page renders a structured, detailed result view (not just a single risk label), including: risk status (low/medium/high), detected origin country (when applicable), a list of public sources with clickable links, and any public alert/report history returned by the backend.",
+        "All user-facing strings added for this page are localized via `frontend/src/i18n/translations.ts` (add keys; do not hardcode strings)."
       ]
     },
     {
-      "id": "REQ-47",
-      "text": "Restrict the report “tag/category” choices shown for Advanced Contact Lookup reporting to exactly: Spam, Phishing, Scam, Other, while preserving the underlying compatibility with existing report category types.",
+      "id": "REQ-2",
+      "text": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-13"
+          "msg-user-1"
         ],
         "quotes": [
-          "Tags opcionais: Spam, Phishing, Golpe, Outro."
+          "criar uma nova página dedicada chamada “Pesquisa Internacional de Contactos”"
         ]
       },
       "acceptanceCriteria": [
-        "In the Advanced Contact Lookup reporting dialog, the selectable tag/category list shown to the user is limited to: Spam, Phishing, Scam, Other.",
-        "The selected tag is submitted using the existing report category model (mapping to existing categories where applicable).",
-        "If the user does not select a tag, the submission still works by defaulting to “Other” (or an equivalent safe default), without blocking submission."
+        "`frontend/src/App.tsx` includes a route mapping for the new page in the switch block and preserves existing redirects/aliases.",
+        "Unknown routes still redirect to the existing home page behavior.",
+        "ConsentGateModal still blocks interaction until accepted, including on the new page."
       ]
     },
     {
-      "id": "REQ-48",
-      "text": "Ensure Advanced Contact Lookup results remain available offline on a best-effort basis by leveraging the existing local cache and service worker caching behavior, without breaking PWA installability.",
-      "target": "frontend",
+      "id": "REQ-3",
+      "text": "Implement a secure backend/canister intermediary method to perform an international contact lookup and return a detailed, structured, legally-compliant result that includes per-field source attribution URLs.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-13"
+          "msg-user-1"
         ],
         "quotes": [
-          "PWA / WebAPK\nService worker cacheando resultados (offline parcial)."
+          "fazer via canister/backend intermediário, garantindo que as chaves das APIs não fiquem expostas no frontend. O frontend recebe apenas os resultados já processados.",
+          "Saída detalhada: Status de risco (baixo, médio, alto); País de origem do contacto; Fonte(s) pública(s) que confirmam os dados; Histórico de denúncias ou alertas públicos; Classificação completa do contacto, tudo dentro da lei",
+          "Todas as respostas devem indicar a fonte de cada dado"
         ]
       },
       "acceptanceCriteria": [
-        "When offline, previously searched contacts that exist in the local cache can still be displayed in the Advanced Contact Lookup results UI.",
-        "The service worker precache includes the public lookup dataset (`/data/public-contact-lookup.json`) and continues to use a network-first strategy with cache fallback for same-origin requests, without introducing install prompt regressions.",
-        "No new service worker console errors are introduced in production mode.",
-        "PWA install CTA remains functional after these changes."
+        "`backend/main.mo` exposes a new public method (Candid-exported) to request an international contact lookup given (a) the raw user input and (b) an inferred/declared contact type (at minimum: phone/email).",
+        "The method returns a single structured response object containing: normalizedContact, contactType, originCountry (optional), riskLevel (low/medium/high), numericRiskScore (0–100 or documented range), findings array (each finding has: label, value, sourceName, sourceUrl, and optional notes), and publicAlerts array (each with sourceName, sourceUrl, summary, and optional timestamp).",
+        "The response includes source attribution (name + URL) for each externally-derived datum (or explicitly marks the datum as derived/heuristic when it is not sourced).",
+        "No API keys are returned to the frontend under any circumstances.",
+        "Backend only uses public/legal sources and explicitly omits any private/illegal data collection (documented in code comments and/or returned ‘limitations’ field)."
       ]
     },
     {
-      "id": "REQ-49",
-      "text": "Add/verify multilingual i18n coverage for all user-facing text introduced or changed by the Advanced Contact Lookup reporting flow across PT/EN/ES/FR/ZH/AR/RU, and ensure English is used for EN user-facing strings.",
-      "target": "frontend",
+      "id": "REQ-4",
+      "text": "Add backend support for provider configuration management so external API integrations can be enabled without exposing keys to the frontend.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-13"
+          "msg-user-1"
         ],
         "quotes": [
-          "Traduções multilíngues\nEN/ES/FR/ZH/AR/RU aplicadas em todos os textos e botões."
+          "Fontes internacionais confiáveis a integrar: NumVerify API, OpenCnam, Spamhaus, PhishTank, HaveIBeenPwned...",
+          "fazer via canister/backend intermediário, garantindo que as chaves das APIs não fiquem expostas no frontend"
         ]
       },
       "acceptanceCriteria": [
-        "All new labels/buttons/help text related to reporting-from-lookup render via the existing i18n system (no hardcoded strings in components).",
-        "EN locale strings are written in English.",
-        "No missing-key placeholders (undefined/fallback fragments) appear in any supported language for the reporting-from-lookup flow."
+        "Backend includes an admin-only method to set/update external provider configuration (e.g., enable flags and API keys/tokens per provider).",
+        "Backend includes a query method for the frontend to learn which providers are enabled (return only booleans/metadata; never secrets).",
+        "If this change requires persisting new state across upgrades, create `backend/migration.mo` following the project’s conditional migration policy to preserve existing state on upgrade.",
+        "If providers are not configured, the international lookup method still returns a valid structured result that clearly indicates which external sources were unavailable."
       ]
     },
     {
-      "id": "REQ-50",
-      "text": "Update the production verification checklist to include explicit test steps for Advanced Contact Lookup (phone/email) and the anonymous reporting flow (including tag selection), alongside existing antifraud engine, consent gate, and PWA/WebAPK checks.",
-      "target": "frontend",
+      "id": "REQ-5",
+      "text": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-13"
+          "msg-user-1"
         ],
         "quotes": [
-          "Testes finais integrados\nPesquisa de contactos públicos validada.\nDenúncias testadas.\nMotor antifraude, PWA/WebAPK e consentimento confirmados."
+          "Normalização automática de números de telefone internacionais (+DDI)",
+          "Detecção de país de origem pelo prefixo",
+          "Score de risco internacional baseado em denúncias públicas e frequência",
+          "O motor AntiFraud Heuristics Engine: já existe, mas para este módulo precisa ser extendido dentro do módulo, para processar resultados internacionais, atribuir score de risco, país de origem e referências de fontes públicas."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/PRODUCTION_BUILD_VERIFICATION.md` includes a new checklist subsection covering: (1) Advanced Contact Lookup search behavior, (2) offline cached lookup behavior, and (3) submitting a report from lookup results with tags Spam/Phishing/Scam/Other.",
-        "Checklist steps are concrete and repeatable (what to click/type, expected UI states)."
+        "For phone inputs, the system normalizes into a consistent international format (E.164-style string with leading `+` when possible) before scoring and display.",
+        "For phone inputs, the system derives an origin country signal (at minimum: ISO country code or country name) based on prefix mapping and includes it in the structured result.",
+        "The backend’s final risk score and risk level incorporate: (a) heuristic signals (format anomalies, suspicious patterns) and (b) public-source/provider signals (presence on abuse lists, known alerts, etc.).",
+        "The frontend displays both the risk level (low/medium/high) and the numeric risk score along with a human-readable explanation of the main contributing factors.",
+        "The result rendering includes clickable links for every referenced source."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "integrado com o motor AntiFraud Heuristics Engine",
+          "O frontend recebe apenas os resultados já processados."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend Candid/IDL typings used by the app are updated to include the new backend method(s) (without editing any files listed under `frontend/immutablePaths`).",
+        "The new page calls the backend method using the existing actor creation approach (compose with existing hooks; do not modify immutable hooks).",
+        "The UI shows loading and error states and never crashes on partial provider failures (backend returns structured ‘unavailable provider’ notes; frontend renders them)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Não quero nome Caffeine na aplicação 🙏"
+        ]
+      },
+      "acceptanceCriteria": [
+        "No user-visible UI text contains the string “Caffeine”.",
+        "App title/metadata shown in the browser tab and/or in-app headings does not include “Caffeine”.",
+        "Existing desired branding (e.g., 'AntiFraud / by HCoragem') remains intact unless it currently includes 'Caffeine'."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "As imagens do rodapé não têm link incorporado da fonte está s."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each footer logo/image is wrapped in an accessible clickable link (`<a>` with `href`, `target=\"_blank\"`, and `rel=\"noreferrer\"`/`noopener`), pointing to the official source/attribution URL for that logo or provider.",
+        "Footer icons continue to load from absolute `/assets/...` paths (no relative imports) and render at exactly 16x16 pixels on mobile without 404s.",
+        "Footer layout remains responsive and readable on mobile and desktop after adding links."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend immutablePaths (e.g., `frontend/src/main.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/components/ui/*`).",
-    "Preserve existing AntiFraud / by HCoragem branding and avoid unintended visual/layout changes outside the Advanced Contact Lookup + reporting surfaces.",
-    "Keep antifraud risk evaluation for contact lookup 100% frontend (no new backend/canister calls for analysis logic).",
-    "Respect the current PWA install flow implementation (`setupPWAInstall()` / `triggerPWAInstall()`) and do not add alternative install prompt logic.",
-    "Backend remains single-actor; do not introduce new backend services or databases."
+    "Backend must remain a single Motoko actor in `backend/main.mo`; do not introduce additional backend services.",
+    "Only create `backend/migration.mo` if required to preserve state during upgrades (conditional migration policy).",
+    "Do not edit any files under `frontend/immutablePaths` (compose around them instead).",
+    "Do not expose any external provider API keys/tokens in frontend code, static assets, logs, or returned API responses.",
+    "All integrated data must be public or obtained via legal APIs; do not collect private/illegal data."
   ],
   "nonGoals": [
-    "Building or distributing native Android/iOS apps (App Store / Google Play).",
-    "Adding third-party auth providers beyond Internet Identity.",
-    "Implementing real-time features (WebSockets/chat/push notifications).",
-    "Expanding report categories beyond the four user-requested tags for the Advanced Contact Lookup reporting UX."
+    "Implementing real-time/streaming lookups (no WebSockets or push updates).",
+    "Adding third-party authentication providers (only Internet Identity is allowed).",
+    "Building a full external database crawler/scraper for country registries beyond explicitly configured legal APIs.",
+    "Guaranteeing coverage/availability of every listed international source without API keys and canister HTTP-outcall configuration."
   ],
   "imageRequirements": {
     "required": [],
@@ -116,7 +183,9 @@
   "userProfileUpdate": {
     "goalsToAdd": [],
     "goalsToRemove": [],
-    "preferencesToAdd": [],
+    "preferencesToAdd": [
+      "Use English for any user-facing text in the build request."
+    ],
     "preferencesToRemove": [],
     "miscToAdd": [],
     "miscToRemove": [],

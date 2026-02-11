@@ -1,30 +1,18 @@
 import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useI18n } from '@/i18n/I18nProvider';
-import { setSeoMetadata } from '@/utils/seo';
+import { setSEO } from '@/utils/seo';
 import { Target, Globe, Heart, Shield, Users, Zap } from 'lucide-react';
 
 export function MissionPage() {
   const { t } = useI18n();
 
   useEffect(() => {
-    setSeoMetadata(
+    setSEO(
       t.missionPageTitle,
       t.missionPageDescription
     );
   }, [t]);
-
-  // Defensive rendering helpers
-  const renderParagraphs = (paragraphs: any, fallback: string = 'Conteúdo em carregamento...') => {
-    if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
-      return <p className="text-muted-foreground leading-relaxed">{fallback}</p>;
-    }
-    return paragraphs.map((paragraph: string, index: number) => (
-      <p key={index} className="text-muted-foreground leading-relaxed">
-        {paragraph || fallback}
-      </p>
-    ));
-  };
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
@@ -48,7 +36,11 @@ export function MissionPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.missionVisionParagraphs)}
+            {t.missionVisionParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
 
@@ -61,7 +53,11 @@ export function MissionPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.missionCoreParagraphs)}
+            {t.missionCoreParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
 
@@ -70,11 +66,15 @@ export function MissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Heart className="h-6 w-6 text-primary" />
-              {t.missionImpactTitle || 'Impacto Social'}
+              {t.missionSocialImpactTitle || 'Impacto Social'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.missionImpactParagraphs)}
+            {t.missionSocialImpactParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
 
@@ -86,8 +86,23 @@ export function MissionPage() {
               {t.missionValuesTitle || 'Nossos Valores'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {renderParagraphs(t.missionValuesParagraphs)}
+          <CardContent className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">{t.missionValuesTransparencyTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.missionValuesTransparencyDesc}</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">{t.missionValuesPrivacyTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.missionValuesPrivacyDesc}</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">{t.missionValuesAccessibilityTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.missionValuesAccessibilityDesc}</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">{t.missionValuesCommunityTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.missionValuesCommunityDesc}</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -100,7 +115,11 @@ export function MissionPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.missionLimitationsParagraphs, 'Informações sobre limitações...')}
+            {t.missionLimitationsParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
 
@@ -113,7 +132,11 @@ export function MissionPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.missionResponsibleUseParagraphs, 'Diretrizes de uso responsável...')}
+            {t.missionResponsibleUseParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
       </div>

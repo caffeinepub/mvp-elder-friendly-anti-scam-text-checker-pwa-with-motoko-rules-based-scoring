@@ -12,6 +12,7 @@ import { HomePage } from './pages/HomePage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { DocumentationPage } from './pages/DocumentationPage';
+import { InternationalContactSearchPage } from './pages/InternationalContactSearchPage';
 import { setupPWAInstall } from './pwa/install';
 
 const queryClient = new QueryClient({
@@ -82,6 +83,9 @@ function AppContent() {
       break;
     case '/documentation':
       pageContent = <DocumentationPage />;
+      break;
+    case '/international-contact-search':
+      pageContent = <InternationalContactSearchPage />;
       break;
     case '':
     case '/':

@@ -52,6 +52,19 @@ export function normalizeEmail(email: string): string {
 }
 
 /**
+ * Normalize contact input based on detected type
+ */
+export function normalizeContactInput(input: string, type: ContactType): string {
+  if (type === 'phone') {
+    return normalizePhone(input);
+  }
+  if (type === 'email') {
+    return normalizeEmail(input);
+  }
+  return input.trim();
+}
+
+/**
  * Validate and normalize contact input
  */
 export function validateContact(input: string, language: string = 'pt'): ContactValidation {

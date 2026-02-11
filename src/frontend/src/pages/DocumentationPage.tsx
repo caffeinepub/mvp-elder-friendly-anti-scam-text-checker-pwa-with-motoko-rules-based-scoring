@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useI18n } from '@/i18n/I18nProvider';
 import { generateDocumentationPdf } from '@/utils/generateDocumentationPdf';
-import { setSeoMetadata } from '@/utils/seo';
+import { setSEO } from '@/utils/seo';
 import { useEffect } from 'react';
 
 export function DocumentationPage() {
@@ -12,7 +12,7 @@ export function DocumentationPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    setSeoMetadata(
+    setSEO(
       t.documentationPageTitle,
       t.documentationPageDescription
     );

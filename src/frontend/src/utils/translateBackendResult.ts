@@ -1,111 +1,56 @@
-import { Language } from '@/i18n/translations';
+// Frontend-only dictionary-based translation utility
+// Converts Portuguese backend analysis results to target languages
+// without modifying the original text
 
-// Simple dictionary-based translation for common Portuguese scam analysis terms
-const translationDictionary: Record<Language, Record<string, string>> = {
-  pt: {},
+type TranslationDictionary = Record<string, Record<string, string>>;
+
+const translations: Record<'pt' | 'en', Record<string, string>> = {
+  pt: {
+    // Portuguese is the source language, no translation needed
+  },
   en: {
-    'Risco': 'Risk',
-    'ALTO': 'HIGH',
-    'MÉDIO': 'MEDIUM',
-    'BAIXO': 'LOW',
-    'Análise': 'Analysis',
-    'Esta mensagem': 'This message',
-    'contém': 'contains',
-    'indicadores': 'indicators',
-    'de fraude': 'of fraud',
-    'golpe': 'scam',
-    'suspeita': 'suspicious',
+    // Risk levels
+    'Risco Baixo': 'Low Risk',
+    'Risco Médio': 'Medium Risk',
+    'Risco Elevado': 'High Risk',
+    'Baixo': 'Low',
+    'Médio': 'Medium',
+    'Elevado': 'High',
+    
+    // Common phrases
+    'A mensagem parece segura': 'The message appears safe',
+    'Tenha cuidado': 'Be careful',
+    'Não confie nesta mensagem': 'Do not trust this message',
+    'Verifique a autenticidade': 'Verify authenticity',
+    'Não partilhe informações pessoais': 'Do not share personal information',
+    'Contacte diretamente a entidade': 'Contact the entity directly',
+    
+    // Indicators
     'urgência': 'urgency',
-    'prêmio': 'prize',
-    'ganhou': 'won',
-    'clique': 'click',
-    'link': 'link',
-    'dados pessoais': 'personal data',
-    'senha': 'password',
-    'conta bancária': 'bank account',
-    'transferência': 'transfer',
-    'dinheiro': 'money',
-    'pagamento': 'payment',
-    'imediato': 'immediate',
-    'urgente': 'urgent',
-    'atenção': 'attention',
-    'cuidado': 'caution',
-    'Pontuação': 'Score',
-    'pontos': 'points',
-    'Recomendação': 'Recommendation',
-    'Não': 'Do not',
-    'não': 'do not',
-    'responda': 'respond',
-    'clique em links': 'click on links',
-    'forneça informações': 'provide information',
-    'segura': 'safe',
-    'parece': 'appears',
-    'legítima': 'legitimate',
+    'ameaça': 'threat',
+    'pedido de dinheiro': 'money request',
+    'link suspeito': 'suspicious link',
+    'endereço de criptomoeda': 'cryptocurrency address',
   },
-  es: {
-    'Risco': 'Riesgo',
-    'ALTO': 'ALTO',
-    'MÉDIO': 'MEDIO',
-    'BAIXO': 'BAJO',
-    'Análise': 'Análisis',
-    'Esta mensagem': 'Este mensaje',
-    'contém': 'contiene',
-    'indicadores': 'indicadores',
-    'de fraude': 'de fraude',
-    'golpe': 'estafa',
-    'suspeita': 'sospechoso',
-    'urgência': 'urgencia',
-    'prêmio': 'premio',
-    'ganhou': 'ganó',
-    'clique': 'haga clic',
-    'link': 'enlace',
-    'dados pessoais': 'datos personales',
-    'senha': 'contraseña',
-    'conta bancária': 'cuenta bancaria',
-    'transferência': 'transferencia',
-    'dinheiro': 'dinero',
-    'pagamento': 'pago',
-    'imediato': 'inmediato',
-    'urgente': 'urgente',
-    'atenção': 'atención',
-    'cuidado': 'cuidado',
-    'Pontuação': 'Puntuación',
-    'pontos': 'puntos',
-    'Recomendação': 'Recomendación',
-    'Não': 'No',
-    'não': 'no',
-    'responda': 'responda',
-    'clique em links': 'haga clic en enlaces',
-    'forneça informações': 'proporcione información',
-    'segura': 'seguro',
-    'parece': 'parece',
-    'legítima': 'legítimo',
-  },
-  fr: {},
-  zh: {},
-  ar: {},
-  ru: {},
 };
 
-export function translateBackendResult(originalText: string, targetLanguage: Language): string {
-  if (targetLanguage === 'pt' || !originalText) {
-    return originalText;
+/**
+ * Translate a Portuguese text to target language using dictionary
+ */
+export function translateBackendResult(text: string, targetLanguage: string): string {
+  // If target is Portuguese or unsupported, return original
+  if (targetLanguage === 'pt' || !(targetLanguage in translations)) {
+    return text;
   }
 
-  const dictionary = translationDictionary[targetLanguage];
-  if (!dictionary || Object.keys(dictionary).length === 0) {
-    return originalText;
-  }
+  const dictionary = translations[targetLanguage as 'en'];
+  let translated = text;
 
-  let translatedText = originalText;
+  // Replace each phrase in the dictionary
+  Object.entries(dictionary).forEach(([pt, target]) => {
+    const regex = new RegExp(pt, 'gi');
+    translated = translated.replace(regex, target);
+  });
 
-  // Sort by length (longest first) to avoid partial replacements
-  const sortedKeys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
-
-  for (const key of sortedKeys) {
-    const regex = new RegExp(key, 'gi');
-    translatedText = translatedText.replace(regex, dictionary[key]);
-  }
-
-  return translatedText;
+  return translated;
 }

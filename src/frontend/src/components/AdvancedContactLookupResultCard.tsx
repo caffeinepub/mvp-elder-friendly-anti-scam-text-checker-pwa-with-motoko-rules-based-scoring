@@ -1,5 +1,6 @@
 // Result card component for Advanced Contact Lookup
-// Combines antifraud analysis with public information section and report action
+// Combines antifraud analysis with aggregated risk score (0-100) and public information section
+// Includes report action button that opens the report dialog with prefilled contact data
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,8 @@ import {
   Calendar,
   FileText,
   WifiOff,
-  Flag
+  Flag,
+  TrendingUp
 } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
@@ -69,6 +71,12 @@ export function AdvancedContactLookupResultCard({
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 60) return 'text-destructive';
+    if (score >= 30) return 'text-warning';
+    return 'text-success';
+  };
+
   return (
     <div className="space-y-4">
       {/* Offline/Cache indicator */}
@@ -90,15 +98,32 @@ export function AdvancedContactLookupResultCard({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Risk Level */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t.structuredRiskLabel}
+          {/* Risk Level & Score */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2 flex-1">
+                <div className="text-sm font-medium text-muted-foreground">
+                  {t.structuredRiskLabel}
+                </div>
+                <Badge variant={getRiskColor(antifraudResult.risk)} className="text-base px-3 py-1">
+                  {t[`structuredRisk${antifraudResult.risk}` as keyof typeof t] || antifraudResult.risk}
+                </Badge>
+              </div>
+              
+              <div className="space-y-2 text-right">
+                <div className="text-sm font-medium text-muted-foreground flex items-center gap-1 justify-end">
+                  <TrendingUp className="h-4 w-4" />
+                  Score
+                </div>
+                <div className={`text-3xl font-bold ${getScoreColor(antifraudResult.riskScore)}`}>
+                  {antifraudResult.riskScore}
+                  <span className="text-lg text-muted-foreground">/100</span>
+                </div>
+              </div>
             </div>
-            <Badge variant={getRiskColor(antifraudResult.risk)} className="text-base px-3 py-1">
-              {t[`structuredRisk${antifraudResult.risk}` as keyof typeof t] || antifraudResult.risk}
-            </Badge>
           </div>
+
+          <Separator />
 
           {/* Explanation */}
           <div className="space-y-2">

@@ -1,369 +1,63 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
-  "summary": "Projeto AntiFraud LIVE com build de produção validado; foco imediato: integrar no ambiente live o módulo avançado de pesquisa de contactos (telefone/email) com resultados detalhados (nome quando disponível, risco, descrição, fonte+data), integração com motor antifraude 100% frontend, suporte PWA/WebAPK (cache/offline parcial) e i18n — agora incluindo também uma funcionalidade de denúncia anónima/legítima para contactos suspeitos (com tags).",
+  "projectStateVersion": 3,
+  "summary": "Build an international contact search module integrated with the existing AntiFraud Heuristics Engine, exposed in a new dedicated frontend page, using a backend/canister intermediary to call external APIs securely and return detailed, source-referenced, legally-compliant risk assessments. Also remove the 'Caffeine' name from the app and ensure footer images include clickable source links.",
   "architectural_notes": [
-    "Motor antifraude será 100% frontend baseado em heurísticas e palavras‑chave críticas, com gatilho de alto risco.",
-    "Modal obrigatório de cookies/termos deve bloquear a UI até aceitação.",
-    "Conteúdo fonte oficial é PT; demais idiomas são traduções derivadas dele.",
-    "App deve funcionar como PWA com CTA instalável em todos os idiomas.",
-    "Além do PWA, suportar builds nativas Android/iOS e fluxo de publicação nas lojas (Play Store/App Store).",
-    "Correção atual deve focar apenas no fluxo de instalação PWA (beforeinstallprompt/WebAPK) sem alterações em UI/cores/layout/menus/conteúdo/traduções nem em rotas/páginas/consentimento.",
-    "Ficheiros PWA localizam-se em: frontend/public/manifest.webmanifest (manifest) e frontend/public/service-worker.js (service worker).",
-    "Evitar dependência de rebuild automático de AI para conteúdo institucional; textos PT oficiais devem ser copiados/colados verbatim no frontend.",
-    "Motor antifraude deve permanecer 100% frontend e isolado, sem chamadas a backend/canisters.",
-    "Decisão confirmada: substituir completamente o fluxo atual de instalação PWA (usePwaInstall, PwaInstallAction, fallbacks, cooldowns e prompts antigos) por um modelo minimalista com `setupPWAInstall()` (captura `beforeinstallprompt` e limpa no `appinstalled`) + `triggerPWAInstall()` (chama `deferredPrompt.prompt()` e avalia `userChoice`), e o botão “Baixar Aplicação” deve chamar exclusivamente `triggerPWAInstall()`."
+    "Frontend should call a backend/canister intermediary for all external API integrations to keep API keys private; frontend receives processed/aggregated results only.",
+    "International contact search must return detailed, structured outputs (not just safe/risky) including risk status, origin country, public confirmation sources, and public report/alert history.",
+    "Legal/compliance constraint: only use public information or legally-provided APIs; every data point should be source-referenced with clickable links."
   ],
   "known_issues": [
-    "Falha/erro no processo de rebuild final (AI hiccup); necessário tentar novamente em etapas.",
-    "Fluxo atual de instalação PWA/CTA pode não disparar beforeinstallprompt corretamente e/ou não resultar em WebAPK real (apenas atalho), com ausência do app em Configurações > Apps e no app drawer.",
-    "Páginas institucionais estão a ser geradas com conteúdo resumido/incompleto em vez de manterem o texto PT verbatim e a estrutura definida.",
-    "WebAPK/instalação PWA pode falhar por limitação do ambiente de deploy (domínio draft/test), não por código: exige HTTPS estável, start_url/scope acessíveis e SW/rotas com resposta 200 para o Chrome disparar prompt nativo.",
-    "Falha interna do sistema de build/integração (internal AI error) interrompeu a integração do módulo live; necessário reiniciar o processo de integração."
+    "Footer images currently lack embedded/clickable source (attribution) links.",
+    "Application currently shows the name “Caffeine” but user does not want it displayed."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-when-the-app-is-installable-beforeinstallprompt-available-and-not-already-installed-show-a-prominent-install-prompt-on-the-home-page-that-asks-the-user-whether-they-want-to-install-the-app-now-the-prompt-must-offer-clear-actions-e-g-install-now-and-not-now-and-must-not-repeatedly-nag-the-user-after-dismissal-persist-dismissal-choice-locally-with-a-reasonable-cooldown",
-      "title": "When the app is installable (beforeinstallprompt available) and not already installed, show a prominent install prompt on the Home page that asks the user whether they want to install the app now. The prompt must offer clear actions (e.g., \"Install now\" and \"Not now\"), and must not repeatedly nag the user after dismissal (persist dismissal choice locally with a reasonable cooldown).",
+      "id": "feature-add-a-new-dedicated-frontend-page-for-the-international-contact-lookup-module-route-ui-and-make-it-accessible-from-the-main-navigation-menu",
+      "title": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-frontend-routing-to-include-the-new-international-lookup-page-without-breaking-existing-routes-consent-gate-behavior-and-spa-fallback-routing",
+      "title": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-extend-the-existing-antifraud-heuristics-engine-logic-to-compute-an-international-risk-score-using-automatic-phone-normalization-country-code-country-detection-by-prefix-for-phone-numbers-and-public-source-signals-reports-alerts-returned-by-providers-producing-low-medium-high-risk-status",
+      "title": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-canister-interface-bindings-to-include-the-new-backend-method-s-and-wire-the-new-international-lookup-page-ui-to-call-the-backend-and-render-the-returned-structured-result",
+      "title": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-any-visible-caffeine-branding-from-the-application-ui-and-metadata-wherever-it-currently-appears",
+      "title": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-footer-data-source-images-logos-clickable-with-embedded-attribution-source-links-while-preserving-correct-static-asset-paths-and-16x16-mobile-visibility",
+      "title": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
       "reqIds": [
         "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-the-non-installable-install-ux-especially-ios-so-that-the-home-page-install-prompt-cta-provides-platform-specific-instructions-via-the-existing-instructions-dialog-with-wording-that-clearly-explains-how-to-add-the-app-to-the-home-screen-ensure-the-instructions-are-reachable-from-the-new-home-page-install-prompt-when-native-install-prompting-is-not-available",
-      "title": "Improve the non-installable install UX (especially iOS) so that the Home page install prompt/CTA provides platform-specific instructions via the existing instructions dialog, with wording that clearly explains how to add the app to the home screen. Ensure the instructions are reachable from the new Home page install prompt when native install prompting is not available.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-in-app-informational-message-english-ui-text-explaining-that-the-current-deliverable-is-a-progressive-web-app-pwa-that-can-be-installed-from-the-browser-on-android-ios-and-that-publishing-as-native-apps-to-google-play-and-apple-app-store-is-not-part-of-this-build-output-place-the-message-in-the-install-ui-flow-e-g-within-the-install-dialog-note",
-      "title": "Add an in-app informational message (English UI text) explaining that the current deliverable is a Progressive Web App (PWA) that can be installed from the browser on Android/iOS, and that publishing as native apps to Google Play and Apple App Store is not part of this build output. Place the message in the install UI flow (e.g., within the install dialog/note).",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-home-page-install-cta-triggers-a-real-working-native-pwa-install-prompt-beforeinstallprompt-on-android-chrome-and-desktop-chrome-edge-when-the-app-is-installable-and-provide-a-user-visible-fallback-instructions-dialog-when-the-install-prompt-is-not-available-or-the-deferred-prompt-is-missing",
-      "title": "Ensure the Home page install CTA triggers a real, working native PWA install prompt (beforeinstallprompt) on Android Chrome and desktop Chrome/Edge when the app is installable, and provide a user-visible fallback (instructions dialog) when the install prompt is not available or the deferred prompt is missing.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-installed-state-detection-so-that-the-install-cta-is-hidden-disabled-only-when-the-app-is-truly-installed-standalone-display-mode-and-ios-standalone-and-ensure-state-updates-correctly-after-successful-installation-appinstalled-event",
-      "title": "Improve installed-state detection so that the install CTA is hidden/disabled only when the app is truly installed (standalone display-mode and iOS standalone), and ensure state updates correctly after successful installation (appinstalled event).",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-and-adjust-pwa-installability-prerequisites-manifest-service-worker-so-that-accepting-the-prompt-on-android-results-in-a-full-installed-pwa-experience-webapk-where-supported-by-the-browser-rather-than-a-simple-homescreen-shortcut-without-changing-app-ui-content",
-      "title": "Verify and adjust PWA installability prerequisites (manifest + service worker) so that accepting the prompt on Android results in a full installed PWA experience (WebAPK where supported by the browser) rather than a simple homescreen shortcut, without changing app UI content.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-pwa-manifest-at-frontend-public-manifest-webmanifest-to-include-webapk-relevant-fields-while-keeping-the-existing-antifraud-branding-and-icon-references-unchanged-add-a-stable-app-id-and-set-prefer-related-applications-explicitly-to-false",
-      "title": "Update the PWA manifest at `frontend/public/manifest.webmanifest` to include WebAPK-relevant fields while keeping the existing AntiFraud branding and icon references unchanged: add a stable app `id` and set `prefer_related_applications` explicitly to `false`.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-the-service-worker-adjustments-in-frontend-public-service-worker-js-to-ensure-stable-installability-prerequisites-without-interfering-with-the-install-prompt-flow-including-ensuring-required-offline-fallback-assets-are-available-to-the-service-worker-cache-preload",
-      "title": "Apply the service worker adjustments in `frontend/public/service-worker.js` to ensure stable installability prerequisites without interfering with the install prompt flow, including ensuring required offline fallback assets are available to the service worker cache preload.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-application-registers-frontend-public-service-worker-js-on-app-load-using-an-editable-frontend-entry-point-do-not-modify-immutable-paths-so-the-service-worker-is-actually-controlling-the-page-under-normal-usage",
-      "title": "Ensure the application registers `frontend/public/service-worker.js` on app load using an editable frontend entry point (do not modify immutable paths), so the service worker is actually controlling the page under normal usage.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-validate-that-the-existing-install-cta-flow-home-page-install-ui-triggers-a-real-native-pwa-install-prompt-when-the-app-is-installable-and-falls-back-to-instructions-when-the-prompt-is-unavailable-using-the-existing-usepwainstall-pwainstallaction-implementation",
-      "title": "Validate that the existing install CTA flow (Home page install UI) triggers a real native PWA install prompt when the app is installable, and falls back to instructions when the prompt is unavailable, using the existing `usePwaInstall` + `PwaInstallAction` implementation.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-completely-replace-the-current-pwa-installation-flow-implementation-including-usepwainstall-pwainstallaction-fallback-logic-cooldown-dismissal-behavior-and-any-auto-prompts-with-a-minimal-flow-based-only-on-setuppwainstall-and-triggerpwainstall-as-specified-by-the-user",
-      "title": "Completely replace the current PWA installation flow implementation (including `usePwaInstall`, `PwaInstallAction` fallback logic, cooldown/dismissal behavior, and any auto-prompts) with a minimal flow based only on `setupPWAInstall()` and `triggerPWAInstall()` as specified by the user.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-or-fully-replace-frontend-src-pwa-install-ts-with-exactly-the-user-specified-implementation-that-captures-beforeinstallprompt-into-a-module-level-deferredprompt-via-setuppwainstall-clears-it-on-appinstalled-and-exposes-triggerpwainstall-that-calls-deferredprompt-prompt-and-returns-whether-the-outcome-was-accepted",
-      "title": "Create (or fully replace) `frontend/src/pwa/install.ts` with exactly the user-specified implementation that captures `beforeinstallprompt` into a module-level `deferredPrompt` via `setupPWAInstall()`, clears it on `appinstalled`, and exposes `triggerPWAInstall()` that calls `deferredPrompt.prompt()` and returns whether the outcome was accepted.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-setuppwainstall-is-called-exactly-once-on-frontend-app-startup-by-adding-the-user-specified-useeffect-setuppwainstall-in-frontend-src-app-tsx-or-equivalent-editable-root-component-without-modifying-any-immutable-frontend-paths",
-      "title": "Ensure `setupPWAInstall()` is called exactly once on frontend app startup by adding the user-specified `useEffect(() => { setupPWAInstall(); }, []);` in `frontend/src/App.tsx` (or equivalent editable root component), without modifying any immutable frontend paths.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-existing-home-page-install-cta-button-labeled-baixar-aplica-o-currently-rendered-via-frontend-src-components-pwainstallaction-tsx-on-frontend-src-pages-homepage-tsx-so-that-clicking-it-calls-exclusively-triggerpwainstall-and-performs-no-other-install-related-behavior-no-fallback-no-instructions-dialog-no-cooldown-dismiss-logic-no-additional-prompts",
-      "title": "Update the existing Home page install CTA button labeled “Baixar Aplicação” (currently rendered via `frontend/src/components/PwaInstallAction.tsx` on `frontend/src/pages/HomePage.tsx`) so that clicking it calls exclusively `triggerPWAInstall()` and performs no other install-related behavior (no fallback, no instructions dialog, no cooldown/dismiss logic, no additional prompts).",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-replace-frontend-public-service-worker-js-with-exactly-the-user-provided-service-worker-implementation-cache-name-antifraud-v4-app-shell-containing-only-manifest-webmanifest-and-the-two-generated-pwa-icon-assets-install-caches-app-shell-activate-clears-old-caches-fetch-is-network-first-with-cache-fallback-to-align-pwa-installability-prerequisites-for-real-webapk-on-android",
-      "title": "Replace `frontend/public/service-worker.js` with exactly the user-provided service worker implementation (cache name `antifraud-v4`, `APP_SHELL` containing only `/`, `/manifest.webmanifest`, and the two generated PWA icon assets; install caches `APP_SHELL`; activate clears old caches; fetch is network-first with cache fallback), to align PWA installability prerequisites for real WebAPK on Android.",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-temporarily-replace-frontend-public-manifest-webmanifest-with-the-exact-minimal-test-manifest-provided-by-the-user-including-description-teste-pwa-webapk-antifraud-id-start-url-scope-display-standalone-prefer-related-applications-false-and-the-existing-generated-192-512-icon-paths",
-      "title": "Temporarily replace `frontend/public/manifest.webmanifest` with the exact minimal test manifest provided by the user (including `description: \"Teste PWA WebAPK AntiFraud\"`, `id: \"/\"`, `start_url: \"/\"`, `scope: \"/\"`, `display: \"standalone\"`, `prefer_related_applications: false`, and the existing generated 192/512 icon paths).",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-temporarily-replace-frontend-public-service-worker-js-with-the-exact-minimal-test-service-worker-provided-by-the-user-including-const-cache-name-antifraud-test-the-app-shell-array-install-activate-handlers-and-the-network-first-fetch-with-cache-fallback-implementation",
-      "title": "Temporarily replace `frontend/public/service-worker.js` with the exact minimal test service worker provided by the user (including `const CACHE_NAME = 'antifraud-test';`, the `APP_SHELL` array, install/activate handlers, and the network-first fetch with cache fallback implementation).",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-temporarily-replace-frontend-src-pwa-install-ts-with-the-exact-minimal-beforeinstallprompt-capture-implementation-provided-by-the-user-including-a-module-level-deferredprompt-setting-window-pwa-can-install-true-false-and-logging-statements-ensure-typescript-compiles-by-declaring-the-window-pwa-can-install-property-via-a-local-declare-global-augmentation-in-the-same-file",
-      "title": "Temporarily replace `frontend/src/pwa/install.ts` with the exact minimal `beforeinstallprompt` capture implementation provided by the user, including a module-level `deferredPrompt`, setting `window.PWA_CAN_INSTALL = true/false`, and logging statements. Ensure TypeScript compiles by declaring the `window.PWA_CAN_INSTALL` property (via a local `declare global` augmentation in the same file).",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-frontend-src-components-installbutton-tsx-implementing-the-user-provided-minimal-install-button-behavior-on-click-call-triggerpwainstall-if-it-returns-false-show-a-simple-alert-indicating-the-app-is-not-yet-eligible-for-installation-wire-this-button-into-the-existing-ui-by-replacing-the-home-page-install-cta-rendering-so-the-home-page-uses-installbutton-instead-of-pwainstallaction-without-changing-any-other-page-content-navigation-consent-flow-or-translations",
-      "title": "Create `frontend/src/components/InstallButton.tsx` implementing the user-provided minimal install button behavior: on click, call `triggerPWAInstall()`; if it returns false, show a simple alert indicating the app is not yet eligible for installation. Wire this button into the existing UI by replacing the Home page install CTA rendering so the Home page uses `InstallButton` instead of `PwaInstallAction`, without changing any other page content, navigation, consent flow, or translations.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-developer-facing-repeatable-android-chrome-validation-checklist-in-a-new-markdown-file-e-g-frontend-pwa-webapk-android-test-md-that-mirrors-the-user-s-exact-required-steps-uninstall-existing-app-from-android-settings-apps-remove-homescreen-shortcut-clear-chrome-data-open-the-site-in-chrome-navigate-1-2-pages-press-the-install-button-confirm-the-native-install-prompt-appears-and-finally-confirm-antifraud-appears-in-android-settings-apps-and-in-the-app-drawer-the-checklist-must-end-with-the-only-two-allowed-outcome-statements-apareceu-como-app-em-defini-es-apps-and-ainda-s-atalho",
-      "title": "Add a developer-facing, repeatable Android Chrome validation checklist (in a new markdown file, e.g. `frontend/PWA_WEBAPK_ANDROID_TEST.md`) that mirrors the user’s exact required steps: uninstall existing app from Android Settings > Apps, remove homescreen shortcut, clear Chrome data, open the site in Chrome, navigate 1–2 pages, press the install button, confirm the native install prompt appears, and finally confirm AntiFraud appears in Android Settings > Apps and in the app drawer. The checklist must end with the only two allowed outcome statements: \"Apareceu como app em Definições > Apps\" and \"Ainda é só atalho\".",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-complete-a-100-frontend-antifraud-analysis-engine-for-all-home-page-verification-tabs-message-email-phone-crypto-using-deterministic-heuristics-only-returning-a-structured-result-object-with-risk-low-medium-high-explanation-recommendation-and-without-calling-any-backend-canister-methods-for-these-analyses",
-      "title": "Implement/complete a 100% frontend antifraud analysis engine for all Home page verification tabs (message, email, phone, crypto) using deterministic heuristics only, returning a structured result object with (risk: Low/Medium/High, explanation, recommendation) and without calling any backend/canister methods for these analyses.",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-mandatory-high-risk-override-for-critical-scam-keywords-for-message-analysis-in-all-supported-ui-languages-pt-en-es-fr-zh-ar-ru-if-any-critical-keyword-is-detected-case-insensitive-accent-insensitive-where-applicable-the-risk-must-be-forced-to-high-regardless-of-other-heuristic-scores-and-the-explanation-must-clearly-state-that-the-high-risk-was-triggered-by-critical-keywords",
-      "title": "Add a mandatory High-risk override for critical scam keywords for message analysis in all supported UI languages (PT/EN/ES/FR/ZH/AR/RU): if any critical keyword is detected (case-insensitive, accent-insensitive where applicable), the risk must be forced to High regardless of other heuristic scores, and the explanation must clearly state that the High risk was triggered by critical keywords.",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-all-antifraud-engine-outputs-are-fully-localized-for-pt-en-es-fr-zh-ar-ru-including-indicator-labels-e-g-urgency-language-credential-requests-links-detected-so-that-explanations-read-naturally-in-the-selected-language-and-do-not-mix-languages",
-      "title": "Ensure all antifraud engine outputs are fully localized for PT/EN/ES/FR/ZH/AR/RU, including indicator labels (e.g., urgency language, credential requests, links detected) so that explanations read naturally in the selected language and do not mix languages.",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-extend-the-frontend-antifraud-structured-analysis-result-model-to-include-a-dedicated-renderable-transparency-payload-that-can-cite-public-legal-sources-and-can-describe-the-collaborative-basis-used-for-the-analysis-without-introducing-any-backend-calls-for-the-analysis-itself",
-      "title": "Extend the frontend antifraud structured analysis result model to include a dedicated, renderable transparency payload that can cite public legal sources and can describe the collaborative basis used for the analysis (without introducing any backend calls for the analysis itself).",
-      "reqIds": [
-        "REQ-31"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-structured-antifraud-analysis-engine-so-every-analysis-output-message-email-phone-crypto-includes-public-source-citations-drawn-from-public-legal-references-and-includes-a-collaborative-basis-statement-explaining-what-data-was-or-was-not-used-from-the-collaborative-database",
-      "title": "Update the structured antifraud analysis engine so every analysis output (message/email/phone/crypto) includes public-source citations drawn from public, legal references and includes a collaborative-basis statement explaining what data was (or was not) used from the collaborative database.",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enhance-the-structured-analysis-results-ui-so-that-every-analysis-result-clearly-displays-a-a-public-sources-section-with-clickable-references-and-b-a-collaborative-basis-section-that-explains-the-community-data-basis-in-a-transparent-way",
-      "title": "Enhance the structured analysis results UI so that every analysis result clearly displays (a) a “Public sources” section with clickable references and (b) a “Collaborative basis” section that explains the community-data basis in a transparent way.",
-      "reqIds": [
-        "REQ-33"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-the-necessary-i18n-keys-for-the-new-transparency-ui-public-sources-and-collaborative-basis-across-all-supported-languages-using-english-user-facing-text-for-the-english-locale-and-consistent-equivalents-for-pt-es-fr-zh-ar-ru",
-      "title": "Add the necessary i18n keys for the new transparency UI (public sources and collaborative basis) across all supported languages, using English user-facing text for the English locale and consistent equivalents for PT/ES/FR/ZH/AR/RU.",
-      "reqIds": [
-        "REQ-34"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-consolidate-the-pwa-production-configuration-by-replacing-the-current-temporary-test-manifest-and-service-worker-with-the-final-production-versions-while-preserving-the-existing-antifraud-branding-and-icon-paths",
-      "title": "Consolidate the PWA production configuration by replacing the current temporary test manifest and service worker with the final production versions, while preserving the existing AntiFraud branding and icon paths.",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-replace-the-current-temporary-pwa-install-prompt-capture-implementation-with-the-finalized-production-setuppwainstall-triggerpwainstall-implementation-ensuring-it-captures-beforeinstallprompt-clears-state-on-appinstalled-and-returns-whether-installation-was-accepted",
-      "title": "Replace the current temporary PWA install prompt capture implementation with the finalized production `setupPWAInstall()` / `triggerPWAInstall()` implementation, ensuring it captures `beforeinstallprompt`, clears state on `appinstalled`, and returns whether installation was accepted.",
-      "reqIds": [
-        "REQ-36"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-make-the-install-cta-fully-production-ready-by-removing-hardcoded-portuguese-strings-from-the-install-button-and-fallback-alert-and-wiring-all-install-cta-user-facing-text-through-i18n-across-all-supported-languages",
-      "title": "Make the install CTA fully production-ready by removing hardcoded Portuguese strings from the install button and fallback alert, and wiring all install CTA user-facing text through i18n across all supported languages.",
-      "reqIds": [
-        "REQ-37"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-complete-and-integrate-the-full-multilingual-translation-set-derived-from-the-official-portuguese-source-for-en-es-fr-zh-ar-and-ru-covering-navigation-consent-modal-pwa-install-ui-analysis-results-including-transparency-sections-and-all-institutional-page-content",
-      "title": "Complete and integrate the full multilingual translation set derived from the official Portuguese source for EN, ES, FR, ZH, AR, and RU, covering navigation, consent modal, PWA install UI, analysis results (including transparency sections), and all institutional page content.",
-      "reqIds": [
-        "REQ-38"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-developer-facing-production-verification-checklist-report-document-that-makes-the-final-build-audit-repeatable-covering-critical-flows-routes-consent-gate-branding-antifraud-engine-frontend-only-public-contact-lookup-behavior-translations-and-pwa-webapk-installation-validation",
-      "title": "Add a developer-facing production verification checklist/report document that makes the final build audit repeatable, covering critical flows: routes, consent gate, branding, antifraud engine (frontend-only), public contact lookup behavior, translations, and PWA/WebAPK installation validation.",
-      "reqIds": [
-        "REQ-39"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-production-ready-advanced-contact-lookup-module-in-the-frontend-that-accepts-either-a-phone-number-or-an-email-address-in-a-single-input-performs-basic-validation-and-runs-a-lookup-when-the-user-presses-a-dedicated-search-button",
-      "title": "Implement a production-ready “Advanced Contact Lookup” module in the frontend that accepts either a phone number or an email address in a single input, performs basic validation, and runs a lookup when the user presses a dedicated “Search” button.",
-      "reqIds": [
-        "REQ-40"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-the-advanced-contact-lookup-results-with-the-existing-100-frontend-antifraud-engine-so-each-searched-contact-returns-a-structured-risk-outcome-low-medium-high-plus-a-user-readable-description-explanation-and-recommendation-in-the-currently-selected-ui-language",
-      "title": "Integrate the Advanced Contact Lookup results with the existing 100% frontend antifraud engine so each searched contact returns a structured risk outcome (Low/Medium/High) plus a user-readable description/explanation and recommendation in the currently selected UI language.",
-      "reqIds": [
-        "REQ-41"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-public-information-lookup-layer-for-phone-email-that-returns-only-legally-safe-non-sensitive-publicly-presented-information-and-always-includes-a-source-name-b-source-url-when-applicable-and-c-as-of-date-for-the-returned-information",
-      "title": "Implement a public-information lookup layer for phone/email that returns only legally safe, non-sensitive, publicly presented information and always includes (a) source name, (b) source URL (when applicable), and (c) “as of” date for the returned information.",
-      "reqIds": [
-        "REQ-42"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-make-the-advanced-contact-lookup-module-compatible-with-pwa-webapk-usage-by-enabling-offline-partial-behavior-the-module-s-static-resources-and-any-same-origin-lookup-resources-must-be-cacheable-and-previously-viewed-lookup-results-should-remain-available-when-offline-best-effort",
-      "title": "Make the Advanced Contact Lookup module compatible with PWA/WebAPK usage by enabling offline partial behavior: the module’s static resources and any same-origin lookup resources must be cacheable, and previously viewed lookup results should remain available when offline (best-effort).",
-      "reqIds": [
-        "REQ-43"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-full-multilingual-support-for-all-new-advanced-contact-lookup-ui-text-across-pt-en-es-fr-zh-ar-ru-using-the-existing-i18n-system-do-not-hardcode-user-facing-strings-in-components",
-      "title": "Add full multilingual support for all new Advanced Contact Lookup UI text across PT/EN/ES/FR/ZH/AR/RU using the existing i18n system; do not hardcode user-facing strings in components.",
-      "reqIds": [
-        "REQ-44"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-the-advanced-contact-lookup-module-into-the-existing-app-navigation-ui-so-it-is-immediately-usable-in-production-without-disrupting-existing-home-page-verification-tabs-and-without-modifying-any-immutable-frontend-paths",
-      "title": "Integrate the Advanced Contact Lookup module into the existing app navigation/UI so it is immediately usable in production without disrupting existing Home page verification tabs and without modifying any immutable frontend paths.",
-      "reqIds": [
-        "REQ-45"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-an-in-context-report-suspicious-contact-action-into-the-advanced-contact-lookup-results-panel-so-users-can-submit-an-anonymous-legally-safe-report-for-the-searched-phone-email-using-the-existing-report-submission-dialog-flow",
-      "title": "Integrate an in-context “Report suspicious contact” action into the Advanced Contact Lookup results panel so users can submit an anonymous, legally-safe report for the searched phone/email, using the existing report submission dialog flow.",
-      "reqIds": [
-        "REQ-46"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-restrict-the-report-tag-category-choices-shown-for-advanced-contact-lookup-reporting-to-exactly-spam-phishing-scam-other-while-preserving-the-underlying-compatibility-with-existing-report-category-types",
-      "title": "Restrict the report “tag/category” choices shown for Advanced Contact Lookup reporting to exactly: Spam, Phishing, Scam, Other, while preserving the underlying compatibility with existing report category types.",
-      "reqIds": [
-        "REQ-47"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-advanced-contact-lookup-results-remain-available-offline-on-a-best-effort-basis-by-leveraging-the-existing-local-cache-and-service-worker-caching-behavior-without-breaking-pwa-installability",
-      "title": "Ensure Advanced Contact Lookup results remain available offline on a best-effort basis by leveraging the existing local cache and service worker caching behavior, without breaking PWA installability.",
-      "reqIds": [
-        "REQ-48"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-verify-multilingual-i18n-coverage-for-all-user-facing-text-introduced-or-changed-by-the-advanced-contact-lookup-reporting-flow-across-pt-en-es-fr-zh-ar-ru-and-ensure-english-is-used-for-en-user-facing-strings",
-      "title": "Add/verify multilingual i18n coverage for all user-facing text introduced or changed by the Advanced Contact Lookup reporting flow across PT/EN/ES/FR/ZH/AR/RU, and ensure English is used for EN user-facing strings.",
-      "reqIds": [
-        "REQ-49"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-production-verification-checklist-to-include-explicit-test-steps-for-advanced-contact-lookup-phone-email-and-the-anonymous-reporting-flow-including-tag-selection-alongside-existing-antifraud-engine-consent-gate-and-pwa-webapk-checks",
-      "title": "Update the production verification checklist to include explicit test steps for Advanced Contact Lookup (phone/email) and the anonymous reporting flow (including tag selection), alongside existing antifraud engine, consent gate, and PWA/WebAPK checks.",
-      "reqIds": [
-        "REQ-50"
       ],
       "version": 1
     }
@@ -371,156 +65,58 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Aplicar conteúdo PT verbatim nas páginas institucionais (/mission, /how-it-works, /terms, /privacy).",
+      "summary": "Create new frontend page “Pesquisa Internacional de Contactos” accessible from the main menu",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Gerar traduções multilíngues a partir do PT oficial (EN/ES/FR/ZH/AR/RU).",
+      "summary": "Implement backend/canister intermediary to call external verification/abuse APIs without exposing API keys to the frontend",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Integrate external sources (NumVerify, OpenCnam, Spamhaus, PhishTank, HaveIBeenPwned, Banco de Portugal, CNCS, and other public country registries) and return detailed structured results with clickable source links",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Configurar PWA e CTA instalável corretamente em todos os idiomas.",
+      "summary": "Extend existing AntiFraud Heuristics Engine to process international contact signals (normalize +DDI, detect country by prefix, compute risk score low/medium/high, include public reports/alerts)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Ativar modal obrigatório de cookies e termos, bloqueando UI até aceitação.",
+      "summary": "Remove the name/branding “Caffeine” from the application UI",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Aplicar branding final: produto “AntiFraud”, subtítulo/rodapé “by HCoragem”, e remover legado antigo.",
+      "summary": "Add clickable source links to footer images (embed the image source/attribution links)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Validar navegação, aliases e estabilidade das rotas.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Apply the official Portuguese (PT) content verbatim to the institutional routes `/mission`, `/how-it-works`, `/terms`, and `/privacy`, ensuring these pages render the complete PT text exactly as defined in the PT translation source (no rewrites, no truncation, no placeholder sections).",
-      "reqIds": [
-        "REQ-1"
-      ],
       "status": "pending"
     },
     {
       "id": "AR-9",
-      "summary": "Generate and integrate complete multilingual UI translations derived from the official PT source for languages: EN, ES, FR, ZH, AR, RU. This must include all institutional page content (mission/how-it-works/terms/privacy) plus all app UI strings used in navigation, consent, PWA install CTA, and analysis results.",
+      "summary": "Implement a secure backend/canister intermediary method to perform an international contact lookup and return a detailed, structured, legally-compliant result that includes per-field source attribution URLs.",
       "reqIds": [
-        "REQ-2"
+        "REQ-3"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-11",
-      "summary": "Configure PWA installability and ensure the install CTA renders correctly in all supported languages, including localized button labels, instructions, and install status messaging.",
+      "id": "AR-10",
+      "summary": "Add backend support for provider configuration management so external API integrations can be enabled without exposing keys to the frontend.",
       "reqIds": [
         "REQ-4"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Enforce a mandatory consent gate modal requiring acceptance of cookies and the Terms/Privacy policy, blocking all app interaction until consent is given. The consent UI must be fully localized for all supported languages and must link users to `/terms` and `/privacy` for review before acceptance.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Apply final branding across the app: product name 'AntiFraud' and subtitle/footer 'by HCoragem', and remove any remaining legacy/old branding or institutional legacy navigation artifacts while preserving necessary route aliases for compatibility.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Validate navigation, route aliases, and overall route stability for the SPA, including canonical routes, legacy aliases, and the 404 SPA fallback behavior for all institutional pages.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Criar aplicação móvel nativa para Android e iOS do AntiFraud e preparar o processo de distribuição/publicação nas lojas (Google Play e Apple App Store), incluindo build, assinaturas/provisionamento e artefatos necessários para submissão.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Corrigir exclusivamente o fluxo de instalação da PWA: beforeinstallprompt funcional (Android/desktop) para o CTA “Baixe a Aplicação AntiFraud gratuitamente”, garantir criação de WebAPK real (não atalho) e validar que aparece em Configurações > Apps e no app drawer, sem alterar cores/layouts/menus/conteúdo/traduções e sem mexer em navegação/páginas/consentimento/rebuild completo.",
-      "reqIds": [],
-      "status": "in_progress"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Criar checklist visível e auditável (passo a passo) para validar objetivamente no dispositivo cada funcionalidade (PWA/instalação, modal, páginas institucionais, branding, idiomas, motor antifraude) antes de novos builds/rebuilds.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "PASSO 2 (Fase 1): Corrigir UI básica removendo transparências/blur/efeito vidro em menus, janelas e modais; garantir fundos sólidos, alto contraste, CTAs consistentes e footer/header legíveis, sem alterar lógica PWA/antifraude/consentimento/i18n.",
-      "reqIds": [],
-      "status": "in_progress"
-    },
-    {
-      "id": "AR-19",
-      "summary": "PASSO 7 (Fase 1): PWA honesta — ajustar copy/CTA para “Adicionar ao ecrã inicial” e explicitar “Versão web instalada no dispositivo”, removendo/evitando promessas de app nativa e referências a WebAPK na comunicação ao utilizador.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "PASSO 5 (Fase 1): Garantir que todas as análises do motor antifraude citam fontes públicas legais e exibem uma base colaborativa visível com referências (transparência e credibilidade).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "Fase 2 (Pro): Implementar apps nativas Android/iOS com detecção de risco em mensagens e chamadas (SMS/WhatsApp/telefonia), alertas (push), processamento local, conformidade (GDPR/lei nacional) e modelo de subscrição (histórico/relatórios).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-22",
-      "summary": "PASSO 8 (Fase 1): Checklist final auditável para validação antes de publicar LIVE (UI sólida, conteúdos completos, idiomas corretos, antifraude funcional e explicado, modal obrigatório, branding limpo, zero referências antigas e zero promessas falsas).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-23",
-      "summary": "Preparar e gerar build final real de produção (LIVE): consolidar código/UI/branding, implementar validações no código (rotas, consentimento, antifraude 100% frontend, pesquisa pública, traduções, PWA/WebAPK), e consolidar manifest + service worker definitivos (não temporários) para garantir instalação PWA/WebAPK no Android Chrome.",
-      "reqIds": [],
-      "status": "in_progress"
-    },
-    {
-      "id": "AR-24",
-      "summary": "Gerar e integrar o módulo avançado de pesquisa de contactos para produção: pesquisa por telefone/email com validação básica; resultados detalhados (nome quando disponível, risco Baixo/Médio/Alto, descrição, fonte e data); integração com o motor antifraude 100% frontend no mesmo painel; consulta a fontes públicas gratuitas (API/mock) com garantia de legalidade; compatível com PWA/WebAPK e com cache/offline parcial via service worker; totalmente localizado (PT/EN/ES/FR/ZH/AR/RU).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-25",
-      "summary": "Adicionar e integrar no build LIVE a funcionalidade de denúncia (report) para contactos suspeitos/alto risco no módulo de pesquisa: denúncia anónima e legalmente segura, com tags opcionais (Spam, Phishing, Golpe, Outro), totalmente integrada com o painel de resultados, i18n (PT/EN/ES/FR/ZH/AR/RU) e compatível com PWA/offline parcial.",
-      "reqIds": [],
-      "status": "in_progress"
     }
   ],
-  "projectName": "AntiFraud",
+  "projectName": "International Contact Lookup module (secure backend intermediary + new page) with legal, source-referenced results",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

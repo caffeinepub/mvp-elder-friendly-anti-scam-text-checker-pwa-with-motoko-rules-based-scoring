@@ -1,116 +1,67 @@
 import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useI18n } from '@/i18n/I18nProvider';
-import { setSeoMetadata } from '@/utils/seo';
+import { setSEO } from '@/utils/seo';
+import { Shield } from 'lucide-react';
 
 export function PrivacyPage() {
   const { t } = useI18n();
 
   useEffect(() => {
-    setSeoMetadata(
+    setSEO(
       t.privacyPageTitle,
       t.privacyPageDescription
     );
   }, [t]);
 
-  // Defensive rendering helper
-  const renderParagraphs = (paragraphs: any, fallback: string = 'Conteúdo em carregamento...') => {
-    if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
-      return <p className="leading-relaxed">{fallback}</p>;
-    }
-    return paragraphs.map((paragraph: string, index: number) => (
-      <p key={index} className="leading-relaxed">{paragraph || fallback}</p>
-    ));
-  };
+  const sections = [
+    { title: t.privacySection1Title, paragraphs: t.privacySection1Paragraphs },
+    { title: t.privacySection2Title, paragraphs: t.privacySection2Paragraphs },
+    { title: t.privacySection3Title, paragraphs: t.privacySection3Paragraphs },
+    { title: t.privacySection4Title, paragraphs: t.privacySection4Paragraphs },
+    { title: t.privacySection5Title, paragraphs: t.privacySection5Paragraphs },
+    { title: t.privacySection6Title, paragraphs: t.privacySection6Paragraphs },
+    { title: t.privacySection7Title, paragraphs: t.privacySection7Paragraphs },
+    { title: t.privacySection8Title, paragraphs: t.privacySection8Paragraphs },
+  ];
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            {t.privacyPageTitle || 'Política de Privacidade'}
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <div className="p-4 bg-primary/10 rounded-full">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
+            {t.privacyPageHeading || 'Política de Privacidade'}
           </h1>
-          <p className="text-base sm:text-lg text-muted-foreground">
-            {t.privacyPageDescription || 'Como protegemos seus dados'}
-          </p>
-          <p className="text-sm text-muted-foreground italic">
-            {t.privacyPageSubheading || 'Última atualização: 10 de fevereiro de 2026'}
+          <p className="text-lg text-muted-foreground">
+            {t.privacyPageSubheading || 'Vigente desde 1 de Janeiro de 2025'}
           </p>
         </div>
 
-        {/* Privacy Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection1Title || 'Compromisso com a Privacidade'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection1Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection2Title || 'Dados Coletados'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection2Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection3Title || 'Uso dos Dados'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection3Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection4Title || 'Compartilhamento de Dados'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection4Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection5Title || 'Segurança'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection5Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection6Title || 'Seus Direitos'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection6Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection7Title || 'Cookies'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection7Paragraphs)}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.privacySection8Title || 'Alterações'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            {renderParagraphs(t.privacySection8Paragraphs)}
-          </CardContent>
-        </Card>
+        {/* Sections */}
+        {sections.map((section, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <CardTitle className="text-xl">{section.title || `Secção ${index + 1}`}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {section.paragraphs && Array.isArray(section.paragraphs) ? (
+                section.paragraphs.map((paragraph: string, pIndex: number) => (
+                  <p key={pIndex} className="text-muted-foreground leading-relaxed">
+                    {paragraph || 'Conteúdo em carregamento...'}
+                  </p>
+                ))
+              ) : (
+                <p className="text-muted-foreground leading-relaxed">Conteúdo em carregamento...</p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </main>
   );

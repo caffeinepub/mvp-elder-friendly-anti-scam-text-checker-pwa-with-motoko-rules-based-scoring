@@ -10,6 +10,43 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface ContactDetails {
+  'id' : string,
+  'verified' : string,
+  'country' : string,
+  'validationSource' : [] | [FieldSource],
+  'type' : string,
+  'trustScore' : string,
+  'riskScoreDescription' : string,
+  'trustScoreSource' : [] | [FieldSource],
+  'countryValidationSource' : [] | [FieldSource],
+  'address' : [] | [string],
+  'reports' : string,
+  'reportsSource' : [] | [FieldSource],
+  'adjustedRiskScore' : [] | [string],
+  'riskLevel' : string,
+  'riskScore' : string,
+  'adjustedRiskScoreSource' : [] | [FieldSource],
+}
+export interface ExtendedContactDetails {
+  'content' : string,
+  'contactType' : LookupProvider,
+  'details' : ContactDetails,
+}
+export interface FieldSource { 'value' : string, 'sourceUrl' : string }
+export type LookupProvider = { 'numLookup' : null } |
+  { 'custom' : string } |
+  { 'google' : null } |
+  { 'amazon' : null };
+export interface ProviderConfig {
+  'endpoint' : [] | [string],
+  'name' : LookupProvider,
+  'enabled' : boolean,
+  'apiKey' : [] | [string],
+}
+export type TargetType = { 'email' : null } |
+  { 'crypto' : null } |
+  { 'phoneNumber' : null };
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -17,15 +54,21 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'clearCryptoReports' : ActorMethod<[string], undefined>,
+  'clearPhoneReports' : ActorMethod<[string], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCryptoReports' : ActorMethod<[string], [] | [bigint]>,
+  'getLookupDetails' : ActorMethod<[string], [] | [ExtendedContactDetails]>,
   'getPhoneReports' : ActorMethod<[string], [] | [bigint]>,
+  'getProviderConfig' : ActorMethod<[string], [] | [ProviderConfig]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserRole' : ActorMethod<[Principal], UserRole>,
   'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'report' : ActorMethod<[TargetType, string, [] | [string]], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setProviderConfig' : ActorMethod<[string, ProviderConfig], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

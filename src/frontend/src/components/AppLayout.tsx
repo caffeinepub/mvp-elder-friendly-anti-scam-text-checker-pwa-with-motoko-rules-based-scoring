@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageSelector } from './LanguageSelector';
 import { AuthControl } from './AuthControl';
+import { Footer } from './Footer';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useSimpleRouter } from '@/router/useSimpleRouter';
 
@@ -23,6 +24,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const navItems = [
     { label: t.navHome, path: '/' },
+    { label: t.navInternationalSearch, path: '/international-contact-search' },
     { label: t.navMission, path: '/mission' },
     { label: t.navHowItWorks, path: '/how-it-works' },
     { label: t.navTerms, path: '/terms' },
@@ -118,14 +120,8 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Main Content */}
       {children}
 
-      {/* Footer */}
-      <footer className="mt-auto border-t bg-muted/50">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-muted-foreground">
-            by HCoragem
-          </div>
-        </div>
-      </footer>
+      {/* Footer - Now using the new Footer component */}
+      <Footer />
     </div>
   );
 }

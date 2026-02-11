@@ -2,30 +2,18 @@ import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useI18n } from '@/i18n/I18nProvider';
-import { setSeoMetadata } from '@/utils/seo';
+import { setSEO } from '@/utils/seo';
 import { Mail, Phone, MessageSquare, Coins, BarChart3, Shield, AlertTriangle } from 'lucide-react';
 
 export function HowItWorksPage() {
   const { t } = useI18n();
 
   useEffect(() => {
-    setSeoMetadata(
+    setSEO(
       t.howItWorksPageTitle,
       t.howItWorksPageDescription
     );
   }, [t]);
-
-  // Defensive rendering helper
-  const renderParagraphs = (paragraphs: any, fallback: string = 'Conteúdo em carregamento...') => {
-    if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
-      return <p className="text-muted-foreground leading-relaxed">{fallback}</p>;
-    }
-    return paragraphs.map((paragraph: string, index: number) => (
-      <p key={index} className="text-muted-foreground leading-relaxed">
-        {paragraph || fallback}
-      </p>
-    ));
-  };
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
@@ -55,7 +43,7 @@ export function HowItWorksPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-4">
-                  {renderParagraphs(t.howItWorksEmailParagraphs)}
+                  <p className="text-muted-foreground leading-relaxed">{t.howItWorksEmailDesc}</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -67,7 +55,7 @@ export function HowItWorksPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-4">
-                  {renderParagraphs(t.howItWorksPhoneParagraphs)}
+                  <p className="text-muted-foreground leading-relaxed">{t.howItWorksPhoneDesc}</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -79,7 +67,7 @@ export function HowItWorksPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-4">
-                  {renderParagraphs(t.howItWorksMessageParagraphs)}
+                  <p className="text-muted-foreground leading-relaxed">{t.howItWorksMessageDesc}</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -91,7 +79,7 @@ export function HowItWorksPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-4">
-                  {renderParagraphs(t.howItWorksCryptoParagraphs)}
+                  <p className="text-muted-foreground leading-relaxed">{t.howItWorksCryptoDesc}</p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -107,7 +95,25 @@ export function HowItWorksPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.howItWorksScoringParagraphs)}
+            <p className="text-muted-foreground leading-relaxed">{t.howItWorksScoringDesc}</p>
+            <ul className="space-y-2 text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                <span>{t.howItWorksScoringFactor1}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                <span>{t.howItWorksScoringFactor2}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                <span>{t.howItWorksScoringFactor3}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                <span>{t.howItWorksScoringFactor4}</span>
+              </li>
+            </ul>
           </CardContent>
         </Card>
 
@@ -120,7 +126,11 @@ export function HowItWorksPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.howItWorksLimitationsParagraphs, 'Informações sobre limitações...')}
+            {t.howItWorksLimitationsParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
 
@@ -133,7 +143,11 @@ export function HowItWorksPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {renderParagraphs(t.howItWorksResponsibleUseParagraphs, 'Diretrizes de uso responsável...')}
+            {t.howItWorksResponsibleUseParagraphs?.map((paragraph: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </CardContent>
         </Card>
       </div>
