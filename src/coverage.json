@@ -1,146 +1,76 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T12:32:07.888Z",
+  "generatedAt": "2026-02-11T16:13:15.368Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 8,
-    "implemented": 6,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
+        "summary": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "frontend/src/components/InternationalContactSearchResult.tsx",
-          "frontend/src/components/AppLayout.tsx",
-          "frontend/src/i18n/translations.ts"
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/i18n/I18nProvider.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "frontend/src/components/InternationalContactSearchResult.tsx",
-          "frontend/src/components/AppLayout.tsx",
-          "frontend/src/i18n/translations.ts"
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/i18n/I18nProvider.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
+        "summary": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/InternationalContactSearchPage.tsx"
+          "frontend/src/components/LanguageSelector.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/InternationalContactSearchPage.tsx"
+          "frontend/src/components/LanguageSelector.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Implement a secure backend/canister intermediary method to perform an international contact lookup and return a detailed, structured, legally-compliant result that includes per-field source attribution URLs.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/components/Footer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/i18n/translations.ts",
+          "frontend/src/components/Footer.tsx"
+        ]
       },
       {
         "id": "REQ-4",
-        "summary": "Add backend support for provider configuration management so external API integrations can be enabled without exposing keys to the frontend.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
+        "summary": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "frontend/src/components/InternationalContactSearchResult.tsx",
-          "frontend/src/utils/contactInputHeuristics.ts",
-          "frontend/src/i18n/translations.ts"
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/LanguageSelector.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "frontend/src/components/InternationalContactSearchResult.tsx",
-          "frontend/src/i18n/translations.ts"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/backend.idl.ts",
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useInternationalContactLookup.ts",
-          "frontend/src/pages/InternationalContactSearchPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useInternationalContactLookup.ts",
-          "frontend/src/pages/InternationalContactSearchPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/index.html",
-          "frontend/src/utils/seo.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/utils/seo.ts"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/Footer.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/LanguageSelector.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/http-outcalls/outcall.mo",
-    "backend/main.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/AppLayout.tsx",
     "frontend/src/components/Footer.tsx",
-    "frontend/src/components/InternationalContactSearchResult.tsx",
     "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useInternationalContactLookup.ts",
+    "frontend/src/i18n/I18nProvider.tsx",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/pages/DocumentationPage.tsx",
-    "frontend/src/pages/HowItWorksPage.tsx",
-    "frontend/src/pages/InternationalContactSearchPage.tsx",
-    "frontend/src/pages/MissionPage.tsx",
-    "frontend/src/pages/PrivacyPage.tsx",
-    "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/utils/documentationContent.ts",
-    "frontend/src/utils/seo.ts",
-    "frontend/src/utils/translateBackendResult.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

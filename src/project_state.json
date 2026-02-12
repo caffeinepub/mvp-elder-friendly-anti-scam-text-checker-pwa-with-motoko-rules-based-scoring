@@ -1,63 +1,49 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build an international contact search module integrated with the existing AntiFraud Heuristics Engine, exposed in a new dedicated frontend page, using a backend/canister intermediary to call external APIs securely and return detailed, source-referenced, legally-compliant risk assessments. Also remove the 'Caffeine' name from the app and ensure footer images include clickable source links.",
+  "summary": "Implement controlled UI/content improvements: expand internationalization to include ES/FR/DE with safe PT fallback and ensure language dropdown lists PT/EN/ES/FR/DE; update footer to include professional reference links (ENISA, CISA, CNCS, Europol) while keeping existing credits, fully responsive, with any icons/assets stored in /assets/.",
   "architectural_notes": [
-    "Frontend should call a backend/canister intermediary for all external API integrations to keep API keys private; frontend receives processed/aggregated results only.",
-    "International contact search must return detailed, structured outputs (not just safe/risky) including risk status, origin country, public confirmation sources, and public report/alert history.",
-    "Legal/compliance constraint: only use public information or legally-provided APIs; every data point should be source-referenced with clickable links."
+    "Do not modify app structure (routing/layout/root/build config) and do not perform a full rebuild.",
+    "Do not touch backend, canisters, or any non-UI logic; only controlled visual/content changes.",
+    "Internationalization must fallback to Portuguese when any translation key is missing.",
+    "Footer must use text/clickable links only (no certification/audit logos or official seals).",
+    "Any icons/assets must be placed under /assets/ and sized 16x16px or be scalable."
   ],
   "known_issues": [
-    "Footer images currently lack embedded/clickable source (attribution) links.",
-    "Application currently shows the name “Caffeine” but user does not want it displayed."
+    "English currently works only partially; other languages (ES/FR/DE) not yet created.",
+    "Footer with international references/links does not yet exist."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-a-new-dedicated-frontend-page-for-the-international-contact-lookup-module-route-ui-and-make-it-accessible-from-the-main-navigation-menu",
-      "title": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
+      "id": "feature-expand-the-internationalization-system-to-support-spanish-es-french-fr-and-german-de-while-guaranteeing-a-safe-fallback-to-portuguese-pt-for-any-missing-translation-key",
+      "title": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-extend-the-frontend-routing-to-include-the-new-international-lookup-page-without-breaking-existing-routes-consent-gate-behavior-and-spa-fallback-routing",
-      "title": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
+      "id": "feature-update-the-language-dropdown-so-it-always-lists-exactly-these-five-options-pt-en-es-fr-de-including-appropriate-native-language-names-and-selecting-an-option-updates-the-ui-language",
+      "title": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-integrate-extend-the-existing-antifraud-heuristics-engine-logic-to-compute-an-international-risk-score-using-automatic-phone-normalization-country-code-country-detection-by-prefix-for-phone-numbers-and-public-source-signals-reports-alerts-returned-by-providers-producing-low-medium-high-risk-status",
-      "title": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
+      "id": "feature-update-the-footer-to-include-a-professional-references-line-with-clickable-official-links-to-enisa-cisa-cncs-and-europol-while-preserving-the-existing-credit-by-hcoragem-and-the-internet-computer-credit",
+      "title": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
       "reqIds": [
-        "REQ-5"
+        "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-frontend-canister-interface-bindings-to-include-the-new-backend-method-s-and-wire-the-new-international-lookup-page-ui-to-call-the-backend-and-render-the-returned-structured-result",
-      "title": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
+      "id": "feature-ensure-the-updated-language-selector-and-footer-layout-remain-fully-responsive-on-mobile-and-desktop-and-ensure-any-images-icons-used-by-these-ui-elements-are-served-from-the-frontend-public-assets-path",
+      "title": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
       "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-any-visible-caffeine-branding-from-the-application-ui-and-metadata-wherever-it-currently-appears",
-      "title": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-make-footer-data-source-images-logos-clickable-with-embedded-attribution-source-links-while-preserving-correct-static-asset-paths-and-16x16-mobile-visibility",
-      "title": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
-      "reqIds": [
-        "REQ-8"
+        "REQ-4"
       ],
       "version": 1
     }
@@ -65,58 +51,19 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Create new frontend page “Pesquisa Internacional de Contactos” accessible from the main menu",
+      "summary": "Internationalization: add ES/FR/DE placeholders, show PT/EN/ES/FR/DE in dropdown, and fallback to Portuguese for missing keys",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Implement backend/canister intermediary to call external verification/abuse APIs without exposing API keys to the frontend",
+      "summary": "Footer: keep existing credits and add clickable reference links to ENISA, CISA, CNCS, and Europol; responsive layout; no certification logos; assets in /assets/ (16x16 or scalable)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Integrate external sources (NumVerify, OpenCnam, Spamhaus, PhishTank, HaveIBeenPwned, Banco de Portugal, CNCS, and other public country registries) and return detailed structured results with clickable source links",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Extend existing AntiFraud Heuristics Engine to process international contact signals (normalize +DDI, detect country by prefix, compute risk score low/medium/high, include public reports/alerts)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Remove the name/branding “Caffeine” from the application UI",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Add clickable source links to footer images (embed the image source/attribution links)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Implement a secure backend/canister intermediary method to perform an international contact lookup and return a detailed, structured, legally-compliant result that includes per-field source attribution URLs.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add backend support for provider configuration management so external API integrations can be enabled without exposing keys to the frontend.",
-      "reqIds": [
-        "REQ-4"
-      ],
       "status": "pending"
     }
   ],
-  "projectName": "International Contact Lookup module (secure backend intermediary + new page) with legal, source-referenced results",
+  "gameProjectType": "none",
+  "projectName": "Add ES/FR/DE i18n with PT fallback, expand language dropdown, and update responsive footer references",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

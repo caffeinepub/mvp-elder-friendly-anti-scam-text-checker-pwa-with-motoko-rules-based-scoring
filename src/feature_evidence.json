@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-dedicated-frontend-page-for-the-international-contact-lookup-module-route-ui-and-make-it-accessible-from-the-main-navigation-menu",
-      "featureTitle": "Add a new dedicated frontend page for the international contact lookup module (route + UI) and make it accessible from the main navigation menu.",
+      "featureId": "feature-expand-the-internationalization-system-to-support-spanish-es-french-fr-and-german-de-while-guaranteeing-a-safe-fallback-to-portuguese-pt-for-any-missing-translation-key",
+      "featureTitle": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
       "files": [
-        "frontend/src/components/AppLayout.tsx",
-        "frontend/src/components/InternationalContactSearchResult.tsx",
-        "frontend/src/i18n/translations.ts",
-        "frontend/src/pages/InternationalContactSearchPage.tsx"
+        "frontend/src/i18n/I18nProvider.tsx",
+        "frontend/src/i18n/translations.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -25,11 +23,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-extend-the-frontend-routing-to-include-the-new-international-lookup-page-without-breaking-existing-routes-consent-gate-behavior-and-spa-fallback-routing",
-      "featureTitle": "Extend the frontend routing to include the new international lookup page without breaking existing routes, consent-gate behavior, and SPA fallback routing.",
+      "featureId": "feature-update-the-language-dropdown-so-it-always-lists-exactly-these-five-options-pt-en-es-fr-de-including-appropriate-native-language-names-and-selecting-an-option-updates-the-ui-language",
+      "featureTitle": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/InternationalContactSearchPage.tsx"
+        "frontend/src/components/LanguageSelector.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -46,12 +43,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-integrate-extend-the-existing-antifraud-heuristics-engine-logic-to-compute-an-international-risk-score-using-automatic-phone-normalization-country-code-country-detection-by-prefix-for-phone-numbers-and-public-source-signals-reports-alerts-returned-by-providers-producing-low-medium-high-risk-status",
-      "featureTitle": "Integrate/extend the existing AntiFraud Heuristics Engine logic to compute an international risk score using: automatic phone normalization (+country code), country detection by prefix for phone numbers, and public-source signals (reports/alerts) returned by providers, producing low/medium/high risk status.",
+      "featureId": "feature-update-the-footer-to-include-a-professional-references-line-with-clickable-official-links-to-enisa-cisa-cncs-and-europol-while-preserving-the-existing-credit-by-hcoragem-and-the-internet-computer-credit",
+      "featureTitle": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
       "files": [
-        "frontend/src/components/InternationalContactSearchResult.tsx",
-        "frontend/src/i18n/translations.ts",
-        "frontend/src/pages/InternationalContactSearchPage.tsx"
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/i18n/translations.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -63,16 +59,16 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-3"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-frontend-canister-interface-bindings-to-include-the-new-backend-method-s-and-wire-the-new-international-lookup-page-ui-to-call-the-backend-and-render-the-returned-structured-result",
-      "featureTitle": "Update the frontend canister interface bindings to include the new backend method(s) and wire the new international lookup page UI to call the backend and render the returned structured result.",
+      "featureId": "feature-ensure-the-updated-language-selector-and-footer-layout-remain-fully-responsive-on-mobile-and-desktop-and-ensure-any-images-icons-used-by-these-ui-elements-are-served-from-the-frontend-public-assets-path",
+      "featureTitle": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
       "files": [
-        "frontend/src/hooks/useInternationalContactLookup.ts",
-        "frontend/src/pages/InternationalContactSearchPage.tsx"
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/LanguageSelector.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -84,48 +80,7 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-remove-any-visible-caffeine-branding-from-the-application-ui-and-metadata-wherever-it-currently-appears",
-      "featureTitle": "Remove any visible 'Caffeine' branding from the application UI and metadata wherever it currently appears.",
-      "files": [
-        "frontend/src/i18n/translations.ts",
-        "frontend/src/utils/seo.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-make-footer-data-source-images-logos-clickable-with-embedded-attribution-source-links-while-preserving-correct-static-asset-paths-and-16x16-mobile-visibility",
-      "featureTitle": "Make footer data-source images/logos clickable with embedded attribution/source links, while preserving correct static asset paths and 16x16 mobile visibility.",
-      "files": [
-        "frontend/src/components/Footer.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
+        "REQ-4"
       ],
       "confidence": "high"
     }

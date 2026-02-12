@@ -1,165 +1,86 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "International Contact Lookup frontend page + navigation + localized, source-attributed results",
+  "title": "Add ES/FR/DE i18n with PT fallback, expand language dropdown, and update responsive footer references",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Create a dedicated “International Contact Search” page with a single input, lookup CTA, and structured, source-attributed results; add it to the main navigation.",
+      "summary": "Extend i18n to support pt/en/es/fr/de with a guaranteed Portuguese fallback for missing translation keys.",
       "acceptanceCriteria": [
-        "A new route exists (e.g., `/international-contact-search`) and renders a dedicated page for international contact lookups.",
-        "The page is reachable from the main menu (desktop + mobile nav) via a new navigation item.",
-        "The page contains a single input that accepts phone number, email, or other contact identifiers (at minimum: phone + email), with a clear call-to-action to run the lookup.",
-        "The page renders a structured, detailed result view (not just a single risk label), including: risk status (low/medium/high), detected origin country (when applicable), a list of public sources with clickable links, and any public alert/report history returned by the backend.",
-        "All user-facing strings added for this page are localized via `frontend/src/i18n/translations.ts` (add keys; do not hardcode strings)."
+        "The app recognizes five language codes: pt, en, es, fr, de.",
+        "If a translation key is missing in the active language, the Portuguese value is shown instead of rendering undefined/blank.",
+        "Switching languages does not change routing, app layout structure, or build configuration.",
+        "No backend/canister changes are introduced."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "operation": "create",
-          "description": "Create the dedicated International Contact Search page UI. Use shadcn-ui components (e.g., Card/Input/Button/Alert/Separator/Badge) to provide the single contact input (phone/email at minimum), a clear lookup CTA, and a structured results view that can render risk level, numeric score, optional origin country, findings list with per-field source attribution links, and public alerts history. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/InternationalContactSearchResult.tsx",
-          "operation": "create",
-          "description": "Add a reusable result renderer for the International Contact Search page that presents a detailed, structured result (risk status, numeric score, contributing factors/explanation, origin country when present, findings with label/value/notes, and public alerts), ensuring every provided source URL is rendered as a clickable link with safe external-link attributes. Use shadcn-ui primitives for consistent styling. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/AppLayout.tsx",
-          "operation": "modify",
-          "description": "Add a new navigation item (desktop + mobile) pointing to `/international-contact-search` using a localized label from `frontend/src/i18n/translations.ts`, ensuring it appears in the main menu and highlights correctly for the active route."
-        },
-        {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Add new localization keys (in English per build request preference) for: navigation label, page title/description, input label/placeholder, CTA, loading/error/empty states, result section labels (risk level, risk score, origin country, findings, alerts, limitations/unavailable providers), and link labels. Do not hardcode strings in the new page/components."
+          "description": "Add ES/FR/DE language entries and ensure the exported Language type includes exactly: pt, en, es, fr, de. Add placeholder dictionaries for es/fr/de (partial is acceptable) while keeping Portuguese as the canonical full key set so it can act as the fallback baseline."
+        },
+        {
+          "path": "frontend/src/i18n/I18nProvider.tsx",
+          "operation": "modify",
+          "description": "Implement safe translation fallback behavior by composing the active language translations over the Portuguese baseline (e.g., merge pt + active) so any missing key in en/es/fr/de resolves to Portuguese. Also harden initial language selection so an unknown stored value safely falls back to 'pt' without runtime errors."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Wire the new international lookup page into SPA routing while preserving existing aliases, home redirect behavior, and the consent gate interaction block.",
+      "summary": "Update the language dropdown to always show PT/EN/ES/FR/DE with native names and switch UI language on selection.",
       "acceptanceCriteria": [
-        "`frontend/src/App.tsx` includes a route mapping for the new page in the switch block and preserves existing redirects/aliases.",
-        "Unknown routes still redirect to the existing home page behavior.",
-        "ConsentGateModal still blocks interaction until accepted, including on the new page."
+        "The language selector dropdown displays five options: PT, EN, ES, FR, DE.",
+        "The currently selected language is reflected in the dropdown trigger (desktop shows native name; mobile shows the 2-letter code).",
+        "Selecting ES/FR/DE works without runtime errors even if translations are placeholders."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/LanguageSelector.tsx",
           "operation": "modify",
-          "description": "Register the `/international-contact-search` route in the existing switch-based routing, keeping current legacy alias behavior and the default unknown-route fallback to Home. Ensure the new page is rendered inside the existing ConsentGateModal/pointer-events blocking wrapper so consent gating behavior remains unchanged."
-        },
-        {
-          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the page content is compatible with the global consent gate behavior (no special casing needed); rely on the existing App-level interaction block and avoid any direct DOM interaction that could bypass the gate."
+          "description": "Expand the languages list to exactly five options (pt/en/es/fr/de) with appropriate native names (e.g., Português, English, Español, Français, Deutsch) and ensure selection calls setLanguage with the correct code. Use the existing shadcn-ui DropdownMenu/Button components to keep behavior consistent; verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "On the new page, display backend-provided international scoring outputs (risk level + numeric score) and a human-readable explanation of key contributing factors, with clickable source links.",
+      "id": "REQ-3",
+      "summary": "Add a professional footer references line linking to ENISA, CISA, CNCS, and Europol while preserving existing credits and ICP section.",
       "acceptanceCriteria": [
-        "For phone inputs, the system normalizes into a consistent international format (E.164-style string with leading `+` when possible) before scoring and display.",
-        "For phone inputs, the system derives an origin country signal (at minimum: ISO country code or country name) based on prefix mapping and includes it in the structured result.",
-        "The backend’s final risk score and risk level incorporate: (a) heuristic signals (format anomalies, suspicious patterns) and (b) public-source/provider signals (presence on abuse lists, known alerts, etc.).",
-        "The frontend displays both the risk level (low/medium/high) and the numeric risk score along with a human-readable explanation of the main contributing factors.",
-        "The result rendering includes clickable links for every referenced source."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "operation": "modify",
-          "description": "Use existing contact detection/normalization utilities to normalize user input for display and backend calls (phone/email at minimum). For phone numbers, prefer displaying an E.164-style normalized string (leading `+` when possible) and surface origin country if present in the backend result."
-        },
-        {
-          "path": "frontend/src/components/InternationalContactSearchResult.tsx",
-          "operation": "modify",
-          "description": "Render risk level (low/medium/high) and numeric risk score prominently, and show a human-readable explanation/contributing factors section derived from backend-provided fields (and/or safely fall back to a generic explanation when unavailable). Ensure all referenced sources are clickable external links."
-        },
-        {
-          "path": "frontend/src/utils/contactInputHeuristics.ts",
-          "operation": "modify",
-          "description": "Extend/adjust phone normalization logic (if needed) to support E.164-style output for international numbers (leading `+` when possible) for the new international lookup flow, without breaking the existing Advanced Contact Lookup behavior."
-        },
-        {
-          "path": "frontend/src/i18n/translations.ts",
-          "operation": "modify",
-          "description": "Add localized strings (in English per build request preference) for risk/explanation labels and any contributing-factor messaging used by the international scoring UI."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Update frontend canister interface bindings for the new backend method(s) and wire the new page to call the backend using existing actor creation, with resilient loading/error handling.",
-      "acceptanceCriteria": [
-        "Frontend Candid/IDL typings used by the app are updated to include the new backend method(s) (without editing any files listed under `frontend/immutablePaths`).",
-        "The new page calls the backend method using the existing actor creation approach (compose with existing hooks; do not modify immutable hooks).",
-        "The UI shows loading and error states and never crashes on partial provider failures (backend returns structured ‘unavailable provider’ notes; frontend renders them)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/backend.idl.ts",
-          "operation": "modify",
-          "description": "Update the IDL service definition to include the new international contact lookup backend capability and any required related methods used by the new page. Keep the definitions aligned with the app’s actor creation approach and avoid touching any immutable paths."
-        },
-        {
-          "path": "frontend/src/backend.d.ts",
-          "operation": "modify",
-          "description": "Update/align TypeScript types (as used by the frontend) to include the structured international contact lookup result shape and the new method signature(s), matching the backend’s candid-exposed contract so the new page can be fully typed."
-        },
-        {
-          "path": "frontend/src/hooks/useInternationalContactLookup.ts",
-          "operation": "create",
-          "description": "Create a small hook that composes with the existing `useActor` hook to call the new backend lookup capability, returning typed loading/error/data states and shielding the UI from partial failures by normalizing missing fields into safe defaults."
-        },
-        {
-          "path": "frontend/src/pages/InternationalContactSearchPage.tsx",
-          "operation": "modify",
-          "description": "Wire the page to call the backend via `useInternationalContactLookup` (which uses the existing `useActor`), and implement loading + error + empty states. Ensure provider unavailability/partial failures are rendered as non-fatal notes rather than crashing the UI."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Remove any user-visible “Caffeine” branding from UI and metadata.",
-      "acceptanceCriteria": [
-        "No user-visible UI text contains the string “Caffeine”.",
-        "App title/metadata shown in the browser tab and/or in-app headings does not include “Caffeine”.",
-        "Existing desired branding (e.g., 'AntiFraud / by HCoragem') remains intact unless it currently includes 'Caffeine'."
+        "Footer still shows the existing 'by HCoragem' credit.",
+        "Footer still contains the existing Internet Computer/ICP reference section already present in the UI.",
+        "Footer includes the exact text line (localized or in English if not localized yet): 'References public cybersecurity advisories from:' followed by ENISA (EU), CISA (USA), CNCS (PT), Europol (EU) as clickable links to: https://www.enisa.europa.eu/, https://www.cisa.gov/, https://www.cncs.gov.pt/, https://www.europol.europa.eu/.",
+        "No certification/audit badges or official certification seals are added (text links only)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/i18n/translations.ts",
           "operation": "modify",
-          "description": "Audit and update any user-facing translation strings that might include “Caffeine” (directly or indirectly) and ensure new strings added for the international module do not introduce “Caffeine” branding."
+          "description": "Add a new translation key for the footer references prefix text (managed via translations per constraints), e.g., 'References public cybersecurity advisories from:' (English is acceptable). Ensure the key exists in pt and can be optionally overridden in en/es/fr/de."
         },
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/Footer.tsx",
           "operation": "modify",
-          "description": "Verify and, if necessary, adjust the HTML title and meta description so the browser tab/metadata does not include “Caffeine” while preserving desired branding ('AntiFraud / by HCoragem')."
-        },
-        {
-          "path": "frontend/src/utils/seo.ts",
-          "operation": "modify",
-          "description": "Verify runtime SEO title construction does not introduce “Caffeine” anywhere and continues to use the desired branding."
+          "description": "Add a new footer line that renders: 'References public cybersecurity advisories from:' followed by text-only links to ENISA, CISA, CNCS, and Europol using the exact URLs provided. Preserve existing 'by HCoragem' and the ICP credit section, and do not add any badge/seal imagery (links only)."
         }
       ]
     },
     {
-      "id": "REQ-8",
-      "summary": "Make footer provider/data-source images clickable with proper attribution links while keeping absolute asset paths and 16x16 mobile sizing.",
+      "id": "REQ-4",
+      "summary": "Ensure language selector and footer remain fully responsive and any icons/images used are served from frontend public /assets.",
       "acceptanceCriteria": [
-        "Each footer logo/image is wrapped in an accessible clickable link (`<a>` with `href`, `target=\"_blank\"`, and `rel=\"noreferrer\"`/`noopener`), pointing to the official source/attribution URL for that logo or provider.",
-        "Footer icons continue to load from absolute `/assets/...` paths (no relative imports) and render at exactly 16x16 pixels on mobile without 404s.",
-        "Footer layout remains responsive and readable on mobile and desktop after adding links."
+        "On small screens, the footer content wraps/aligns without overflow or overlapping elements.",
+        "On desktop screens, footer content remains readable and properly spaced.",
+        "Any images/icons referenced by these components resolve under /assets/ (including existing /assets subfolders) and render crisply at 16x16px when used as small icons."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Footer.tsx",
           "operation": "modify",
-          "description": "Wrap each footer logo/image (e.g., ICP, HaveIBeenPwned, PhishTank) in accessible external links to their official attribution/source pages using `<a href target=\"_blank\" rel=\"noreferrer noopener\">`. Preserve absolute `/assets/generated/...` paths (including: `/assets/generated/icp-logo-icon.dim_16x16.png`, `/assets/generated/haveibeenpwned-icon.dim_16x16.png`, `/assets/generated/phishtank-icon.dim_16x16.png`) and ensure icons remain exactly 16x16 on mobile."
+          "description": "Adjust footer layout classes to support wrapping and readable spacing across breakpoints (especially when the new references line is added), preventing overflow/overlap on mobile while keeping a clear horizontal layout on desktop. Keep existing icon image sources under /assets (e.g., /assets/generated/icp-logo-icon.dim_16x16.png, /assets/generated/haveibeenpwned-icon.dim_16x16.png, /assets/generated/phishtank-icon.dim_16x16.png)."
+        },
+        {
+          "path": "frontend/src/components/LanguageSelector.tsx",
+          "operation": "modify",
+          "description": "Validate responsive trigger behavior remains correct with five options (desktop shows native name; mobile shows code) and that no non-/assets images are introduced. Continue using the existing shadcn-ui dropdown primitives; verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -1,107 +1,48 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T12:32:07.885Z",
-  "summary": "The diff adds a new International Contact Search page with routing and nav entry, localized strings, a results component, and footer logos wrapped with attribution links. However, the backend API/methods and data model required by the spec (structured lookup response, provider config admin/query methods, and heuristic scoring performed in backend) are not evidenced in the diff summary, and the frontend binding/hook appears to call an existing/other backend method (getLookupDetails) rather than the required new lookup method signature/shape.",
+  "generatedAt": "2026-02-11T16:13:15.365Z",
+  "summary": "REQ-1 and REQ-2 appear implemented (5-language support + PT fallback, dropdown shows PT/EN/ES/FR/DE with native names and mobile code). Footer was updated and made responsive, but the diff is truncated, so the exact required references line and the full set of required official links (ENISA, CISA, CNCS, Europol) cannot be fully verified from the provided evidence. Some extra footer content (additional data source icons/links and Banco de Portugal link) was added beyond the request.",
   "missing_requirements": [
     {
       "id": "REQ-3",
-      "requirement": "Backend must expose a new Candid method for international contact lookup that accepts raw input + contactType (at minimum phone/email) and returns the specified structured response (normalizedContact, contactType, originCountry?, riskLevel, numericRiskScore, findings[], publicAlerts[], with per-field source attribution and limitations/derived markings).",
-      "reason": "backend/main.mo shows type additions (ContactDetails/ExtendedContactDetails/ProviderConfig) but the diff summary does not show any new public lookup method with the required inputs/outputs, nor the required findings/publicAlerts arrays, numericRiskScore range, or limitations/derived attribution behavior.",
+      "requirement": "Footer includes the exact text line 'References public cybersecurity advisories from:' followed by ENISA (EU), CISA (USA), CNCS (PT), Europol (EU) as clickable links to the specified official URLs, while preserving existing credits.",
+      "reason": "Footer code is truncated right after starting the ENISA link; the required exact prefix text and the presence of *all* required links (especially CISA and Europol in the references line) cannot be confirmed from the diff summary. CNCS is shown elsewhere (Portuguese entities row), but that is not sufficient evidence that CNCS is also included in the required references line.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/hooks/useInternationalContactLookup.ts"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Backend provider configuration management: admin-only method to set/update provider config (including keys) and a query method to list which providers are enabled (no secrets); handle missing provider config by returning a valid structured result indicating unavailable sources; add backend/migration.mo only if needed for state persistence.",
-      "reason": "backend/main.mo defines ProviderConfig and a providerConfigStore map, but the diff summary does not show any admin-only setter/update method, any query method returning enabled-provider metadata, nor behavior indicating unavailable providers in lookup responses; no migration file is shown.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Compute international risk score using backend heuristics: phone normalization to E.164 when possible, origin-country detection by prefix mapping, and incorporation of provider/public alerts into numeric risk score + low/medium/high level; frontend must show numeric score and human-readable main factors; clickable links for referenced sources.",
-      "reason": "Frontend normalizes/validates via contactInputHeuristics, but the requirement calls for backend scoring and origin derivation. The diff summary does not show backend normalization/country-prefix mapping/scoring logic, nor a structured explanation of contributing factors coming from backend (only a riskScoreDescription string in the shown type). Provider/public alert integration is also not evidenced.",
-      "evidence": [
-        "frontend/src/pages/InternationalContactSearchPage.tsx",
-        "frontend/src/hooks/useInternationalContactLookup.ts",
-        "backend/main.mo",
-        "frontend/src/components/InternationalContactSearchResult.tsx"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "requirement": "Update frontend canister interface bindings (IDL/typings) to include the new backend method(s) and wire the page to call them using existing actor creation approach; include loading/error handling; handle partial provider failures via structured unavailable-provider notes.",
-      "reason": "The new hook calls actor.getLookupDetails(normalizedContact) and does not pass raw input + contactType as required. The diff summary indicates frontend/src/backend.idl.ts still exposes analyzeText only, and frontend/src/backend.d.ts lists analyzeText/getPhoneReports/getCryptoReports—no new international lookup method or provider-config methods are evidenced. Partial provider failure notes are not shown in the returned type used by the hook.",
-      "evidence": [
-        "frontend/src/hooks/useInternationalContactLookup.ts",
-        "frontend-file-summaries.txt (frontend/src/backend.idl.ts)",
-        "frontend-file-summaries.txt (frontend/src/backend.d.ts)"
+        "frontend/src/components/Footer.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added/modified PWA/service worker install/registration and manifest-related behavior.",
-      "reason": "The BuildRequest does not ask for PWA install flow changes or service worker registration updates as part of the international lookup module or branding/footer requirements.",
+      "description": "Added a 'Public Data Sources' footer row with clickable icon links to HaveIBeenPwned and PhishTank (including /assets/generated icons).",
+      "reason": "BuildRequest footer changes only asked for a professional references line linking ENISA/CISA/CNCS/Europol while preserving existing credits/ICP reference; it did not request adding additional external data-source links or icons.",
       "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/public/manifest.webmanifest",
-        "frontend/src/pwa/install (referenced in App.tsx)"
+        "frontend/src/components/Footer.tsx"
       ]
     },
     {
-      "description": "Added SEO utility that sets document title as `${title} | AntiFraud / by HCoragem` and multiple pages call setSEO.",
-      "reason": "Runtime SEO/title/meta-description management was not requested (beyond removing 'Caffeine' branding).",
+      "description": "Added a 'Portuguese Public Entities' footer row linking Banco de Portugal and CNCS.",
+      "reason": "Not requested; requirement only mentions adding the specific cybersecurity advisories references line with ENISA/CISA/CNCS/Europol links.",
       "evidence": [
-        "frontend/src/utils/seo.ts",
-        "frontend/src/pages/InternationalContactSearchPage.tsx",
-        "frontend/src/pages/DocumentationPage.tsx",
-        "frontend/src/pages/HowItWorksPage.tsx",
-        "frontend/src/pages/MissionPage.tsx",
-        "frontend/src/pages/TermsPage.tsx",
-        "frontend/src/pages/PrivacyPage.tsx"
+        "frontend/src/components/Footer.tsx"
       ]
     },
     {
-      "description": "Added a frontend-only translateBackendResult dictionary-based translation utility.",
-      "reason": "Not requested by any REQ; i18n localization was required for the new page strings, but not a backend-result translation subsystem.",
+      "description": "Persisted selected language to sessionStorage under key 'app_language' and validated stored language against the allowed set.",
+      "reason": "Not explicitly requested in REQ-1/REQ-2 (they only require language switching and fallback behavior).",
       "evidence": [
-        "frontend/src/utils/translateBackendResult.ts"
-      ]
-    },
-    {
-      "description": "Significant documentation/PDF generation and documentation content restructuring updates.",
-      "reason": "Not part of the international contact lookup module requirements or the branding/footer requirements.",
-      "evidence": [
-        "frontend/src/pages/DocumentationPage.tsx",
-        "frontend/src/utils/documentationContent.ts"
+        "frontend/src/i18n/I18nProvider.tsx"
       ]
     }
   ],
-  "confidence": 0.66,
+  "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AppLayout.tsx",
     "frontend/src/components/Footer.tsx",
-    "frontend/src/components/InternationalContactSearchResult.tsx",
     "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/hooks/useInternationalContactLookup.ts",
+    "frontend/src/i18n/I18nProvider.tsx",
     "frontend/src/i18n/translations.ts",
-    "frontend/src/pages/DocumentationPage.tsx",
-    "frontend/src/pages/HowItWorksPage.tsx",
-    "frontend/src/pages/InternationalContactSearchPage.tsx",
-    "frontend/src/pages/MissionPage.tsx",
-    "frontend/src/pages/PrivacyPage.tsx",
-    "frontend/src/pages/TermsPage.tsx",
-    "frontend/src/utils/documentationContent.ts",
-    "frontend/src/utils/seo.ts",
-    "frontend/src/utils/translateBackendResult.ts",
     "project_state.json"
   ]
 }
