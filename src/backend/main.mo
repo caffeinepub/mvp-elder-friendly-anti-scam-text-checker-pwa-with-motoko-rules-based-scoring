@@ -7,6 +7,7 @@ import Text "mo:core/Text";
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 import List "mo:core/List";
+import Iter "mo:core/Iter";
 
 actor {
   // Feature flag boundary for PRO features
@@ -103,6 +104,20 @@ actor {
 
   // Additional state for future use
   let boolResponses = Map.empty<Text, Bool>();
+
+  // Terms of Service and Privacy Policy type definition
+  public type TermsDocument = {
+    version : Nat;
+    effectiveDate : Text;
+    content : Text; // JSON-encoded multilingual content
+  };
+
+  // Store the current Terms document
+  var currentTerms : TermsDocument = {
+    version = 1;
+    effectiveDate = "2024-04-27";
+    content = "{ \"default\": \"These are the terms of service and privacy policy. Please provide your preferred language names and texts.\" }";
+  };
 
   // User profile management functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -240,5 +255,101 @@ actor {
     };
 
     internationalContactLookup.get(key);
+  };
+
+  // Public endpoint to retrieve the current Terms and Privacy Policy
+  // No authorization required - terms must be publicly accessible
+  public query func getCurrentTerms() : async TermsDocument {
+    currentTerms;
+  };
+
+  // Admin-only: Update the Terms and Privacy Policy
+  public shared ({ caller }) func updateTerms(newTerms : TermsDocument) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update the terms");
+    };
+    currentTerms := newTerms;
+  };
+
+  // Risk Dictionary Definition
+  var riskDictionaryInitialized = false;
+  let riskDictionary = Map.empty<Text, [Text]>();
+
+  // Internal function to initialize risk dictionary (called once on first use)
+  func ensureRiskDictionaryInitialized() {
+    if (not riskDictionaryInitialized) {
+      riskDictionary.add("crpyto-related-high-risk", [
+        "cryptocurrency wallets",
+        "crypto trading exchanges",
+        "nft investment",
+        "blockchain brokerage",
+        "digital wallet options",
+        "altcoin storage",
+        "ico participation",
+        "token swapping",
+        "stablecoin platforms",
+        "erc20 tokens",
+        "defi lending",
+        "crypto hardware wallets"
+      ]);
+      riskDictionary.add("crypto-risks", [
+        "bitcoin hardware wallet",
+        "cryptocurrency protection",
+        "cold storage wallets",
+        "seed phrases",
+        "decentralized crypto apps",
+        "hot wallet risks",
+        "crypto security",
+        "multi-signature wallets",
+        "crypto phishing",
+        "token swap platforms",
+        "crypto transaction fees",
+        "crypto wallet compatibility"
+      ]);
+      riskDictionaryInitialized := true;
+    };
+  };
+
+  // Admin-only: Manual initialization of risk dictionary (for maintenance)
+  public shared ({ caller }) func initializeRiskDictionary() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can initialize the risk dictionary");
+    };
+    ensureRiskDictionaryInitialized();
+  };
+
+  // Helper function to count keyword matches in text
+  func countKeywordMatches(text : Text, keywords : [Text]) : Nat {
+    var matches = 0;
+    for (keyword in keywords.values()) {
+      if (text.contains(#text keyword)) {
+        matches += 1;
+      };
+    };
+    matches;
+  };
+
+  // Updated analyzeMessageText function with cumulative scoring
+  public query func analyzeMessageText(text : Text) : async Nat {
+    // No authorization required - this is a public analysis function
+    // Ensure risk dictionary is initialized
+    ensureRiskDictionaryInitialized();
+
+    // Start with a base score
+    var score = 0;
+
+    // Apply cumulative scoring from risk dictionary
+    for (entry in riskDictionary.entries()) {
+      let (_, keywords) = entry;
+      let matches = countKeywordMatches(text, keywords);
+      score += matches;
+    };
+
+    // Clamp the score to a maximum of 100
+    if (score > 100) {
+      score := 100;
+    };
+
+    score;
   };
 };

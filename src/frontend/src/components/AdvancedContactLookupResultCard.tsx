@@ -1,305 +1,210 @@
-// Result card component for Advanced Contact Lookup
-// Combines antifraud analysis with aggregated risk score (0-100) and public information section
-// Includes report action button that opens the report dialog with prefilled contact data
-
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  AlertTriangle, 
-  Shield, 
-  AlertCircle, 
-  ExternalLink, 
-  Info,
-  Calendar,
-  FileText,
-  WifiOff,
-  Flag,
-  TrendingUp
-} from 'lucide-react';
-import { useI18n } from '@/i18n/I18nProvider';
-import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
-import type { PublicContactInfo } from '@/utils/publicContactLookup';
+import { AlertTriangle, CheckCircle, Info, ExternalLink, Flag, Globe } from 'lucide-react';
 import { ReportSubmissionDialog } from './ReportSubmissionDialog';
+import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
+import type { ContactType } from '@/utils/contactInputHeuristics';
+import { deriveCountryFromPhone } from '@/utils/phoneCountry';
 
 interface AdvancedContactLookupResultCardProps {
-  antifraudResult: StructuredAnalysisResult;
-  publicInfo?: PublicContactInfo;
-  isOffline?: boolean;
-  fromCache?: boolean;
-  searchedContact?: string;
-  contactType?: 'phone' | 'email';
+  result: StructuredAnalysisResult;
+  detectedType: ContactType;
+  publicInfo: any;
+  input: string;
 }
 
-export function AdvancedContactLookupResultCard({ 
-  antifraudResult, 
+export function AdvancedContactLookupResultCard({
+  result,
+  detectedType,
   publicInfo,
-  isOffline = false,
-  fromCache = false,
-  searchedContact,
-  contactType
+  input
 }: AdvancedContactLookupResultCardProps) {
-  const { t } = useI18n();
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'High':
-        return 'destructive';
-      case 'Medium':
-        return 'default';
-      case 'Low':
-        return 'secondary';
-      default:
-        return 'default';
+      case 'High': return 'destructive';
+      case 'Medium': return 'default';
+      case 'Low': return 'outline';
+      default: return 'outline';
     }
   };
 
   const getRiskIcon = (risk: string) => {
     switch (risk) {
-      case 'High':
-        return <AlertTriangle className="h-5 w-5 text-destructive" />;
-      case 'Medium':
-        return <AlertCircle className="h-5 w-5 text-warning" />;
-      case 'Low':
-        return <Shield className="h-5 w-5 text-success" />;
-      default:
-        return <Shield className="h-5 w-5" />;
+      case 'High': return <AlertTriangle className="h-4 w-4" />;
+      case 'Medium': return <Info className="h-4 w-4" />;
+      case 'Low': return <CheckCircle className="h-4 w-4" />;
+      default: return <Info className="h-4 w-4" />;
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 60) return 'text-destructive';
-    if (score >= 30) return 'text-warning';
-    return 'text-success';
-  };
+  // Derive country for phone numbers
+  const derivedCountry = detectedType === 'phone' ? deriveCountryFromPhone(input) : null;
+
+  // Map detectedType to contactType for ReportSubmissionDialog
+  const reportContactType: 'phone' | 'email' | undefined = 
+    detectedType === 'phone' ? 'phone' : 
+    detectedType === 'email' ? 'email' : 
+    undefined;
 
   return (
-    <div className="space-y-4">
-      {/* Offline/Cache indicator */}
-      {(isOffline || fromCache) && (
-        <Alert>
-          <WifiOff className="h-4 w-4" />
-          <AlertDescription>
-            {t.advancedLookupOfflineIndicator}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Antifraud Analysis Section */}
-      <Card className="border-2">
+    <>
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            {getRiskIcon(antifraudResult.risk)}
-            {t.structuredResultTitle}
-          </CardTitle>
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                {getRiskIcon(result.risk)}
+                Analysis Result
+              </CardTitle>
+              <CardDescription>
+                Detected type: {detectedType}
+              </CardDescription>
+            </div>
+            <Badge variant={getRiskColor(result.risk)} className="text-sm">
+              {result.risk} ({result.riskScore}/100)
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Risk Level & Score */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {t.structuredRiskLabel}
-                </div>
-                <Badge variant={getRiskColor(antifraudResult.risk)} className="text-base px-3 py-1">
-                  {t[`structuredRisk${antifraudResult.risk}` as keyof typeof t] || antifraudResult.risk}
-                </Badge>
-              </div>
-              
-              <div className="space-y-2 text-right">
-                <div className="text-sm font-medium text-muted-foreground flex items-center gap-1 justify-end">
-                  <TrendingUp className="h-4 w-4" />
-                  Score
-                </div>
-                <div className={`text-3xl font-bold ${getScoreColor(antifraudResult.riskScore)}`}>
-                  {antifraudResult.riskScore}
-                  <span className="text-lg text-muted-foreground">/100</span>
-                </div>
-              </div>
+          {/* Risk Score Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium">Risk Score</span>
+              <span className="text-muted-foreground">{result.riskScore}/100</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all ${
+                  result.risk === 'High' ? 'bg-destructive' :
+                  result.risk === 'Medium' ? 'bg-warning' :
+                  'bg-success'
+                }`}
+                style={{ width: `${result.riskScore}%` }}
+              />
             </div>
           </div>
 
-          <Separator />
-
           {/* Explanation */}
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t.structuredExplanationLabel}
-            </div>
-            <p className="text-foreground leading-relaxed">
-              {antifraudResult.explanation}
-            </p>
+            <h4 className="font-medium text-sm">Explanation</h4>
+            <p className="text-sm text-muted-foreground">{result.explanation}</p>
           </div>
 
           {/* Recommendation */}
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t.structuredRecommendationLabel}
-            </div>
-            <p className="text-foreground leading-relaxed font-medium">
-              {antifraudResult.recommendation}
-            </p>
+            <h4 className="font-medium text-sm">Recommendation</h4>
+            <Alert variant={result.risk === 'High' ? 'destructive' : 'default'}>
+              <AlertDescription>{result.recommendation}</AlertDescription>
+            </Alert>
           </div>
 
-          <Separator className="my-4" />
+          {/* Public Information Section */}
+          {publicInfo && (
+            <div className="space-y-2 pt-4 border-t">
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Public Information
+              </h4>
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                {publicInfo.displayName && (
+                  <div>
+                    <span className="text-sm font-medium">Entity: </span>
+                    <span className="text-sm text-muted-foreground">{publicInfo.displayName}</span>
+                  </div>
+                )}
+                {publicInfo.summary && (
+                  <div>
+                    <span className="text-sm font-medium">Summary: </span>
+                    <span className="text-sm text-muted-foreground">{publicInfo.summary}</span>
+                  </div>
+                )}
+                {derivedCountry && (
+                  <div>
+                    <span className="text-sm font-medium">Country: </span>
+                    <span className="text-sm text-muted-foreground">{derivedCountry}</span>
+                  </div>
+                )}
+                {publicInfo.source && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Source:</span>
+                    <a
+                      href={publicInfo.sourceUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-primary hover:underline"
+                    >
+                      {publicInfo.source}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+                {publicInfo.asOf && (
+                  <div className="text-xs text-muted-foreground">
+                    As of: {publicInfo.asOf}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Public Sources */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <ExternalLink className="h-4 w-4" />
-              {t.transparencySourcesLabel}
-            </div>
-            <ul className="space-y-1.5 text-sm">
-              {antifraudResult.sources.map((source, index) => (
-                <li key={index}>
+          {result.sources && result.sources.length > 0 && (
+            <div className="space-y-2 pt-4 border-t">
+              <h4 className="font-medium text-sm">Public Sources</h4>
+              <div className="space-y-1">
+                {result.sources.map((source, idx) => (
                   <a
+                    key={idx}
                     href={source.url}
                     target="_blank"
-                    rel="noreferrer noopener"
-                    className="text-primary hover:underline inline-flex items-center gap-1"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary hover:underline"
                   >
-                    {source.name}
                     <ExternalLink className="h-3 w-3" />
+                    {source.name}
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Collaborative Basis */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              {t.transparencyCollaborativeBasisLabel}
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {antifraudResult.collaborativeBasis.statement}
+          <div className="pt-4 border-t">
+            <p className="text-xs text-muted-foreground italic">
+              {result.collaborativeBasis.statement}
             </p>
           </div>
 
-          <Separator className="my-4" />
-
-          {/* Report Action */}
-          <div className="pt-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setReportDialogOpen(true)}
-              disabled={!searchedContact || !contactType}
-            >
-              <Flag className="h-4 w-4 mr-2" />
-              {t.reportSuspiciousContactButton}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Public Information Section */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            {t.advancedLookupPublicInfoTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {publicInfo ? (
-            <>
-              {/* Display Name */}
-              {publicInfo.displayName && (
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {t.advancedLookupDisplayName}
-                  </div>
-                  <p className="text-foreground font-medium">
-                    {publicInfo.displayName}
-                  </p>
-                </div>
-              )}
-
-              {/* Summary */}
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {t.advancedLookupSummary}
-                </div>
-                <p className="text-foreground leading-relaxed">
-                  {publicInfo.summary}
-                </p>
-              </div>
-
-              {/* Details */}
-              {publicInfo.details && (
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {t.advancedLookupDetails}
-                  </div>
-                  <p className="text-foreground leading-relaxed">
-                    {publicInfo.details}
-                  </p>
-                </div>
-              )}
-
-              <Separator className="my-4" />
-
-              {/* Attribution */}
-              <div className="space-y-3">
-                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  {t.advancedLookupAttribution}
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-muted-foreground min-w-[80px]">
-                      {t.advancedLookupSource}:
-                    </span>
-                    {publicInfo.sourceUrl ? (
-                      <a
-                        href={publicInfo.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="text-primary hover:underline inline-flex items-center gap-1"
-                      >
-                        {publicInfo.source}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="text-foreground">{publicInfo.source}</span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {t.advancedLookupAsOf}:
-                    </span>
-                    <span className="text-foreground">{publicInfo.asOfDate}</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                {t.advancedLookupNoPublicInfo}
-              </AlertDescription>
-            </Alert>
+          {/* Report Action - only show for phone/email */}
+          {reportContactType && (
+            <div className="pt-4 border-t">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReportDialog(true)}
+                className="w-full"
+              >
+                <Flag className="mr-2 h-4 w-4" />
+                Report this contact
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Report Dialog */}
-      <ReportSubmissionDialog
-        open={reportDialogOpen}
-        onOpenChange={setReportDialogOpen}
-        prefilledContact={searchedContact}
-        contactType={contactType}
-      />
-    </div>
+      {reportContactType && (
+        <ReportSubmissionDialog
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+          prefilledContact={input}
+          contactType={reportContactType}
+        />
+      )}
+    </>
   );
 }

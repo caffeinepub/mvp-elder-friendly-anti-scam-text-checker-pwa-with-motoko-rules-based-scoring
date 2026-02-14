@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-expand-the-internationalization-system-to-support-spanish-es-french-fr-and-german-de-while-guaranteeing-a-safe-fallback-to-portuguese-pt-for-any-missing-translation-key",
-      "featureTitle": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
+      "featureId": "feature-extend-the-existing-message-text-analysis-logic-to-include-an-internal-risk-dictionary-object-with-severity-critical-and-risk-level-maximum-containing-the-provided-keyword-phrase-groups-and-apply-it-only-when-analyzing-message-text-not-phone-email-crypto-or-public-entity-lookups",
+      "featureTitle": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
       "files": [
-        "frontend/src/i18n/I18nProvider.tsx",
-        "frontend/src/i18n/translations.ts"
+        "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,10 +22,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-language-dropdown-so-it-always-lists-exactly-these-five-options-pt-en-es-fr-de-including-appropriate-native-language-names-and-selecting-an-option-updates-the-ui-language",
-      "featureTitle": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
+      "featureId": "feature-implement-cumulative-scoring-for-the-risk-dictionary-in-message-text-analysis-each-matched-keyword-phrase-occurrence-increases-the-message-risk-score-and-multiple-matches-increase-the-score-cumulatively-cap-clamp-the-final-message-risk-score-to-the-existing-scoring-range-e-g-0-100-without-changing-non-message-scoring-behaviors",
+      "featureTitle": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
       "files": [
-        "frontend/src/components/LanguageSelector.tsx"
+        "frontend/src/utils/antifraudTextNormalize.ts",
+        "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -43,11 +43,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-footer-to-include-a-professional-references-line-with-clickable-official-links-to-enisa-cisa-cncs-and-europol-while-preserving-the-existing-credit-by-hcoragem-and-the-internet-computer-credit",
-      "featureTitle": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
+      "featureId": "feature-enforce-the-public-phone-rule-override-in-the-phone-search-flow-when-a-searched-phone-number-is-identified-as-a-public-official-entity-always-display-entity-name-and-country-and-always-force-risk-level-to-low-with-risk-score-shown-as-0-regardless-of-any-other-heuristics-dictionary-scoring-this-override-must-not-affect-non-public-phone-results-and-must-not-affect-message-analysis",
+      "featureTitle": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
       "files": [
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/i18n/translations.ts"
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+        "frontend/src/utils/phoneCountry.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -60,27 +61,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-updated-language-selector-and-footer-layout-remain-fully-responsive-on-mobile-and-desktop-and-ensure-any-images-icons-used-by-these-ui-elements-are-served-from-the-frontend-public-assets-path",
-      "featureTitle": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
-      "files": [
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/LanguageSelector.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

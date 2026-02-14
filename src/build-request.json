@@ -1,93 +1,101 @@
 {
   "kind": "build_request",
-  "title": "Add ES/FR/DE i18n with PT fallback, expand language dropdown, and update responsive footer references",
+  "title": "Incremental AntiFraud message dictionary scoring + public phone LOW override (logic-only patch)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
-      "target": "frontend",
+      "text": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-1"
         ],
         "quotes": [
-          "Restaurar e criar os idiomas ES, FR, DE com fallback seguro para Português"
+          "Extend the existing message analysis module by adding a risk_dictionary with severity=\"critical\" and risk_level=\"maximum\". This dictionary must affect ONLY message text analysis.",
+          "Do not alter scoring behavior for phone, crypto, email or public entity lookups."
         ]
       },
       "acceptanceCriteria": [
-        "The app recognizes five language codes: pt, en, es, fr, de.",
-        "If a translation key is missing in the active language, the Portuguese value is shown instead of rendering undefined/blank.",
-        "Switching languages does not change routing, app layout structure, or build configuration.",
-        "No backend/canister changes are introduced."
+        "A `risk_dictionary` exists in the message analysis module with fields `severity: \"critical\"` and `risk_level: \"maximum\"` and includes all keywords/phrases provided in the request (grouped as given).",
+        "Dictionary matching is applied only for message text analysis paths; phone/email/crypto analysis results remain unchanged for the same inputs compared to pre-patch behavior.",
+        "No persistence is added for analyzed message content; analysis remains in-memory only.",
+        "Backend API surface (existing methods/types) remains unchanged; only internal message analysis logic is updated."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
-      "target": "frontend",
+      "text": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-1"
         ],
         "quotes": [
-          "Garantir dropdown com PT, EN, ES, FR, DE"
+          "Each listed keyword increases risk score. Multiple keywords increase score cumulatively."
         ]
       },
       "acceptanceCriteria": [
-        "The language selector dropdown displays five options: PT, EN, ES, FR, DE.",
-        "The currently selected language is reflected in the dropdown trigger (desktop shows native name; mobile shows the 2-letter code).",
-        "Selecting ES/FR/DE works without runtime errors even if translations are placeholders."
+        "For message text analysis, adding more distinct dictionary keywords/phrases to the input increases the computed risk score monotonically (cumulative effect).",
+        "Repeated occurrences of a listed keyword/phrase increase the score cumulatively (occurrence-based), per the request.",
+        "Final message risk score remains within the existing score bounds used by the app (no overflow), and message risk level mapping continues to function."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
+      "text": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-1"
         ],
         "quotes": [
-          "Rodapé atualizado com referências públicas legais (ENISA, CISA, CNCS, Europol), links clicáveis"
+          "When a searched phone number is identified as a public or official entity: Always display entity name and country. Always display risk level = 0% (LOW). Never escalate public official numbers to high or critical. This rule overrides dictionary logic."
         ]
       },
       "acceptanceCriteria": [
-        "Footer still shows the existing 'by HCoragem' credit.",
-        "Footer still contains the existing Internet Computer/ICP reference section already present in the UI.",
-        "Footer includes the exact text line (localized or in English if not localized yet): 'References public cybersecurity advisories from:' followed by ENISA (EU), CISA (USA), CNCS (PT), Europol (EU) as clickable links to: https://www.enisa.europa.eu/, https://www.cisa.gov/, https://www.cncs.gov.pt/, https://www.europol.europa.eu/.",
-        "No certification/audit badges or official certification seals are added (text links only)."
+        "When `public/official entity` detection is true for a phone lookup, the UI shows the entity name and country and shows risk as LOW with score 0/100 (0%).",
+        "For the same public/official phone lookup, risk is never displayed as Medium/High/Critical, even if other risk signals (e.g., reports, heuristics) would otherwise elevate it.",
+        "Non-public phone lookups display risk exactly as before this patch.",
+        "Message analysis risk behavior is unaffected by this phone override (separate code paths)."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
-      "target": "frontend",
+      "text": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere in user-facing text, metadata, or visible code as part of this patch.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-1"
         ],
         "quotes": [
-          "Layout totalmente responsivo, imagens em /assets/"
+          "Apply incremental logic update only. Do NOT rebuild the application. Do NOT recreate pages. Do NOT modify existing layout, seals, research modules, crypto search, email analysis or phone search.",
+          "No persistence. No backend structure changes. No authentication changes. Logic patch only.",
+          "Do not include the name “Caffeine” anywhere in the application, footer, metadata or visible code."
         ]
       },
       "acceptanceCriteria": [
-        "On small screens, the footer content wraps/aligns without overflow or overlapping elements.",
-        "On desktop screens, footer content remains readable and properly spaced.",
-        "Any images/icons referenced by these components resolve under /assets/ (including existing /assets subfolders) and render crisply at 16x16px when used as small icons."
+        "No new routes/pages/layout components are added or recreated as part of this change; only the targeted analysis logic is modified.",
+        "No new backend stable variables/tables are added; no schema/state migrations are introduced.",
+        "No authentication/Internet Identity-related code is changed.",
+        "A repository-wide check confirms the patch did not introduce the literal string \"Caffeine\" in frontend user-facing text, HTML metadata, or source code comments/identifiers intended to be visible."
       ]
     }
   ],
   "constraints": [
-    "Do not modify the backend (no Motoko changes, no canister changes).",
-    "Do not perform a structural rebuild of the app (no routing, root, or build config refactors).",
-    "Do not edit any files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT; only compose/use them.",
-    "Use English for any new user-facing text added as part of this change unless it is managed via translations."
+    "Do not rebuild or recreate the application/pages; apply an incremental logic-only patch.",
+    "Do not modify existing layout, seals, research modules, crypto search, email analysis, or phone search behavior except the explicit public-phone LOW override rule.",
+    "No persistence and no backend structure/schema changes; no authentication changes.",
+    "The risk_dictionary must affect ONLY message text analysis.",
+    "Public/official phone numbers must always display entity name and country and must always remain LOW at 0% risk, overriding other logic.",
+    "Do not include the name “Caffeine” anywhere in the application, footer, metadata, or visible code.",
+    "Use English for any user-facing text introduced or modified by this patch."
   ],
   "nonGoals": [
-    "Providing fully translated ES/FR/DE copy across the entire app (placeholders are acceptable for this step).",
-    "Adding new pages, new navigation routes, or new backend APIs.",
-    "Adding certification logos or claims of certification in the footer."
+    "Adding new UI pages (including /antifraud) or changing existing navigation/layout.",
+    "Changing scoring thresholds/weights for email/phone/crypto lookups (other than forcing public phones to 0% LOW).",
+    "Adding databases, persistence, or storing analyzed message content.",
+    "Introducing new authentication or identity flows."
   ],
   "imageRequirements": {
     "required": [],

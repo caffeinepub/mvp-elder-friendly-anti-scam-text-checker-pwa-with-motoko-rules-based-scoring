@@ -98,6 +98,17 @@ export interface FieldSource {
     value: string;
     sourceUrl: string;
 }
+export interface TermsDocument {
+    content: string;
+    version: bigint;
+    effectiveDate: string;
+}
+export interface ProviderConfig {
+    endpoint?: string;
+    name: LookupProvider;
+    enabled: boolean;
+    apiKey?: string;
+}
 export type LookupProvider = {
     __kind__: "numLookup";
     numLookup: null;
@@ -111,12 +122,6 @@ export type LookupProvider = {
     __kind__: "amazon";
     amazon: null;
 };
-export interface ProviderConfig {
-    endpoint?: string;
-    name: LookupProvider;
-    enabled: boolean;
-    apiKey?: string;
-}
 export interface ContactDetails {
     id: string;
     verified: string;
@@ -150,22 +155,26 @@ export enum UserRole {
 }
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    analyzeMessageText(text: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCryptoReports(address: string): Promise<void>;
     clearPhoneReports(phone: string): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCryptoReports(address: string): Promise<bigint | null>;
+    getCurrentTerms(): Promise<TermsDocument>;
     getLookupDetails(key: string): Promise<ExtendedContactDetails | null>;
     getPhoneReports(phone: string): Promise<bigint | null>;
     getProviderConfig(name: string): Promise<ProviderConfig | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserRole(user: Principal): Promise<UserRole>;
+    initializeRiskDictionary(): Promise<void>;
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     report(targetType: TargetType, target: string, category: string | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setProviderConfig(name: string, config: ProviderConfig): Promise<void>;
+    updateTerms(newTerms: TermsDocument): Promise<void>;
 }
 import type { ContactDetails as _ContactDetails, ExtendedContactDetails as _ExtendedContactDetails, FieldSource as _FieldSource, LookupProvider as _LookupProvider, ProviderConfig as _ProviderConfig, TargetType as _TargetType, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -181,6 +190,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            return result;
+        }
+    }
+    async analyzeMessageText(arg0: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.analyzeMessageText(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.analyzeMessageText(arg0);
             return result;
         }
     }
@@ -268,6 +291,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getCurrentTerms(): Promise<TermsDocument> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCurrentTerms();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCurrentTerms();
+            return result;
+        }
+    }
     async getLookupDetails(arg0: string): Promise<ExtendedContactDetails | null> {
         if (this.processError) {
             try {
@@ -338,6 +375,20 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
         }
     }
+    async initializeRiskDictionary(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.initializeRiskDictionary();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.initializeRiskDictionary();
+            return result;
+        }
+    }
     async isAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -405,6 +456,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.setProviderConfig(arg0, to_candid_ProviderConfig_n22(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async updateTerms(arg0: TermsDocument): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateTerms(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateTerms(arg0);
             return result;
         }
     }

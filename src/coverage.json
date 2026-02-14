@@ -1,76 +1,81 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T16:13:15.368Z",
+  "generatedAt": "2026-02-14T15:38:46.528Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 4,
-    "implemented": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Expand the internationalization system to support Spanish (ES), French (FR), and German (DE) while guaranteeing a safe fallback to Portuguese (PT) for any missing translation key.",
+        "summary": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/i18n/I18nProvider.tsx"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ],
         "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/i18n/I18nProvider.tsx"
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the language dropdown so it always lists exactly these five options: PT, EN, ES, FR, DE (including appropriate native language names), and selecting an option updates the UI language.",
+        "summary": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/LanguageSelector.tsx"
+          "frontend/src/utils/antifraudTextNormalize.ts",
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/LanguageSelector.tsx"
+          "frontend/src/utils/antifraudTextNormalize.ts",
+          "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Update the footer to include a professional references line with clickable official links to ENISA, CISA, CNCS, and Europol, while preserving the existing credit 'by HCoragem' and the Internet Computer credit.",
+        "summary": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/utils/phoneCountry.ts",
+          "frontend/src/components/AdvancedContactLookup.tsx",
+          "frontend/src/components/AdvancedContactLookupResultCard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/i18n/translations.ts",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/utils/phoneCountry.ts",
+          "frontend/src/components/AdvancedContactLookup.tsx",
+          "frontend/src/components/AdvancedContactLookupResultCard.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Ensure the updated language selector and footer layout remain fully responsive on mobile and desktop, and ensure any images/icons used by these UI elements are served from the frontend public /assets/ path.",
-        "status": "implemented",
+        "summary": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere in user-facing text, metadata, or visible code as part of this patch.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/LanguageSelector.tsx"
+          "frontend/scripts/check-prohibited-literals.mjs",
+          "frontend/scripts/restart-live-integration.mjs"
         ],
-        "matchedFiles": [
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/LanguageSelector.tsx"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/i18n/I18nProvider.tsx",
-    "frontend/src/i18n/translations.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AdvancedContactLookup.tsx",
+    "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/utils/phoneCountry.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

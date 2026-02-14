@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useI18n } from '../i18n/I18nProvider';
-import { useSimpleRouter } from '../router/useSimpleRouter';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogAction,
-} from './ui/alert-dialog';
-import { Checkbox } from './ui/checkbox';
-import { Button } from './ui/button';
-import { Label } from './ui/label';
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useI18n } from '@/i18n/I18nProvider';
+import { useSimpleRouter } from '@/router/useSimpleRouter';
+import { useConsentGate } from '@/hooks/useConsentGate';
 
 interface ConsentGateModalProps {
   open: boolean;
@@ -22,16 +21,17 @@ interface ConsentGateModalProps {
 export function ConsentGateModal({ open, onAccept }: ConsentGateModalProps) {
   const { t } = useI18n();
   const { navigate } = useSimpleRouter();
+  const { currentVersion } = useConsentGate();
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  // Reset checkboxes when modal opens
-  useEffect(() => {
-    if (open) {
-      setCookiesAccepted(false);
-      setTermsAccepted(false);
+  const canAccept = cookiesAccepted && termsAccepted;
+
+  const handleAccept = () => {
+    if (canAccept) {
+      onAccept();
     }
-  }, [open]);
+  };
 
   const handleViewTerms = () => {
     navigate('/terms');
@@ -41,103 +41,90 @@ export function ConsentGateModal({ open, onAccept }: ConsentGateModalProps) {
     navigate('/privacy');
   };
 
-  const handleAccept = () => {
-    if (cookiesAccepted && termsAccepted) {
-      onAccept();
-    }
-  };
-
-  const canAccept = cookiesAccepted && termsAccepted;
-
-  // Prevent ESC key from closing the modal
-  const handleEscapeKeyDown = (e: KeyboardEvent) => {
-    e.preventDefault();
-  };
-
   return (
-    <AlertDialog open={open}>
+    <AlertDialog open={open} onOpenChange={() => {}}>
       <AlertDialogContent
-        className="max-w-md"
-        onEscapeKeyDown={handleEscapeKeyDown}
+        className="max-w-2xl"
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl font-bold text-center">
-            {t.consentModalTitle}
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-center text-base">
+          <AlertDialogTitle className="text-2xl">{t.consentModalTitle}</AlertDialogTitle>
+          <AlertDialogDescription className="text-base">
             {t.consentModalDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="cookies-consent"
-              checked={cookiesAccepted}
-              onCheckedChange={(checked) => setCookiesAccepted(checked === true)}
-              aria-label={t.consentCookiesLabel}
-            />
-            <Label
-              htmlFor="cookies-consent"
-              className="text-sm font-medium leading-relaxed cursor-pointer"
-            >
-              {t.consentCookiesLabel}
-            </Label>
+        <div className="space-y-6 py-4">
+          {/* Version info */}
+          <div className="p-3 bg-muted/50 rounded-lg border border-border">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t.consentVersionLabel}:</span>
+              <span className="font-mono font-semibold">{currentVersion}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm mt-1">
+              <span className="text-muted-foreground">{t.consentEffectiveDateLabel}:</span>
+              <span className="font-semibold">{t.termsEffectiveDate}</span>
+            </div>
           </div>
 
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="terms-consent"
-              checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-              aria-label={t.consentTermsLabel}
-            />
-            <Label
-              htmlFor="terms-consent"
-              className="text-sm font-medium leading-relaxed cursor-pointer"
-            >
-              {t.consentTermsLabel}
-            </Label>
-          </div>
-
-          <div className="pt-2 space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {t.consentReadBeforeAccepting}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleViewTerms}
-                className="flex-1"
+          {/* Checkboxes */}
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="cookies"
+                checked={cookiesAccepted}
+                onCheckedChange={(checked) => setCookiesAccepted(checked === true)}
+              />
+              <label
+                htmlFor="cookies"
+                className="text-sm leading-relaxed cursor-pointer select-none"
               >
+                {t.consentCookiesLabel}
+              </label>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm leading-relaxed cursor-pointer select-none"
+              >
+                {t.consentTermsLabel}
+              </label>
+            </div>
+          </div>
+
+          {/* Read documents */}
+          <div className="p-4 bg-muted/30 rounded-lg border border-border">
+            <p className="text-sm font-medium mb-3">{t.consentReadBeforeAccepting}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={handleViewTerms}>
                 {t.consentViewTermsButton}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleViewPrivacy}
-                className="flex-1"
-              >
+              <Button variant="outline" size="sm" onClick={handleViewPrivacy}>
                 {t.consentViewPrivacyButton}
               </Button>
             </div>
           </div>
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogAction
+        <AlertDialogFooter className="flex-col sm:flex-row gap-3">
+          <p className="text-xs text-muted-foreground text-center sm:text-left flex-1">
+            {t.consentFooterNote}
+          </p>
+          <Button
             onClick={handleAccept}
             disabled={!canAccept}
-            className="w-full"
+            size="lg"
+            className="w-full sm:w-auto"
           >
             {t.consentAcceptButton}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
-
-        <p className="text-xs text-center text-muted-foreground pt-2">
-          {t.consentFooterNote}
-        </p>
       </AlertDialogContent>
     </AlertDialog>
   );

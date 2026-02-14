@@ -47,28 +47,37 @@ export interface ProviderConfig {
 export type TargetType = { 'email' : null } |
   { 'crypto' : null } |
   { 'phoneNumber' : null };
+export interface TermsDocument {
+  'content' : string,
+  'version' : bigint,
+  'effectiveDate' : string,
+}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'analyzeMessageText' : ActorMethod<[string], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearCryptoReports' : ActorMethod<[string], undefined>,
   'clearPhoneReports' : ActorMethod<[string], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCryptoReports' : ActorMethod<[string], [] | [bigint]>,
+  'getCurrentTerms' : ActorMethod<[], TermsDocument>,
   'getLookupDetails' : ActorMethod<[string], [] | [ExtendedContactDetails]>,
   'getPhoneReports' : ActorMethod<[string], [] | [bigint]>,
   'getProviderConfig' : ActorMethod<[string], [] | [ProviderConfig]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserRole' : ActorMethod<[Principal], UserRole>,
+  'initializeRiskDictionary' : ActorMethod<[], undefined>,
   'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'report' : ActorMethod<[TargetType, string, [] | [string]], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setProviderConfig' : ActorMethod<[string, ProviderConfig], undefined>,
+  'updateTerms' : ActorMethod<[TermsDocument], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

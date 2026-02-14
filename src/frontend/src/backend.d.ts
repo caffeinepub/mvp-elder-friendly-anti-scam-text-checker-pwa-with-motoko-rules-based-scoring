@@ -16,6 +16,17 @@ export interface FieldSource {
     value: string;
     sourceUrl: string;
 }
+export interface TermsDocument {
+    content: string;
+    version: bigint;
+    effectiveDate: string;
+}
+export interface ProviderConfig {
+    endpoint?: string;
+    name: LookupProvider;
+    enabled: boolean;
+    apiKey?: string;
+}
 export type LookupProvider = {
     __kind__: "numLookup";
     numLookup: null;
@@ -29,12 +40,6 @@ export type LookupProvider = {
     __kind__: "amazon";
     amazon: null;
 };
-export interface ProviderConfig {
-    endpoint?: string;
-    name: LookupProvider;
-    enabled: boolean;
-    apiKey?: string;
-}
 export interface ContactDetails {
     id: string;
     verified: string;
@@ -67,20 +72,24 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    analyzeMessageText(text: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCryptoReports(address: string): Promise<void>;
     clearPhoneReports(phone: string): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCryptoReports(address: string): Promise<bigint | null>;
+    getCurrentTerms(): Promise<TermsDocument>;
     getLookupDetails(key: string): Promise<ExtendedContactDetails | null>;
     getPhoneReports(phone: string): Promise<bigint | null>;
     getProviderConfig(name: string): Promise<ProviderConfig | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserRole(user: Principal): Promise<UserRole>;
+    initializeRiskDictionary(): Promise<void>;
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     report(targetType: TargetType, target: string, category: string | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setProviderConfig(name: string, config: ProviderConfig): Promise<void>;
+    updateTerms(newTerms: TermsDocument): Promise<void>;
 }

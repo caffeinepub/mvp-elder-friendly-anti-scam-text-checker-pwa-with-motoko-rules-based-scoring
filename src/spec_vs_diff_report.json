@@ -1,48 +1,70 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T16:13:15.365Z",
-  "summary": "REQ-1 and REQ-2 appear implemented (5-language support + PT fallback, dropdown shows PT/EN/ES/FR/DE with native names and mobile code). Footer was updated and made responsive, but the diff is truncated, so the exact required references line and the full set of required official links (ENISA, CISA, CNCS, Europol) cannot be fully verified from the provided evidence. Some extra footer content (additional data source icons/links and Banco de Portugal link) was added beyond the request.",
+  "generatedAt": "2026-02-14T15:38:46.523Z",
+  "summary": "Diff adds a new internal risk_dictionary in structuredFraudAnalysis and introduces new text-normalization/occurrence-count utilities, plus a new phone-to-country derivation helper. However, the required Public Phone Rule override (force LOW at 0% and always show entity name + country) is not evidenced as implemented, and the patch appears to modify backend/main.mo despite constraints calling for a logic-only patch without backend changes. Also, it is not clearly evidenced that the risk_dictionary is applied only to message-text analysis (and not to phone/email/crypto paths) nor that the final message score is clamped within the existing bounds.",
   "missing_requirements": [
     {
       "id": "REQ-3",
-      "requirement": "Footer includes the exact text line 'References public cybersecurity advisories from:' followed by ENISA (EU), CISA (USA), CNCS (PT), Europol (EU) as clickable links to the specified official URLs, while preserving existing credits.",
-      "reason": "Footer code is truncated right after starting the ENISA link; the required exact prefix text and the presence of *all* required links (especially CISA and Europol in the references line) cannot be confirmed from the diff summary. CNCS is shown elsewhere (Portuguese entities row), but that is not sufficient evidence that CNCS is also included in the required references line.",
+      "requirement": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
+      "reason": "The UI still renders risk and score directly from `result` (e.g., `{result.risk} ({result.riskScore}/100)` and risk bar width `${result.riskScore}%`) with no conditional override when `publicInfo.isPublicEntity` is true. While a country can be derived, there is no evidence that entity name+country are always displayed for public entities or that risk is forced to LOW/0%.",
       "evidence": [
-        "frontend/src/components/Footer.tsx (truncated)"
+        "frontend/src/components/AdvancedContactLookup.tsx",
+        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+        "frontend/src/utils/phoneCountry.ts"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
+      "reason": "A `risk_dictionary` object with the specified fields is present, but the diff excerpt does not show the gating/usage logic that ensures dictionary matching affects ONLY message-text analysis and not other analysis paths within the same analysis module.",
+      "evidence": [
+        "frontend/src/utils/structuredFraudAnalysis.ts"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
+      "reason": "Utilities for occurrence-based counting exist (`countKeywordOccurrences`), but the diff excerpt does not show the scoring integration that (a) applies counts to the message risk score cumulatively, and (b) clamps the final score to the app’s scoring range (0–100).",
+      "evidence": [
+        "frontend/src/utils/antifraudTextNormalize.ts",
+        "frontend/src/utils/structuredFraudAnalysis.ts"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere.",
+      "reason": "The diff indicates `backend/main.mo` was modified, which conflicts with the constraint to avoid backend structure/schema/auth changes and apply a logic-only patch. The provided excerpt does not clarify what was changed, so compliance is not evidenced.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added a 'Public Data Sources' footer row with clickable icon links to HaveIBeenPwned and PhishTank (including /assets/generated icons).",
-      "reason": "BuildRequest footer changes only asked for a professional references line linking ENISA/CISA/CNCS/Europol while preserving existing credits/ICP reference; it did not request adding additional external data-source links or icons.",
+      "description": "Added advanced phrase-pattern matching utilities (partial matching within a window) and phrase occurrence counting beyond simple keyword matching.",
+      "reason": "The BuildRequest asks for cumulative scoring based on keyword/phrase occurrences from a provided dictionary for message text analysis, but does not request implementing a new partial-matching phrase-pattern engine/window-based matching behavior.",
       "evidence": [
-        "frontend/src/components/Footer.tsx"
+        "frontend/src/utils/antifraudTextNormalize.ts"
       ]
     },
     {
-      "description": "Added a 'Portuguese Public Entities' footer row linking Banco de Portugal and CNCS.",
-      "reason": "Not requested; requirement only mentions adding the specific cybersecurity advisories references line with ENISA/CISA/CNCS/Europol links.",
+      "description": "Added a standalone phone country derivation utility with a hardcoded country calling code list.",
+      "reason": "The request requires that public/official phone numbers display entity name and country, but does not specify implementing country derivation from E.164 prefixes via a new utility module (this is additional implementation not explicitly requested, though it may support REQ-3).",
       "evidence": [
-        "frontend/src/components/Footer.tsx"
-      ]
-    },
-    {
-      "description": "Persisted selected language to sessionStorage under key 'app_language' and validated stored language against the allowed set.",
-      "reason": "Not explicitly requested in REQ-1/REQ-2 (they only require language switching and fallback behavior).",
-      "evidence": [
-        "frontend/src/i18n/I18nProvider.tsx"
+        "frontend/src/utils/phoneCountry.ts"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/LanguageSelector.tsx",
-    "frontend/src/i18n/I18nProvider.tsx",
-    "frontend/src/i18n/translations.ts",
+    "frontend/src/components/AdvancedContactLookup.tsx",
+    "frontend/src/components/AdvancedContactLookupResultCard.tsx",
+    "frontend/src/utils/antifraudTextNormalize.ts",
+    "frontend/src/utils/phoneCountry.ts",
+    "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json"
   ]
 }

@@ -14,6 +14,11 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const TermsDocument = IDL.Record({
+  'content' : IDL.Text,
+  'version' : IDL.Nat,
+  'effectiveDate' : IDL.Text,
+});
 export const LookupProvider = IDL.Variant({
   'numLookup' : IDL.Null,
   'custom' : IDL.Text,
@@ -61,12 +66,14 @@ export const TargetType = IDL.Variant({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'analyzeMessageText' : IDL.Func([IDL.Text], [IDL.Nat], ['query']),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'clearCryptoReports' : IDL.Func([IDL.Text], [], []),
   'clearPhoneReports' : IDL.Func([IDL.Text], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCryptoReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+  'getCurrentTerms' : IDL.Func([], [TermsDocument], ['query']),
   'getLookupDetails' : IDL.Func(
       [IDL.Text],
       [IDL.Opt(ExtendedContactDetails)],
@@ -84,11 +91,13 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getUserRole' : IDL.Func([IDL.Principal], [UserRole], ['query']),
+  'initializeRiskDictionary' : IDL.Func([], [], []),
   'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'report' : IDL.Func([TargetType, IDL.Text, IDL.Opt(IDL.Text)], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setProviderConfig' : IDL.Func([IDL.Text, ProviderConfig], [], []),
+  'updateTerms' : IDL.Func([TermsDocument], [], []),
 });
 
 export const idlInitArgs = [];
@@ -100,6 +109,11 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const TermsDocument = IDL.Record({
+    'content' : IDL.Text,
+    'version' : IDL.Nat,
+    'effectiveDate' : IDL.Text,
+  });
   const LookupProvider = IDL.Variant({
     'numLookup' : IDL.Null,
     'custom' : IDL.Text,
@@ -147,12 +161,14 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'analyzeMessageText' : IDL.Func([IDL.Text], [IDL.Nat], ['query']),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'clearCryptoReports' : IDL.Func([IDL.Text], [], []),
     'clearPhoneReports' : IDL.Func([IDL.Text], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCryptoReports' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
+    'getCurrentTerms' : IDL.Func([], [TermsDocument], ['query']),
     'getLookupDetails' : IDL.Func(
         [IDL.Text],
         [IDL.Opt(ExtendedContactDetails)],
@@ -170,11 +186,13 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getUserRole' : IDL.Func([IDL.Principal], [UserRole], ['query']),
+    'initializeRiskDictionary' : IDL.Func([], [], []),
     'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'report' : IDL.Func([TargetType, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setProviderConfig' : IDL.Func([IDL.Text, ProviderConfig], [], []),
+    'updateTerms' : IDL.Func([TermsDocument], [], []),
   });
 };
 

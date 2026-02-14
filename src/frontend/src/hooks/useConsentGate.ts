@@ -1,54 +1,49 @@
 import { useState, useEffect } from 'react';
 
-// Consent version - bump this to force re-consent
-const CONSENT_VERSION = 1;
-const CONSENT_STORAGE_KEY = 'antifraud_consent_state';
+const CONSENT_KEY = 'antifraud_consent';
+const CURRENT_TERMS_VERSION = 1; // Increment when terms change
 
-interface ConsentState {
-  version: number;
+interface ConsentData {
   accepted: boolean;
   timestamp: number;
+  version: number;
 }
 
 export function useConsentGate() {
-  const [consentRequired, setConsentRequired] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [consentRequired, setConsentRequired] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for existing consent
     try {
-      const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
+      const stored = localStorage.getItem(CONSENT_KEY);
       if (stored) {
-        const state: ConsentState = JSON.parse(stored);
-        // Check if consent is valid (same version and accepted)
-        if (state.version === CONSENT_VERSION && state.accepted) {
+        const data: ConsentData = JSON.parse(stored);
+        // Require re-consent if version changed
+        if (data.accepted && data.version === CURRENT_TERMS_VERSION) {
           setConsentRequired(false);
         }
       }
     } catch (error) {
-      console.error('Error reading consent state:', error);
+      console.error('Error loading consent state:', error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const acceptConsent = () => {
-    try {
-      const state: ConsentState = {
-        version: CONSENT_VERSION,
-        accepted: true,
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(state));
-      setConsentRequired(false);
-    } catch (error) {
-      console.error('Error saving consent state:', error);
-    }
+    const data: ConsentData = {
+      accepted: true,
+      timestamp: Date.now(),
+      version: CURRENT_TERMS_VERSION,
+    };
+    localStorage.setItem(CONSENT_KEY, JSON.stringify(data));
+    setConsentRequired(false);
   };
 
   return {
     consentRequired,
     isLoading,
     acceptConsent,
+    currentVersion: CURRENT_TERMS_VERSION,
   };
 }
