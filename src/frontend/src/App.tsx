@@ -30,7 +30,7 @@ function AppContent() {
   const { consentRequired, isLoading, acceptConsent } = useConsentGate();
 
   useEffect(() => {
-    document.title = 'AntiFraud / by HCoragem';
+    document.title = 'AntiFraud';
   }, []);
 
   // Setup PWA install flow

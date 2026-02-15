@@ -1,78 +1,105 @@
 {
   "kind": "build_request",
-  "title": "Refine Message Analysis critical-trigger scoring thresholds (frontend-only)",
+  "title": "Phase 1: Public Location Search via OpenStreetMap Nominatim (frontend-only, no layout/scoring changes)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Message Analysis text-scoring logic so that critical trigger phrase detection overrides normal incremental scoring and enforces minimum risk_score thresholds based on the number of detected critical triggers: 1 trigger => risk_score must start at (or be raised to) at least 85; 2 triggers => risk_score must be at least 92; 3 or more triggers => risk_score must be 100 (maximum). This refinement must apply only to message text analysis and must not affect phone/email/crypto analysis flows.",
+      "text": "Implement a minimal, isolated frontend Search module that detects public-location keywords and runs OpenStreetMap Nominatim queries for public entities, without changing backend behavior, without restructuring the app, and without modifying the existing message scoring engine.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "recent-messages"
         ],
         "quotes": [
-          "Apply scoring refinement patch to Message Analysis only.\nEnhance critical keyword impact as follows:\nIf message contains any high-severity trigger phrase from the defined critical list, base risk_score must start at 85%.\nIf multiple critical triggers are detected:\n2 triggers → minimum 92%\n3 or more triggers → 100% (maximum)\nCritical phrases must override normal incremental scoring.\nThis applies ONLY to message text analysis."
+          "Extend Search module to support public location queries.",
+          "Use OpenStreetMap Nominatim API for public-category queries.",
+          "Frontend request only. No backend restructuring. No persistent storage."
         ]
       },
       "acceptanceCriteria": [
-        "When analyzing a message containing 1 critical trigger phrase, the returned riskScore is >= 85 regardless of the underlying heuristic score.",
-        "When analyzing a message containing exactly 2 critical trigger phrases, the returned riskScore is >= 92 regardless of the underlying heuristic score.",
-        "When analyzing a message containing 3+ critical trigger phrases, the returned riskScore is exactly 100.",
-        "The override applies only to message text analysis (e.g., the function exported as analyzeMessage in frontend utilities) and does not change scoring for phone, email, or crypto analysis.",
-        "No data is persisted as part of this scoring change (no backend calls or storage of message content beyond in-memory processing for the current analysis)."
+        "A new minimal, modular Search layer exists in the frontend codebase (isolated utility/hook/components as appropriate) and can be invoked from the current search/analysis flow without app restructuring.",
+        "Public-location keyword detection is accent-insensitive and case-insensitive (e.g., “polícia”, “policia”, “POLICIA” match).",
+        "The keyword list includes at minimum: hospital, police, fire station, bombeiros, polícia, emergência, government office.",
+        "When a public-location keyword is detected, the module queries OpenStreetMap Nominatim using public categories: hospital, police, fire_station, government, emergency.",
+        "No backend canister methods are added/changed; no persistence is introduced (no new backend storage; no required database-like layer).",
+        "The existing scoring/heuristics for normal searches remains unchanged and continues to run for non-public-location queries."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Integrate the user-provided critical words/phrases list into the existing critical risk dictionary used by Message Analysis (frontend), ensuring matching is case-insensitive and accent-insensitive. The integrated list must include all of the following exact triggers: dinheiro, transparência, ola pai, olá mãe, investimento, grátis, amigo, amiga, o seu filho, a sua filha, criptomoedas, dados, bancários, morada, liquidez; Urgente, Urgentíssimo, Ação necessária, Resposta imediata, Responda agora, Act immediately, Último aviso, Final warning; Sua conta será bloqueada hoje, Seu acesso será cancelado, Atividade suspeita, Suspicious activity, Tentativa de acesso indevido; Detectámos atividade suspeita no seu IP, na sua conta, Sua conta está em risco, será encerrada, foi suspensa; Não conseguimos processar o seu pagamento, Falha no pagamento, Payment failed, Fatura em atraso, Invoice em aberto, Cobrança pendente; Atualize seus dados, Confirme o cadastro, Verificação necessária, Precisamos da sua informação, We need your information, Verify now; Envie o código de 6 dígitos, Reenvie o código que recebeu por engano, Clique no link para confirmar/instalar/verificar; Informe os dados do seu cartão, Dados bancários, CVV, Senha de acesso; Você ganhou!, Prémio, Sorteio, Giveaway, Presente exclusivo, Bónus especial, Cashback garantido, Reembolso imediato; Poucas horas de trabalho alto retorno financeiro, Oferta imperdível, Uma oportunidade única na vida; Mudei de número salva este novo, Estou com problema no banco cartão podes fazer um pagamento por mim; Estou no estrangeiro e tive um acidente preciso de ajuda urgente, Faz uma transferência para este IBAN Pix MBWay para mim.",
+      "text": "Render public-location search results inside the existing results display area (reuse the current results container), matching the existing result format style and without introducing new layout panels or visual redesign.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-critical-list"
+          "recent-messages"
         ],
         "quotes": [
-          "Todas as palavras e frases listadas abaixo devem elevar o risco da mensagem para 85–100%.\nPalavras críticas e gatilhos\n...\nConfiguração de risco\nCada ocorrência destas palavras ou frases aumenta automaticamente o score para 85–100%.\nDeve ser cumulativo: múltiplos gatilhos numa mesma mensagem elevam o risco para o máximo 100%."
+          "Display results inside the existing results display area.",
+          "Do NOT create new layout panels. Do NOT restructure UI.",
+          "Reuse current results container. Render public-location results in the same format style.",
+          "No visual redesign."
         ]
       },
       "acceptanceCriteria": [
-        "All listed critical triggers are included in the frontend Message Analysis critical trigger detection list (no omissions).",
-        "Matching detects triggers regardless of letter casing and diacritics (e.g., 'ola pai' matches 'Olá Pai').",
-        "Trigger counting used for thresholding is based on detected trigger phrases in the message text and drives the 85/92/100 minimum thresholds.",
-        "This integration is confined to message text analysis utilities and does not modify layout, routing, or other feature modules."
+        "Public-location results are displayed in the same existing results area currently used for analysis results (no new side panels, no new page sections).",
+        "Each returned entity shows: Entity name, Category, City/Region, Phone number (if available).",
+        "Result rendering is consistent with the current card/typography style used by the existing results container (no theme overhaul).",
+        "If Nominatim returns no results or errors, the user sees an error/empty state in the same results area (no new UI regions)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure the Search (Phone) public number override logic remains untouched and continues to execute before any heuristics in the phone search flow; this message-analysis patch must not modify any Search (Phone) module files or behavior.",
+      "text": "For all returned public entities from Nominatim public-location searches, override risk output to risk_score = 0 and risk_level = LOW, fully overriding heuristics for those entities only, while keeping normal scoring unchanged for normal searches.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "recent-messages"
         ],
         "quotes": [
-          "Do NOT modify Search (Phone) module.\nPublic number override logic must remain untouched and execute before any heuristics."
+          "All returned public entities must automatically: risk_score = 0 risk_level = LOW Override heuristics completely",
+          "No scoring logic change for normal searches."
         ]
       },
       "acceptanceCriteria": [
-        "No changes are made to Search (Phone) module behavior or code paths as part of this patch.",
-        "Phone lookups that previously used a public-number override continue to bypass heuristics and remain unaffected by message-scoring changes.",
-        "Message analysis scoring changes do not alter any phone/email/crypto lookup results."
+        "Every public-location entity displayed includes (or is represented by) a risk score of 0 and a risk level of LOW.",
+        "The override applies only to public-location search results sourced from Nominatim; it does not alter message/email/phone/crypto scoring logic for other flows.",
+        "No changes are made to the existing message scoring engine logic (e.g., no edits that change scoring behavior for message analysis)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Remove platform references from the application footer and metadata (HTML head/SEO helpers/manifest) so no platform branding or links appear in the footer or metadata.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "No platform references anywhere in footer or metadata."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The footer no longer includes platform branding/link elements (e.g., remove the external platform link and related icon/text currently present).",
+        "No platform references are introduced into index.html metadata, runtime SEO title/description generation, or the web manifest.",
+        "All remaining user-facing strings introduced/modified by this Phase 1 implementation are in English."
       ]
     }
   ],
   "constraints": [
-    "Frontend-only patch (no backend changes; no backend restructuring).",
-    "Do not modify layout.",
-    "Do not modify the Search (Phone) module.",
-    "No persistence of message contents or personal data; only in-memory processing for scoring.",
-    "User-facing text in any new/changed strings must be in English."
+    "Do not rebuild the entire application; implement Phase 1 as a minimal modular extension.",
+    "Do not modify the message scoring engine logic.",
+    "Do not modify the existing layout or restructure the UI; reuse the current results container.",
+    "Frontend-only change for public-location search (no backend restructuring, no new persistence).",
+    "No GPS/location-permission requirements in Phase 1.",
+    "Confirm and implement Phase 1 only (no Phase 2+ scope)."
   ],
   "nonGoals": [
-    "Rebuilding or redesigning the application UI.",
-    "Adding new pages, routes, or navigation items.",
-    "Changing authentication/Internet Identity behavior.",
-    "Introducing databases or any external integrations."
+    "Adding GPS-based proximity search or map UI.",
+    "Adding backend storage of search results or entity caches.",
+    "Introducing new pages/routes or new layout panels for results.",
+    "Changing normal risk scoring heuristics for non-public-location searches.",
+    "Implementing non-Nominatim OSM querying methods (e.g., Overpass) in Phase 1."
   ],
   "imageRequirements": {
     "required": [],

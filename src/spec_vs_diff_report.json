@@ -1,57 +1,56 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T15:56:59.421Z",
-  "summary": "The diff adds a new message critical-trigger list and wires it into the structured fraud analysis utility via an import, but the provided diff summary does not show the required scoring-threshold override logic being implemented, nor does it clearly demonstrate case-/accent-insensitive matching for the new triggers. Several requested “exact triggers” also appear to be split or altered rather than included verbatim. Additional unrelated documentation/state files were modified/added beyond the requested frontend-only message-analysis scoring change.",
+  "generatedAt": "2026-02-15T17:52:00.719Z",
+  "summary": "Phase 1 public-location search module, hook, and results component were added, and the AdvancedContactLookup flow appears to route public-location queries to the new Nominatim search. However, the diff summary is truncated around the integration point, so it is not fully evidenced that results render in the existing results container. Risk override is implemented in UI/data but uses riskLevel 'Low' (not 'LOW') internally. Footer/metadata branding appears removed/avoided. Some unrelated routing behavior was also added.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Critical trigger phrase detection must override normal incremental scoring for Message Analysis and enforce minimum riskScore thresholds: 1 trigger => >=85; 2 triggers => >=92; 3+ triggers => exactly 100; apply only to message text analysis and not to phone/email/crypto flows.",
-      "reason": "The diff summary shows MESSAGE_CRITICAL_TRIGGERS being imported into structuredFraudAnalysis.ts, but does not show any implemented logic that counts detected critical triggers and applies the required 85/92/100 override thresholds to the returned riskScore. The relevant code section is truncated and no thresholding logic is visible.",
+      "id": "REQ-2",
+      "requirement": "Render public-location search results inside the existing results display area (reuse the current results container), matching the existing result format style, with error/empty states in the same area.",
+      "reason": "While a PublicLocationResults component exists and AdvancedContactLookup routes to the public location search, the diff summary is truncated before showing that the component is actually rendered in the existing results container and wired to the hook’s state.",
       "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)",
-        "frontend/src/utils/messageCriticalTriggers.ts"
+        "frontend/src/components/AdvancedContactLookup.tsx (truncated)",
+        "frontend/src/components/PublicLocationResults.tsx"
       ]
     },
     {
-      "id": "REQ-2",
-      "requirement": "Integrate the provided critical words/phrases into the Message Analysis critical risk detection list with case-insensitive and accent-insensitive matching, including all listed triggers with no omissions (exact triggers), and use trigger counting for the 85/92/100 thresholding.",
-      "reason": "While a new trigger list file is added, the diff shows multiple requested exact triggers are not included verbatim (some appear split into partial tokens), and the diff summary does not show matching logic that is explicitly case-insensitive and accent-insensitive for this list. Also, the trigger-counting linkage to thresholding is not shown (see REQ-1).",
+      "id": "REQ-3",
+      "requirement": "Override risk output to risk_score = 0 and risk_level = LOW for Nominatim public-location entities.",
+      "reason": "PublicLocationEntity sets riskLevel to the string literal 'Low' (capital-L) rather than 'LOW' as specified, even though the UI badge displays \"LOW (0%)\".",
       "evidence": [
-        "frontend/src/utils/messageCriticalTriggers.ts",
-        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
+        "frontend/src/search/publicLocationSearch.ts",
+        "frontend/src/components/PublicLocationResults.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added/modified production build verification checklist with many non-requested sections (auth, i18n, admin route checks, etc.).",
-      "reason": "BuildRequest is narrowly scoped to frontend-only Message Analysis critical-trigger scoring and explicitly lists non-goals like adding pages/routes/navigation and unrelated behavior; this documentation expansion is not requested by any REQ.",
+      "description": "Legacy route alias handling for /institucional and /institucional/mission redirecting to /mission.",
+      "reason": "Not part of Phase 1 public-location search scope; introduces new routing behavior unrelated to Nominatim search or footer/metadata cleanup.",
       "evidence": [
-        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
+        "frontend/src/App.tsx"
       ]
     },
     {
-      "description": "Modified/added project summary/state tracking content referencing Search (Phone) public/emergency number registry/override behavior.",
-      "reason": "BuildRequest REQ-3 explicitly says Search (Phone) must remain untouched; adding state/docs that describe new phone override behavior is not requested as part of this message-analysis patch and conflicts with the stated constraint (even if only documentation, it introduces an unrequested feature description).",
+      "description": "Source attribution section/alert in public location results UI.",
+      "reason": "Not requested in the BuildRequest acceptance criteria; additional UI content beyond required fields (name/category/city-region/phone) and error/empty states.",
       "evidence": [
-        "project_state.json (truncated)"
-      ]
-    },
-    {
-      "description": "Modified a large frontend file summaries document describing many unrelated features (admin route, i18n, PWA, etc.).",
-      "reason": "Not requested by any requirement; BuildRequest scope is limited to message text analysis scoring changes and trigger list integration.",
-      "evidence": [
-        "frontend-file-summaries.txt (truncated)"
+        "frontend/src/components/PublicLocationResults.tsx (truncated)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.64,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
-    "frontend/src/utils/messageCriticalTriggers.ts",
-    "frontend/src/utils/structuredFraudAnalysis.ts",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdvancedContactLookup.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/PublicLocationResults.tsx",
+    "frontend/src/hooks/usePublicLocationSearch.ts",
+    "frontend/src/search/publicLocationSearch.ts",
+    "frontend/src/utils/seo.ts",
     "project_state.json"
   ]
 }

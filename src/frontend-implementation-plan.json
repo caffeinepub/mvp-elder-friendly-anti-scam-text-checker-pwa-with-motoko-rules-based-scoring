@@ -1,61 +1,123 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Refine Message Analysis critical-trigger scoring thresholds (frontend-only)",
+  "title": "Phase 1: Frontend-only public location search (OSM Nominatim) + remove platform branding",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Refine message text risk scoring so critical trigger phrase detection overrides incremental heuristics with minimum thresholds (85/92/100) without impacting phone/email/crypto flows.",
+      "summary": "Add an isolated frontend public-location Search module that detects keywords (accent/case-insensitive) and queries OpenStreetMap Nominatim for public entities without changing existing heuristics/scoring for non-public searches.",
       "acceptanceCriteria": [
-        "When analyzing a message containing 1 critical trigger phrase, the returned riskScore is >= 85 regardless of the underlying heuristic score.",
-        "When analyzing a message containing exactly 2 critical trigger phrases, the returned riskScore is >= 92 regardless of the underlying heuristic score.",
-        "When analyzing a message containing 3+ critical trigger phrases, the returned riskScore is exactly 100.",
-        "The override applies only to message text analysis (e.g., the function exported as analyzeMessage in frontend utilities) and does not change scoring for phone, email, or crypto analysis.",
-        "No data is persisted as part of this scoring change (no backend calls or storage of message content beyond in-memory processing for the current analysis)."
+        "A new minimal, modular Search layer exists in the frontend codebase (isolated utility/hook/components as appropriate) and can be invoked from the current search/analysis flow without app restructuring.",
+        "Public-location keyword detection is accent-insensitive and case-insensitive (e.g., “polícia”, “policia”, “POLICIA” match).",
+        "The keyword list includes at minimum: hospital, police, fire station, bombeiros, polícia, emergência, government office.",
+        "When a public-location keyword is detected, the module queries OpenStreetMap Nominatim using public categories: hospital, police, fire_station, government, emergency.",
+        "No backend canister methods are added/changed; no persistence is introduced (no new backend storage; no required database-like layer).",
+        "The existing scoring/heuristics for normal searches remains unchanged and continues to run for non-public-location queries."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "path": "frontend/src/search/publicLocationSearch.ts",
+          "operation": "create",
+          "description": "Create an isolated public-location search utility that (1) performs accent/case-insensitive keyword detection using the existing normalizeText helper, and (2) runs a Nominatim fetch for public categories (hospital, police, fire_station, government, emergency) and returns normalized entity results for the UI (including name/category/city-region/phone when available)."
+        },
+        {
+          "path": "frontend/src/hooks/usePublicLocationSearch.ts",
+          "operation": "create",
+          "description": "Create a small React hook that wraps the publicLocationSearch utility with loading/error state and a single async search function so it can be invoked from the current search/analysis flow without restructuring."
+        },
+        {
+          "path": "frontend/src/components/AdvancedContactLookup.tsx",
           "operation": "modify",
-          "description": "Update the exported message-text analysis flow to (1) detect and count matched critical trigger phrases in the message text using existing normalization utilities, and (2) apply a hard override/minimum riskScore based on critical trigger count: 1→min 85, 2→min 92, 3+→set 100, ensuring this override happens after normal heuristic scoring and is applied ONLY in analyzeMessage (message text) and not in analyzeEmail/analyzePhone/analyzeCrypto. Keep all processing in-memory and do not add any persistence or backend calls."
+          "description": "Integrate the new public-location detection + Nominatim query into the existing AdvancedContactLookup flow for the appropriate input type (e.g., unknown/message-like inputs). If a public-location keyword is detected, invoke the new hook and skip the normal heuristic analysis path for that request only; otherwise, keep the current analysis logic unchanged."
+        },
+        {
+          "path": "frontend/src/utils/antifraudTextNormalize.ts",
+          "operation": "modify",
+          "description": "If needed for correctness, extend/adjust normalization helpers to ensure robust accent-insensitive and case-insensitive matching for the public-location keyword list without changing any existing message-scoring behavior (keep changes strictly limited to normalization helpers)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add the full user-provided critical words/phrases list to Message Analysis critical trigger detection with case-insensitive and accent-insensitive matching.",
+      "summary": "Render public-location search results in the existing results display area with the current card/typography style, including proper empty/error states.",
       "acceptanceCriteria": [
-        "All listed critical triggers are included in the frontend Message Analysis critical trigger detection list (no omissions).",
-        "Matching detects triggers regardless of letter casing and diacritics (e.g., 'ola pai' matches 'Olá Pai').",
-        "Trigger counting used for thresholding is based on detected trigger phrases in the message text and drives the 85/92/100 minimum thresholds.",
-        "This integration is confined to message text analysis utilities and does not modify layout, routing, or other feature modules."
+        "Public-location results are displayed in the same existing results area currently used for analysis results (no new side panels, no new page sections).",
+        "Each returned entity shows: Entity name, Category, City/Region, Phone number (if available).",
+        "Result rendering is consistent with the current card/typography style used by the existing results container (no theme overhaul).",
+        "If Nominatim returns no results or errors, the user sees an error/empty state in the same results area (no new UI regions)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/messageCriticalTriggers.ts",
+          "path": "frontend/src/components/PublicLocationResults.tsx",
           "operation": "create",
-          "description": "Create a dedicated constant list for message text critical trigger words/phrases containing ALL user-provided triggers exactly as provided, intended for case-insensitive and accent-insensitive matching via existing normalization utilities. This file must be used only by message text analysis."
+          "description": "Add a minimal results renderer that reuses the existing results container styling patterns (Card/typography) to display a list of Nominatim entities with: Entity name, Category, City/Region, Phone (if present), plus an in-place empty/error state. Use shadcn-ui components (e.g., Card, Alert, Badge) to match existing styling. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/utils/structuredFraudAnalysis.ts",
+          "path": "frontend/src/components/AdvancedContactLookup.tsx",
           "operation": "modify",
-          "description": "Integrate the new critical trigger list into message text critical detection by importing it and using normalization-based matching (case-insensitive, accent-insensitive). Ensure trigger counting is based on detected trigger phrases in the message text (unique phrase matches) and feeds the REQ-1 85/92/100 threshold override. Keep changes confined to message text analysis utilities."
+          "description": "Render PublicLocationResults in the same location where AdvancedContactLookup currently renders its results (reuse the existing results area; do not add panels/sections). Ensure empty/error states appear in that same area. Use shadcn-ui components to keep existing style consistency. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Ensure the Search (Phone) public-number override logic remains unchanged by this patch; add a verification step without modifying phone search modules.",
+      "summary": "For Nominatim-sourced public entities only, force risk_score=0 and risk_level=LOW in the displayed results while keeping normal scoring unchanged for all other flows.",
       "acceptanceCriteria": [
-        "No changes are made to Search (Phone) module behavior or code paths as part of this patch.",
-        "Phone lookups that previously used a public-number override continue to bypass heuristics and remain unaffected by message-scoring changes.",
-        "Message analysis scoring changes do not alter any phone/email/crypto lookup results."
+        "Every public-location entity displayed includes (or is represented by) a risk score of 0 and a risk level of LOW.",
+        "The override applies only to public-location search results sourced from Nominatim; it does not alter message/email/phone/crypto scoring logic for other flows.",
+        "No changes are made to the existing message scoring engine logic (e.g., no edits that change scoring behavior for message analysis)."
       ],
       "file_operations": [
         {
-          "path": "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+          "path": "frontend/src/search/publicLocationSearch.ts",
           "operation": "modify",
-          "description": "Add a regression verification checklist item explicitly confirming that Search (Phone) public-number override logic still executes before any heuristics and that no phone module behavior changed as part of the message-analysis scoring patch (documentation-only change; do not modify any phone/search module code)."
+          "description": "Ensure the returned public-entity model includes explicit UI-ready risk fields set to riskScore=0 and riskLevel='Low' (or equivalent) for Nominatim-derived entities only, without touching the existing structured fraud analysis/scoring utilities."
+        },
+        {
+          "path": "frontend/src/components/PublicLocationResults.tsx",
+          "operation": "modify",
+          "description": "Display risk for each public-location entity as LOW with a score of 0 in the same visual style conventions used by existing result cards (no redesign). Use shadcn-ui badges/typography as appropriate. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AdvancedContactLookup.tsx",
+          "operation": "modify",
+          "description": "Guarantee that the risk override is applied only when rendering Nominatim public-location results, and that the existing analyzeMessage/analyzeEmail/analyzePhone/analyzeCrypto paths remain unchanged for normal searches."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Remove platform branding/links from footer and metadata (HTML head, runtime SEO helper, manifest) and ensure Phase 1 introduced/modified user-facing strings are English.",
+      "acceptanceCriteria": [
+        "The footer no longer includes platform branding/link elements (e.g., remove the external platform link and related icon/text currently present).",
+        "No platform references are introduced into index.html metadata, runtime SEO title/description generation, or the web manifest.",
+        "All remaining user-facing strings introduced/modified by this Phase 1 implementation are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Remove the external platform link and icon/text currently present in the footer (e.g., the Internet Computer/ICP reference), keeping the rest of the footer content and layout structure intact."
+        },
+        {
+          "path": "frontend/src/utils/seo.ts",
+          "operation": "modify",
+          "description": "Update runtime SEO title/description behavior to remove platform branding references from document.title and related metadata generation; keep any new/modified visible strings in English."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Remove platform branding references from static HTML metadata (title/description). Ensure any modified metadata text is in English."
+        },
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "modify",
+          "description": "Remove platform branding references from the PWA manifest description/metadata and ensure any modified strings are in English."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove/adjust any hardcoded document.title initialization that includes platform references so it aligns with updated metadata rules and does not reintroduce removed branding."
         }
       ]
     }

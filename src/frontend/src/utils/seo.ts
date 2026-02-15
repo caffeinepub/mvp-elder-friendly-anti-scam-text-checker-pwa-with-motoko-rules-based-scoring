@@ -4,8 +4,8 @@
  */
 
 export function setSEO(title: string, description?: string) {
-  // Set document title with AntiFraud branding
-  document.title = `${title} | AntiFraud / by HCoragem`;
+  // Set document title with AntiFraud branding (no platform references)
+  document.title = `${title} | AntiFraud`;
 
   // Update meta description if provided
   if (description) {

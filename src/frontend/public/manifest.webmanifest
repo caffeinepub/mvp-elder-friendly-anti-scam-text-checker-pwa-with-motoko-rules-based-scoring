@@ -2,7 +2,7 @@
   "name": "AntiFraud",
   "short_name": "AntiFraud",
   "id": "/",
-  "description": "Plataforma de verificação antifraude para mensagens, emails, telefones e criptomoedas",
+  "description": "Digital fraud verification platform for messages, emails, phones, and crypto",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -14,14 +14,12 @@
     {
       "src": "/assets/generated/antifraud-pwa-icon.dim_192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/assets/generated/antifraud-pwa-icon.dim_512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

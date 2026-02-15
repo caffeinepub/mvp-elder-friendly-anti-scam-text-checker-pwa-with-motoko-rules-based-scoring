@@ -1,37 +1,46 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "AntiFraud scoring enhancements: (1) refine Message Analysis scoring so critical trigger phrases force elevated risk thresholds (85%/92%/100% based on trigger count) overriding normal scoring; (2) enhance Search (Phone) with a public/emergency number registry and a pre-scoring override that forces LOW risk (0) and skips heuristics for official numbers. No backend/layout changes and no persistence.",
+  "summary": "Phase 1: Extend (or create minimal) Search module to detect public-location keywords and query OpenStreetMap Nominatim for public entities, rendering results in existing results container with scoring overridden (risk_score=0, risk_level=LOW) for those entities only, with no backend restructuring, no UI/layout changes, and no scoring engine modifications.",
   "architectural_notes": [
-    "Do not modify backend structure/authentication/layout; apply incremental frontend logic patches only.",
-    "Search (Phone): if number matches internal official registry, short-circuit scoring (heuristics must not execute) and force LOW/0 with entity display and explanation.",
-    "Message Analysis: critical trigger phrases override normal scoring; enforce min thresholds 85% (1), 92% (2), 100% (3+).",
-    "No permanent storage of personal data; process content only for risk scoring."
+    "Implement as minimal, modular, isolated Search module if none exists; avoid app-wide rebuild/restructure.",
+    "Frontend-only integration using OpenStreetMap Nominatim API; no backend restructuring, no persistent storage.",
+    "Reuse existing results display container; no new panels or layout/UI redesign.",
+    "For public-location results only: force risk_score=0 and risk_level=LOW; override heuristics completely without changing normal search scoring logic.",
+    "Remove/avoid any platform references in footer or metadata."
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-message-analysis-text-scoring-logic-so-that-critical-trigger-phrase-detection-overrides-normal-incremental-scoring-and-enforces-minimum-risk-score-thresholds-based-on-the-number-of-detected-critical-triggers-1-trigger-risk-score-must-start-at-or-be-raised-to-at-least-85-2-triggers-risk-score-must-be-at-least-92-3-or-more-triggers-risk-score-must-be-100-maximum-this-refinement-must-apply-only-to-message-text-analysis-and-must-not-affect-phone-email-crypto-analysis-flows",
-      "title": "Update the Message Analysis text-scoring logic so that critical trigger phrase detection overrides normal incremental scoring and enforces minimum risk_score thresholds based on the number of detected critical triggers: 1 trigger => risk_score must start at (or be raised to) at least 85; 2 triggers => risk_score must be at least 92; 3 or more triggers => risk_score must be 100 (maximum). This refinement must apply only to message text analysis and must not affect phone/email/crypto analysis flows.",
+      "id": "feature-implement-a-minimal-isolated-frontend-search-module-that-detects-public-location-keywords-and-runs-openstreetmap-nominatim-queries-for-public-entities-without-changing-backend-behavior-without-restructuring-the-app-and-without-modifying-the-existing-message-scoring-engine",
+      "title": "Implement a minimal, isolated frontend Search module that detects public-location keywords and runs OpenStreetMap Nominatim queries for public entities, without changing backend behavior, without restructuring the app, and without modifying the existing message scoring engine.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-integrate-the-user-provided-critical-words-phrases-list-into-the-existing-critical-risk-dictionary-used-by-message-analysis-frontend-ensuring-matching-is-case-insensitive-and-accent-insensitive-the-integrated-list-must-include-all-of-the-following-exact-triggers-dinheiro-transpar-ncia-ola-pai-ol-m-e-investimento-gr-tis-amigo-amiga-o-seu-filho-a-sua-filha-criptomoedas-dados-banc-rios-morada-liquidez-urgente-urgent-ssimo-a-o-necess-ria-resposta-imediata-responda-agora-act-immediately-ltimo-aviso-final-warning-sua-conta-ser-bloqueada-hoje-seu-acesso-ser-cancelado-atividade-suspeita-suspicious-activity-tentativa-de-acesso-indevido-detect-mos-atividade-suspeita-no-seu-ip-na-sua-conta-sua-conta-est-em-risco-ser-encerrada-foi-suspensa-n-o-conseguimos-processar-o-seu-pagamento-falha-no-pagamento-payment-failed-fatura-em-atraso-invoice-em-aberto-cobran-a-pendente-atualize-seus-dados-confirme-o-cadastro-verifica-o-necess-ria-precisamos-da-sua-informa-o-we-need-your-information-verify-now-envie-o-c-digo-de-6-d-gitos-reenvie-o-c-digo-que-recebeu-por-engano-clique-no-link-para-confirmar-instalar-verificar-informe-os-dados-do-seu-cart-o-dados-banc-rios-cvv-senha-de-acesso-voc-ganhou-pr-mio-sorteio-giveaway-presente-exclusivo-b-nus-especial-cashback-garantido-reembolso-imediato-poucas-horas-de-trabalho-alto-retorno-financeiro-oferta-imperd-vel-uma-oportunidade-nica-na-vida-mudei-de-n-mero-salva-este-novo-estou-com-problema-no-banco-cart-o-podes-fazer-um-pagamento-por-mim-estou-no-estrangeiro-e-tive-um-acidente-preciso-de-ajuda-urgente-faz-uma-transfer-ncia-para-este-iban-pix-mbway-para-mim",
-      "title": "Integrate the user-provided critical words/phrases list into the existing critical risk dictionary used by Message Analysis (frontend), ensuring matching is case-insensitive and accent-insensitive. The integrated list must include all of the following exact triggers: dinheiro, transparência, ola pai, olá mãe, investimento, grátis, amigo, amiga, o seu filho, a sua filha, criptomoedas, dados, bancários, morada, liquidez; Urgente, Urgentíssimo, Ação necessária, Resposta imediata, Responda agora, Act immediately, Último aviso, Final warning; Sua conta será bloqueada hoje, Seu acesso será cancelado, Atividade suspeita, Suspicious activity, Tentativa de acesso indevido; Detectámos atividade suspeita no seu IP, na sua conta, Sua conta está em risco, será encerrada, foi suspensa; Não conseguimos processar o seu pagamento, Falha no pagamento, Payment failed, Fatura em atraso, Invoice em aberto, Cobrança pendente; Atualize seus dados, Confirme o cadastro, Verificação necessária, Precisamos da sua informação, We need your information, Verify now; Envie o código de 6 dígitos, Reenvie o código que recebeu por engano, Clique no link para confirmar/instalar/verificar; Informe os dados do seu cartão, Dados bancários, CVV, Senha de acesso; Você ganhou!, Prémio, Sorteio, Giveaway, Presente exclusivo, Bónus especial, Cashback garantido, Reembolso imediato; Poucas horas de trabalho alto retorno financeiro, Oferta imperdível, Uma oportunidade única na vida; Mudei de número salva este novo, Estou com problema no banco cartão podes fazer um pagamento por mim; Estou no estrangeiro e tive um acidente preciso de ajuda urgente, Faz uma transferência para este IBAN Pix MBWay para mim.",
+      "id": "feature-render-public-location-search-results-inside-the-existing-results-display-area-reuse-the-current-results-container-matching-the-existing-result-format-style-and-without-introducing-new-layout-panels-or-visual-redesign",
+      "title": "Render public-location search results inside the existing results display area (reuse the current results container), matching the existing result format style and without introducing new layout panels or visual redesign.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-the-search-phone-public-number-override-logic-remains-untouched-and-continues-to-execute-before-any-heuristics-in-the-phone-search-flow-this-message-analysis-patch-must-not-modify-any-search-phone-module-files-or-behavior",
-      "title": "Ensure the Search (Phone) public number override logic remains untouched and continues to execute before any heuristics in the phone search flow; this message-analysis patch must not modify any Search (Phone) module files or behavior.",
+      "id": "feature-for-all-returned-public-entities-from-nominatim-public-location-searches-override-risk-output-to-risk-score-0-and-risk-level-low-fully-overriding-heuristics-for-those-entities-only-while-keeping-normal-scoring-unchanged-for-normal-searches",
+      "title": "For all returned public entities from Nominatim public-location searches, override risk output to risk_score = 0 and risk_level = LOW, fully overriding heuristics for those entities only, while keeping normal scoring unchanged for normal searches.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-platform-references-from-the-application-footer-and-metadata-html-head-seo-helpers-manifest-so-no-platform-branding-or-links-appear-in-the-footer-or-metadata",
+      "title": "Remove platform references from the application footer and metadata (HTML head/SEO helpers/manifest) so no platform branding or links appear in the footer or metadata.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -39,18 +48,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Message Analysis scoring refinement: critical trigger phrases set base/min risk_score to 85%; 2 triggers => min 92%; 3+ => 100%, overriding normal incremental scoring; no persistence; no layout/backend changes",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Search (Phone) public number registry + pre-scoring override: if searched number matches official registry (e.g., 112/911/999/110/118) force risk_score=0 & risk_level=LOW, display entity_name/region and explanation, and skip heuristics; frontend-only; no persistence; no layout/backend changes",
+      "summary": "Phase 1 Public Location Search Extension: detect public-location keywords, query OSM Nominatim categories (hospital/police/fire_station/government/emergency), display entity details in existing results area, and override scoring (risk_score=0, risk_level=LOW) for returned public entities only.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Refine Message Analysis critical-trigger scoring thresholds (frontend-only)",
+  "projectName": "Phase 1: Public Location Search via OpenStreetMap Nominatim (frontend-only, no layout/scoring changes)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

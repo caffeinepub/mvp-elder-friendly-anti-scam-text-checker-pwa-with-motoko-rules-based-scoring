@@ -12,6 +12,9 @@ import { useAntiFraudActors } from '@/hooks/useAntiFraudActors';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useAdvancedContactLookupCache } from '@/hooks/useAdvancedContactLookupCache';
 import { AdvancedContactLookupResultCard } from './AdvancedContactLookupResultCard';
+import { PublicLocationResults } from './PublicLocationResults';
+import { usePublicLocationSearch } from '@/hooks/usePublicLocationSearch';
+import { isPublicLocationQuery } from '@/search/publicLocationSearch';
 import type { StructuredAnalysisResult } from '@/utils/structuredFraudAnalysis';
 import type { ContactType } from '@/utils/contactInputHeuristics';
 
@@ -26,6 +29,7 @@ export function AdvancedContactLookup() {
   const { extraActor } = useAntiFraudActors();
   const isOffline = useOfflineStatus();
   const { getCached, addToCache } = useAdvancedContactLookupCache();
+  const publicLocationSearch = usePublicLocationSearch();
 
   const handleAnalyze = async () => {
     if (!input.trim()) {
@@ -39,6 +43,15 @@ export function AdvancedContactLookup() {
     setPublicInfo(null);
 
     try {
+      // PHASE 1: Check if this is a public location query
+      if (isPublicLocationQuery(input)) {
+        // Route to public location search (Nominatim)
+        await publicLocationSearch.search(input);
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // NORMAL FLOW: Continue with existing analysis logic
       // Detect input type
       const type = detectContactType(input);
       setDetectedType(type);
@@ -146,6 +159,10 @@ export function AdvancedContactLookup() {
     }
   };
 
+  // Determine which results to show
+  const showPublicLocationResults = publicLocationSearch.result?.isPublicLocationQuery;
+  const showNormalResults = result && !showPublicLocationResults;
+
   return (
     <div className="space-y-6">
       <Card>
@@ -155,7 +172,7 @@ export function AdvancedContactLookup() {
             Advanced Contact Lookup
           </CardTitle>
           <CardDescription>
-            Analyze messages, emails, phone numbers, or crypto addresses
+            Analyze messages, emails, phone numbers, crypto addresses, or search public locations
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -174,30 +191,30 @@ export function AdvancedContactLookup() {
             </Label>
             <Input
               id="contact-input"
-              placeholder="Message, email, phone, or crypto address..."
+              placeholder="Message, email, phone, crypto, or public location (hospital, police, etc.)..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || publicLocationSearch.isSearching}
             />
           </div>
 
-          {error && (
+          {(error || publicLocationSearch.error) && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{error || publicLocationSearch.error}</AlertDescription>
             </Alert>
           )}
 
           <Button
             onClick={handleAnalyze}
-            disabled={isAnalyzing || !input.trim()}
+            disabled={isAnalyzing || publicLocationSearch.isSearching || !input.trim()}
             className="w-full"
           >
-            {isAnalyzing ? (
+            {(isAnalyzing || publicLocationSearch.isSearching) ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
+                {publicLocationSearch.isSearching ? 'Searching...' : 'Analyzing...'}
               </>
             ) : (
               <>
@@ -209,7 +226,16 @@ export function AdvancedContactLookup() {
         </CardContent>
       </Card>
 
-      {result && (
+      {/* Public Location Results */}
+      {showPublicLocationResults && publicLocationSearch.result && (
+        <PublicLocationResults
+          entities={publicLocationSearch.result.entities}
+          error={publicLocationSearch.result.error}
+        />
+      )}
+
+      {/* Normal Analysis Results */}
+      {showNormalResults && (
         <AdvancedContactLookupResultCard
           result={result}
           detectedType={detectedType}

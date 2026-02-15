@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Refine Message Analysis (text) risk scoring so critical trigger phrases enforce minimum risk score thresholds based on trigger count, without affecting phone/email/crypto flows.
+**Goal:** Add a minimal frontend-only public-location search path that detects certain keywords and queries OpenStreetMap Nominatim, showing results in the existing results area while keeping existing scoring and UI structure unchanged.
 
 **Planned changes:**
-- Update the frontend Message Analysis text-scoring logic so detected critical trigger phrases override normal incremental scoring and enforce minimum riskScore thresholds: 1 trigger ≥ 85, 2 triggers ≥ 92, 3+ triggers = 100.
-- Integrate the provided critical words/phrases into the Message Analysis critical trigger list, with case-insensitive and accent-insensitive matching, and count detected triggers to drive the thresholds.
-- Keep Search (Phone) module behavior untouched, ensuring its public number override logic and all phone/email/crypto analysis results remain unaffected.
+- Add an isolated frontend Search module (utility/hook/components as needed) that detects public-location keywords in an accent-insensitive and case-insensitive way and, when detected, queries OpenStreetMap Nominatim for public categories (hospital, police, fire_station, government, emergency).
+- Render Nominatim public-location results inside the existing results display container (no new panels/sections), matching the current result styling; show entity name, category, city/region, and phone number (if available), with error/empty states shown in the same area.
+- For Nominatim-sourced public-location entities only, override displayed risk output to risk_score = 0 and risk_level = LOW without changing normal scoring/heuristics for other searches.
+- Remove platform references from the footer and from metadata (HTML head/SEO helpers/manifest) so no platform branding/links appear; ensure any new/modified user-facing strings in this phase are English.
 
-**User-visible outcome:** Message text analyses will show higher risk scores when critical trigger phrases are present (85/92/100 based on how many are detected), while phone, email, and crypto analysis behavior remains the same.
+**User-visible outcome:** Users can enter queries like “polícia/policia” or “hospital” and see public entity results (with basic details) in the existing results area, always marked as LOW risk (score 0), while normal searches behave as before and platform branding is removed from footer/metadata.

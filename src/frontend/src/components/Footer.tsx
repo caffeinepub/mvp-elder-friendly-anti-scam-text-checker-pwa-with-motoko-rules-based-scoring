@@ -11,20 +11,6 @@ export function Footer() {
         <div className="flex flex-col items-center gap-4 mb-6">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>© {currentYear} {t.appSubtitle}</span>
-            <span className="text-muted-foreground/50">•</span>
-            <a
-              href="https://internetcomputer.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:text-foreground transition-colors"
-            >
-              <img
-                src="/assets/generated/icp-logo-icon.dim_16x16.png"
-                alt="ICP"
-                className="w-4 h-4"
-              />
-              <span>ICP ∞</span>
-            </a>
           </div>
         </div>
 
