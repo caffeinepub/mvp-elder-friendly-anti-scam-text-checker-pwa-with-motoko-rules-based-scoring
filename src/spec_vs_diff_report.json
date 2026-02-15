@@ -1,69 +1,56 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T15:38:46.523Z",
-  "summary": "Diff adds a new internal risk_dictionary in structuredFraudAnalysis and introduces new text-normalization/occurrence-count utilities, plus a new phone-to-country derivation helper. However, the required Public Phone Rule override (force LOW at 0% and always show entity name + country) is not evidenced as implemented, and the patch appears to modify backend/main.mo despite constraints calling for a logic-only patch without backend changes. Also, it is not clearly evidenced that the risk_dictionary is applied only to message-text analysis (and not to phone/email/crypto paths) nor that the final message score is clamped within the existing bounds.",
+  "generatedAt": "2026-02-15T15:56:59.421Z",
+  "summary": "The diff adds a new message critical-trigger list and wires it into the structured fraud analysis utility via an import, but the provided diff summary does not show the required scoring-threshold override logic being implemented, nor does it clearly demonstrate case-/accent-insensitive matching for the new triggers. Several requested “exact triggers” also appear to be split or altered rather than included verbatim. Additional unrelated documentation/state files were modified/added beyond the requested frontend-only message-analysis scoring change.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
-      "reason": "The UI still renders risk and score directly from `result` (e.g., `{result.risk} ({result.riskScore}/100)` and risk bar width `${result.riskScore}%`) with no conditional override when `publicInfo.isPublicEntity` is true. While a country can be derived, there is no evidence that entity name+country are always displayed for public entities or that risk is forced to LOW/0%.",
-      "evidence": [
-        "frontend/src/components/AdvancedContactLookup.tsx",
-        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-        "frontend/src/utils/phoneCountry.ts"
-      ]
-    },
-    {
       "id": "REQ-1",
-      "requirement": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
-      "reason": "A `risk_dictionary` object with the specified fields is present, but the diff excerpt does not show the gating/usage logic that ensures dictionary matching affects ONLY message-text analysis and not other analysis paths within the same analysis module.",
+      "requirement": "Critical trigger phrase detection must override normal incremental scoring for Message Analysis and enforce minimum riskScore thresholds: 1 trigger => >=85; 2 triggers => >=92; 3+ triggers => exactly 100; apply only to message text analysis and not to phone/email/crypto flows.",
+      "reason": "The diff summary shows MESSAGE_CRITICAL_TRIGGERS being imported into structuredFraudAnalysis.ts, but does not show any implemented logic that counts detected critical triggers and applies the required 85/92/100 override thresholds to the returned riskScore. The relevant code section is truncated and no thresholding logic is visible.",
       "evidence": [
-        "frontend/src/utils/structuredFraudAnalysis.ts"
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)",
+        "frontend/src/utils/messageCriticalTriggers.ts"
       ]
     },
     {
       "id": "REQ-2",
-      "requirement": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
-      "reason": "Utilities for occurrence-based counting exist (`countKeywordOccurrences`), but the diff excerpt does not show the scoring integration that (a) applies counts to the message risk score cumulatively, and (b) clamps the final score to the app’s scoring range (0–100).",
+      "requirement": "Integrate the provided critical words/phrases into the Message Analysis critical risk detection list with case-insensitive and accent-insensitive matching, including all listed triggers with no omissions (exact triggers), and use trigger counting for the 85/92/100 thresholding.",
+      "reason": "While a new trigger list file is added, the diff shows multiple requested exact triggers are not included verbatim (some appear split into partial tokens), and the diff summary does not show matching logic that is explicitly case-insensitive and accent-insensitive for this list. Also, the trigger-counting linkage to thresholding is not shown (see REQ-1).",
       "evidence": [
-        "frontend/src/utils/antifraudTextNormalize.ts",
-        "frontend/src/utils/structuredFraudAnalysis.ts"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere.",
-      "reason": "The diff indicates `backend/main.mo` was modified, which conflicts with the constraint to avoid backend structure/schema/auth changes and apply a logic-only patch. The provided excerpt does not clarify what was changed, so compliance is not evidenced.",
-      "evidence": [
-        "backend/main.mo"
+        "frontend/src/utils/messageCriticalTriggers.ts",
+        "frontend/src/utils/structuredFraudAnalysis.ts (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added advanced phrase-pattern matching utilities (partial matching within a window) and phrase occurrence counting beyond simple keyword matching.",
-      "reason": "The BuildRequest asks for cumulative scoring based on keyword/phrase occurrences from a provided dictionary for message text analysis, but does not request implementing a new partial-matching phrase-pattern engine/window-based matching behavior.",
+      "description": "Added/modified production build verification checklist with many non-requested sections (auth, i18n, admin route checks, etc.).",
+      "reason": "BuildRequest is narrowly scoped to frontend-only Message Analysis critical-trigger scoring and explicitly lists non-goals like adding pages/routes/navigation and unrelated behavior; this documentation expansion is not requested by any REQ.",
       "evidence": [
-        "frontend/src/utils/antifraudTextNormalize.ts"
+        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
       ]
     },
     {
-      "description": "Added a standalone phone country derivation utility with a hardcoded country calling code list.",
-      "reason": "The request requires that public/official phone numbers display entity name and country, but does not specify implementing country derivation from E.164 prefixes via a new utility module (this is additional implementation not explicitly requested, though it may support REQ-3).",
+      "description": "Modified/added project summary/state tracking content referencing Search (Phone) public/emergency number registry/override behavior.",
+      "reason": "BuildRequest REQ-3 explicitly says Search (Phone) must remain untouched; adding state/docs that describe new phone override behavior is not requested as part of this message-analysis patch and conflicts with the stated constraint (even if only documentation, it introduces an unrequested feature description).",
       "evidence": [
-        "frontend/src/utils/phoneCountry.ts"
+        "project_state.json (truncated)"
+      ]
+    },
+    {
+      "description": "Modified a large frontend file summaries document describing many unrelated features (admin route, i18n, PWA, etc.).",
+      "reason": "Not requested by any requirement; BuildRequest scope is limited to message text analysis scoring changes and trigger list integration.",
+      "evidence": [
+        "frontend-file-summaries.txt (truncated)"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AdvancedContactLookup.tsx",
-    "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-    "frontend/src/utils/antifraudTextNormalize.ts",
-    "frontend/src/utils/phoneCountry.ts",
+    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+    "frontend/src/utils/messageCriticalTriggers.ts",
     "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json"
   ]

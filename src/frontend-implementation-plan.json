@@ -1,92 +1,61 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Incremental AntiFraud dictionary scoring + public phone LOW override (frontend-only)",
+  "title": "Refine Message Analysis critical-trigger scoring thresholds (frontend-only)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Ensure a critical/maximum internal risk_dictionary exists for message-text analysis only, without affecting phone/email/crypto/public lookups.",
+      "summary": "Refine message text risk scoring so critical trigger phrase detection overrides incremental heuristics with minimum thresholds (85/92/100) without impacting phone/email/crypto flows.",
       "acceptanceCriteria": [
-        "A `risk_dictionary` exists in the message analysis module with fields `severity: \"critical\"` and `risk_level: \"maximum\"` and includes all keywords/phrases provided in the request (grouped as given).",
-        "Dictionary matching is applied only for message text analysis paths; phone/email/crypto analysis results remain unchanged for the same inputs compared to pre-patch behavior.",
-        "No persistence is added for analyzed message content; analysis remains in-memory only.",
-        "Backend API surface (existing methods/types) remains unchanged; only internal message analysis logic is updated."
+        "When analyzing a message containing 1 critical trigger phrase, the returned riskScore is >= 85 regardless of the underlying heuristic score.",
+        "When analyzing a message containing exactly 2 critical trigger phrases, the returned riskScore is >= 92 regardless of the underlying heuristic score.",
+        "When analyzing a message containing 3+ critical trigger phrases, the returned riskScore is exactly 100.",
+        "The override applies only to message text analysis (e.g., the function exported as analyzeMessage in frontend utilities) and does not change scoring for phone, email, or crypto analysis.",
+        "No data is persisted as part of this scoring change (no backend calls or storage of message content beyond in-memory processing for the current analysis)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/utils/structuredFraudAnalysis.ts",
           "operation": "modify",
-          "description": "Scope the existing internal `risk_dictionary` so it is only used by the message-text analysis path (e.g., the `analyzeMessage` wrapper) and does not influence email/phone/crypto/public-source flows that use other analyzers."
+          "description": "Update the exported message-text analysis flow to (1) detect and count matched critical trigger phrases in the message text using existing normalization utilities, and (2) apply a hard override/minimum riskScore based on critical trigger count: 1→min 85, 2→min 92, 3+→set 100, ensuring this override happens after normal heuristic scoring and is applied ONLY in analyzeMessage (message text) and not in analyzeEmail/analyzePhone/analyzeCrypto. Keep all processing in-memory and do not add any persistence or backend calls."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement cumulative, occurrence-based risk_dictionary scoring for message text and clamp final score to the existing 0–100 range without affecting non-message scoring.",
+      "summary": "Add the full user-provided critical words/phrases list to Message Analysis critical trigger detection with case-insensitive and accent-insensitive matching.",
       "acceptanceCriteria": [
-        "For message text analysis, adding more distinct dictionary keywords/phrases to the input increases the computed risk score monotonically (cumulative effect).",
-        "Repeated occurrences of a listed keyword/phrase increase the score cumulatively (occurrence-based), per the request.",
-        "Final message risk score remains within the existing score bounds used by the app (no overflow), and message risk level mapping continues to function."
+        "All listed critical triggers are included in the frontend Message Analysis critical trigger detection list (no omissions).",
+        "Matching detects triggers regardless of letter casing and diacritics (e.g., 'ola pai' matches 'Olá Pai').",
+        "Trigger counting used for thresholding is based on detected trigger phrases in the message text and drives the 85/92/100 minimum thresholds.",
+        "This integration is confined to message text analysis utilities and does not modify layout, routing, or other feature modules."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/antifraudTextNormalize.ts",
-          "operation": "modify",
-          "description": "Add a small helper for normalized occurrence counting / safe matching that can be used to implement occurrence-based dictionary scoring for message text (in-memory only)."
+          "path": "frontend/src/utils/messageCriticalTriggers.ts",
+          "operation": "create",
+          "description": "Create a dedicated constant list for message text critical trigger words/phrases containing ALL user-provided triggers exactly as provided, intended for case-insensitive and accent-insensitive matching via existing normalization utilities. This file must be used only by message text analysis."
         },
         {
           "path": "frontend/src/utils/structuredFraudAnalysis.ts",
           "operation": "modify",
-          "description": "Compute an additional cumulative score contribution for message text by counting occurrences of matched risk_dictionary keywords/phrases, add it to the existing message risk score, and clamp to the app’s 0–100 scoring bounds; keep phone/email/crypto scoring behaviors unchanged."
+          "description": "Integrate the new critical trigger list into message text critical detection by importing it and using normalization-based matching (case-insensitive, accent-insensitive). Ensure trigger counting is based on detected trigger phrases in the message text (unique phrase matches) and feeds the REQ-1 85/92/100 threshold override. Keep changes confined to message text analysis utilities."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Force LOW (0%) risk display for public/official phone entities while always showing entity name and country, without affecting non-public phone lookups or message analysis.",
+      "summary": "Ensure the Search (Phone) public-number override logic remains unchanged by this patch; add a verification step without modifying phone search modules.",
       "acceptanceCriteria": [
-        "When `public/official entity` detection is true for a phone lookup, the UI shows the entity name and country and shows risk as LOW with score 0/100 (0%).",
-        "For the same public/official phone lookup, risk is never displayed as Medium/High/Critical, even if other risk signals (e.g., reports, heuristics) would otherwise elevate it.",
-        "Non-public phone lookups display risk exactly as before this patch.",
-        "Message analysis risk behavior is unaffected by this phone override (separate code paths)."
+        "No changes are made to Search (Phone) module behavior or code paths as part of this patch.",
+        "Phone lookups that previously used a public-number override continue to bypass heuristics and remain unaffected by message-scoring changes.",
+        "Message analysis scoring changes do not alter any phone/email/crypto lookup results."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/phoneCountry.ts",
-          "operation": "create",
-          "description": "Add a lightweight, non-persistent helper to derive a display country from an E.164-like phone number (e.g., based on leading country calling code) for use when rendering public/official phone entities."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookup.tsx",
+          "path": "frontend/PRODUCTION_BUILD_VERIFICATION.md",
           "operation": "modify",
-          "description": "In the phone search flow, when a public/official entity is detected via the existing public source lookup, override the computed phone antifraudResult before rendering so that risk is forced to Low and riskScore forced to 0/100 (0%), without altering non-public phone results."
-        },
-        {
-          "path": "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-          "operation": "modify",
-          "description": "When displaying public/official phone results, ensure the public info section always shows the entity name (existing displayName) and also shows a derived country (via the new helper) while keeping the existing layout structure intact."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Deliver as a small logic-only patch with no new pages/routes/layout changes, no persistence changes, and add a safeguard to prevent introducing the prohibited literal string in frontend code.",
-      "acceptanceCriteria": [
-        "No new routes/pages/layout components are added or recreated as part of this change; only the targeted analysis logic is modified.",
-        "No new backend stable variables/tables are added; no schema/state migrations are introduced.",
-        "No authentication/Internet Identity-related code is changed.",
-        "A repository-wide check confirms the patch did not introduce the literal string \"Caffeine\" in frontend user-facing text, HTML metadata, or source code comments/identifiers intended to be visible."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/scripts/check-prohibited-literals.mjs",
-          "operation": "create",
-          "description": "Add a small CI-friendly script that scans frontend source/public files for prohibited literal strings required by this patch policy (no persistence; no runtime behavior changes)."
-        },
-        {
-          "path": "frontend/scripts/restart-live-integration.mjs",
-          "operation": "modify",
-          "description": "Wire the prohibited-literals check into the existing restart/verification workflow so it fails fast if the prohibited literal is introduced anywhere in the frontend workspace."
+          "description": "Add a regression verification checklist item explicitly confirming that Search (Phone) public-number override logic still executes before any heuristics and that no phone module behavior changed as part of the message-analysis scoring patch (documentation-only change; do not modify any phone/search module code)."
         }
       ]
     }

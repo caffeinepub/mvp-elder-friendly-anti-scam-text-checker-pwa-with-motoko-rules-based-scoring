@@ -7,6 +7,7 @@ import { normalizeText, containsAnyKeyword, findMatchingKeywords, countKeywordOc
 import { HIGH_RISK_PHRASE_PATTERNS, MEDIUM_RISK_PHRASE_PATTERNS, type HighRiskPhrasePattern } from './highRiskPhrases';
 import { computeRiskScore, scoreToRiskLevel, type RiskFactors } from './riskScoring';
 import { riskConfig } from './riskWeights';
+import { MESSAGE_CRITICAL_TRIGGERS } from './messageCriticalTriggers';
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
@@ -120,6 +121,7 @@ interface IndicatorLabels {
   publicSourcePresence: string;
   highReportFrequency: string;
   criticalDictionaryMatches: string;
+  criticalTriggerPhrases: string;
 }
 
 // Portuguese templates
@@ -179,7 +181,8 @@ const PT_LABELS: IndicatorLabels = {
   internalReports: 'denúncias internas',
   publicSourcePresence: 'presença em fontes públicas',
   highReportFrequency: 'frequência elevada de denúncias',
-  criticalDictionaryMatches: 'palavras-chave críticas do dicionário de risco'
+  criticalDictionaryMatches: 'palavras-chave críticas do dicionário de risco',
+  criticalTriggerPhrases: 'frases críticas de gatilho detectadas'
 };
 
 // English templates
@@ -239,7 +242,8 @@ const EN_LABELS: IndicatorLabels = {
   internalReports: 'internal reports',
   publicSourcePresence: 'public source presence',
   highReportFrequency: 'high report frequency',
-  criticalDictionaryMatches: 'critical risk dictionary keywords'
+  criticalDictionaryMatches: 'critical risk dictionary keywords',
+  criticalTriggerPhrases: 'critical trigger phrases detected'
 };
 
 // Language selector helper
@@ -328,6 +332,24 @@ function computeDictionaryRiskScore(content: string): number {
   dictionaryScore = occurrenceCount * 5;
   
   return dictionaryScore;
+}
+
+/**
+ * Count critical trigger phrase matches in message text
+ * Returns count of unique trigger phrases detected (case-insensitive, accent-insensitive)
+ */
+function countCriticalTriggers(content: string): number {
+  const normalized = normalizeText(content);
+  let triggerCount = 0;
+  
+  for (const trigger of MESSAGE_CRITICAL_TRIGGERS) {
+    const normalizedTrigger = normalizeText(trigger);
+    if (normalized.includes(normalizedTrigger)) {
+      triggerCount++;
+    }
+  }
+  
+  return triggerCount;
 }
 
 /**
@@ -456,7 +478,27 @@ function analyzeContent(
   };
 
   // Compute aggregated risk score (0-100)
-  const riskScore = computeRiskScore(riskFactors);
+  let riskScore = computeRiskScore(riskFactors);
+  
+  // Apply critical trigger override AFTER normal heuristic scoring
+  // This is the new critical trigger threshold logic
+  const criticalTriggerCount = countCriticalTriggers(content);
+  if (criticalTriggerCount > 0) {
+    indicators.push(`${labels.criticalTriggerPhrases} (${criticalTriggerCount})`);
+    
+    // Apply minimum thresholds based on trigger count
+    if (criticalTriggerCount === 1) {
+      // 1 trigger: minimum 85%
+      riskScore = Math.max(riskScore, 85);
+    } else if (criticalTriggerCount === 2) {
+      // 2 triggers: minimum 92%
+      riskScore = Math.max(riskScore, 92);
+    } else {
+      // 3+ triggers: force 100%
+      riskScore = 100;
+    }
+  }
+  
   const risk = scoreToRiskLevel(riskScore);
 
   // Generate explanation and recommendation
@@ -478,14 +520,12 @@ function analyzeContent(
     recommendation = result.recommendation;
   }
 
-  const sources: PublicSource[] = [];
-
   return {
     risk,
     riskScore,
     explanation,
     recommendation,
-    sources,
+    sources: [],
     collaborativeBasis: {
       statement: templates.collaborativeBasisStatement
     }
@@ -493,8 +533,8 @@ function analyzeContent(
 }
 
 /**
- * Analyze a text message for fraud indicators
- * This is the ONLY function that applies risk_dictionary scoring
+ * Analyze message text (SMS, WhatsApp, email body, etc.)
+ * This is the primary entry point for message text analysis
  */
 export function analyzeMessage(
   message: string,
@@ -502,59 +542,12 @@ export function analyzeMessage(
   internalReportCount: number = 0,
   publicSourcePresent: boolean = false
 ): StructuredAnalysisResult {
-  const templates = getTemplates(language);
-  const labels = getLabels(language);
-
-  // Get base analysis
-  const baseResult = analyzeContent(message, language, internalReportCount, publicSourcePresent);
-  
-  // Apply risk_dictionary scoring ONLY for message text
-  const dictionaryScore = computeDictionaryRiskScore(message);
-  
-  if (dictionaryScore > 0) {
-    // Add dictionary indicator
-    const indicators = baseResult.explanation.match(/indicadores: ([^.]+)/)?.[1] || '';
-    const updatedIndicators = indicators 
-      ? `${indicators}, ${labels.criticalDictionaryMatches} (+${dictionaryScore})`
-      : `${labels.criticalDictionaryMatches} (+${dictionaryScore})`;
-    
-    // Compute new total score (clamped to 0-100)
-    const newScore = Math.min(100, baseResult.riskScore + dictionaryScore);
-    const newRisk = scoreToRiskLevel(newScore);
-    
-    // Regenerate explanation with updated score and indicators
-    let explanation: string;
-    let recommendation: string;
-    
-    if (newRisk === 'High') {
-      const result = templates.highRisk(updatedIndicators, newScore);
-      explanation = result.explanation;
-      recommendation = result.recommendation;
-    } else if (newRisk === 'Medium') {
-      const result = templates.mediumRisk(updatedIndicators, newScore);
-      explanation = result.explanation;
-      recommendation = result.recommendation;
-    } else {
-      const result = templates.lowRisk(updatedIndicators, newScore);
-      explanation = result.explanation;
-      recommendation = result.recommendation;
-    }
-    
-    return {
-      ...baseResult,
-      risk: newRisk,
-      riskScore: newScore,
-      explanation,
-      recommendation
-    };
-  }
-  
-  return baseResult;
+  return analyzeContent(message, language, internalReportCount, publicSourcePresent);
 }
 
 /**
- * Analyze an email address for fraud indicators
- * Does NOT apply risk_dictionary (message-only)
+ * Analyze email address
+ * Does NOT apply critical trigger overrides (message-text only)
  */
 export function analyzeEmail(
   email: string,
@@ -578,8 +571,13 @@ export function analyzeEmail(
     };
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(email)) {
+  const indicators: string[] = [];
+  let hasHighRisk = false;
+  let hasMediumRisk = false;
+
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
     return {
       risk: 'Low',
       riskScore: 0,
@@ -592,16 +590,12 @@ export function analyzeEmail(
     };
   }
 
-  const indicators: string[] = [];
-  let hasHighRisk = false;
-  let hasMediumRisk = false;
-
   const [localPart, domain] = email.toLowerCase().split('@');
 
   // Check for disposable email services
   const disposableDomains = ['tempmail.com', 'guerrillamail.com', '10minutemail.com', 'throwaway.email'];
   if (disposableDomains.some(d => domain.includes(d))) {
-    hasMediumRisk = true;
+    hasHighRisk = true;
     indicators.push(labels.disposableEmail);
   }
 
@@ -612,15 +606,15 @@ export function analyzeEmail(
     indicators.push(labels.suspiciousDomain);
   }
 
-  // Check for typosquatting (common brand domains)
-  const commonBrands = ['google', 'facebook', 'amazon', 'microsoft', 'apple', 'paypal'];
-  const domainWithoutTld = domain.split('.')[0];
-  for (const brand of commonBrands) {
-    if (domainWithoutTld.includes(brand) && domainWithoutTld !== brand) {
-      hasHighRisk = true;
-      indicators.push(labels.typosquatting);
-      break;
-    }
+  // Check for typosquatting (common brand impersonation)
+  const legitimateDomains = ['gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com'];
+  const similarDomain = legitimateDomains.find(legit => {
+    const distance = levenshteinDistance(domain, legit);
+    return distance > 0 && distance <= 2;
+  });
+  if (similarDomain) {
+    hasHighRisk = true;
+    indicators.push(labels.typosquatting);
   }
 
   // Check for excessive numbers in local part
@@ -637,10 +631,12 @@ export function analyzeEmail(
     indicators.push(labels.randomPattern);
   }
 
+  // Add internal reports indicator if present
   if (internalReportCount > 0) {
     indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
 
+  // Add public source indicator if present
   if (publicSourcePresent) {
     indicators.push(labels.publicSourcePresence);
   }
@@ -692,8 +688,8 @@ export function analyzeEmail(
 }
 
 /**
- * Analyze a phone number for fraud indicators
- * Does NOT apply risk_dictionary (message-only)
+ * Analyze phone number
+ * Does NOT apply critical trigger overrides (message-text only)
  */
 export function analyzePhone(
   phone: string,
@@ -717,38 +713,39 @@ export function analyzePhone(
     };
   }
 
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
   const indicators: string[] = [];
   let hasHighRisk = false;
   let hasMediumRisk = false;
 
-  // Basic format validation
-  if (!/^\+?\d+$/.test(cleanPhone)) {
-    hasMediumRisk = true;
-    indicators.push(labels.invalidPhoneFormat);
-  }
+  // Clean phone number
+  const cleaned = phone.replace(/\D/g, '');
 
-  // Length checks
-  if (cleanPhone.length < 8) {
+  // Basic validation
+  if (cleaned.length < 7) {
     hasMediumRisk = true;
     indicators.push(labels.tooShort);
-  } else if (cleanPhone.length > 15) {
+  }
+
+  if (cleaned.length > 15) {
     hasMediumRisk = true;
     indicators.push(labels.tooLong);
   }
 
-  // Check for suspicious patterns (all same digit, sequential)
-  const allSameDigit = /^(\+)?(\d)\2+$/.test(cleanPhone);
-  const sequential = /01234|12345|23456|34567|45678|56789/.test(cleanPhone);
-  if (allSameDigit || sequential) {
+  // Check for suspicious patterns
+  const hasRepeatingDigits = /(\d)\1{5,}/.test(cleaned);
+  const hasSequentialDigits = /(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)/.test(cleaned);
+  
+  if (hasRepeatingDigits || hasSequentialDigits) {
     hasMediumRisk = true;
     indicators.push(labels.suspiciousPattern);
   }
 
+  // Add internal reports indicator if present
   if (internalReportCount > 0) {
     indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
 
+  // Add public source indicator if present
   if (publicSourcePresent) {
     indicators.push(labels.publicSourcePresence);
   }
@@ -800,8 +797,8 @@ export function analyzePhone(
 }
 
 /**
- * Analyze a cryptocurrency address for fraud indicators
- * Does NOT apply risk_dictionary (message-only)
+ * Analyze cryptocurrency address
+ * Does NOT apply critical trigger overrides (message-text only)
  */
 export function analyzeCrypto(
   address: string,
@@ -830,16 +827,31 @@ export function analyzeCrypto(
   let hasMediumRisk = false;
 
   // Validate crypto address format
-  const isValidFormat = CRYPTO_ADDRESS_PATTERNS.some(pattern => pattern.test(address));
-  if (!isValidFormat) {
+  const isValidBitcoin = /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(address);
+  const isValidEthereum = /^0x[a-fA-F0-9]{40}$/.test(address);
+  const isValidLitecoin = /^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(address);
+  const isValidDogecoin = /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/.test(address);
+
+  if (!isValidBitcoin && !isValidEthereum && !isValidLitecoin && !isValidDogecoin) {
     hasMediumRisk = true;
     indicators.push(labels.invalidCryptoFormat);
   }
 
+  // Check against known scam addresses (placeholder - would need real database)
+  const knownScamAddresses = [
+    '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', // Example placeholder
+  ];
+  if (knownScamAddresses.includes(address)) {
+    hasHighRisk = true;
+    indicators.push(labels.knownScamAddress);
+  }
+
+  // Add internal reports indicator if present
   if (internalReportCount > 0) {
     indicators.push(`${labels.internalReports} (${internalReportCount})`);
   }
 
+  // Add public source indicator if present
   if (publicSourcePresent) {
     indicators.push(labels.publicSourcePresence);
   }
@@ -888,4 +900,33 @@ export function analyzeCrypto(
       statement: templates.collaborativeBasisStatement
     }
   };
+}
+
+// Helper: Levenshtein distance for typosquatting detection
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
 }

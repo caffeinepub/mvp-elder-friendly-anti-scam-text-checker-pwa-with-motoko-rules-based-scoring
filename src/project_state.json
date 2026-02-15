@@ -1,38 +1,35 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "AntiFraud message-analysis logic update: add critical maximum-risk dictionary affecting only message text scoring, with cumulative keyword scoring; enforce override rule for public/official phone numbers to always remain LOW (0%) and display entity name/country; no persistence and no changes to backend/auth/layout/pages; strict removal/avoidance of name “Caffeine”.",
+  "summary": "AntiFraud scoring enhancements: (1) refine Message Analysis scoring so critical trigger phrases force elevated risk thresholds (85%/92%/100% based on trigger count) overriding normal scoring; (2) enhance Search (Phone) with a public/emergency number registry and a pre-scoring override that forces LOW risk (0) and skips heuristics for official numbers. No backend/layout changes and no persistence.",
   "architectural_notes": [
-    "Apply incremental patch only: update message-analysis logic without rebuilding app, recreating pages, or modifying layout/seals/modules.",
-    "Risk dictionary affects only message text scoring; must not alter scoring behavior for phone/crypto/email/public entity lookups.",
-    "Public/official phone identification overrides all other scoring: always LOW (0%) and display entity name + country.",
-    "No persistence of analyzed messages or personal data; scoring is in-memory only.",
-    "No backend structure/authentication changes; logic patch only."
+    "Do not modify backend structure/authentication/layout; apply incremental frontend logic patches only.",
+    "Search (Phone): if number matches internal official registry, short-circuit scoring (heuristics must not execute) and force LOW/0 with entity display and explanation.",
+    "Message Analysis: critical trigger phrases override normal scoring; enforce min thresholds 85% (1), 92% (2), 100% (3+).",
+    "No permanent storage of personal data; process content only for risk scoring."
   ],
-  "known_issues": [
-    "Prior build attempt failed to process request; user now requires incremental logic-only patch with no rebuild."
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-extend-the-existing-message-text-analysis-logic-to-include-an-internal-risk-dictionary-object-with-severity-critical-and-risk-level-maximum-containing-the-provided-keyword-phrase-groups-and-apply-it-only-when-analyzing-message-text-not-phone-email-crypto-or-public-entity-lookups",
-      "title": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
+      "id": "feature-update-the-message-analysis-text-scoring-logic-so-that-critical-trigger-phrase-detection-overrides-normal-incremental-scoring-and-enforces-minimum-risk-score-thresholds-based-on-the-number-of-detected-critical-triggers-1-trigger-risk-score-must-start-at-or-be-raised-to-at-least-85-2-triggers-risk-score-must-be-at-least-92-3-or-more-triggers-risk-score-must-be-100-maximum-this-refinement-must-apply-only-to-message-text-analysis-and-must-not-affect-phone-email-crypto-analysis-flows",
+      "title": "Update the Message Analysis text-scoring logic so that critical trigger phrase detection overrides normal incremental scoring and enforces minimum risk_score thresholds based on the number of detected critical triggers: 1 trigger => risk_score must start at (or be raised to) at least 85; 2 triggers => risk_score must be at least 92; 3 or more triggers => risk_score must be 100 (maximum). This refinement must apply only to message text analysis and must not affect phone/email/crypto analysis flows.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-cumulative-scoring-for-the-risk-dictionary-in-message-text-analysis-each-matched-keyword-phrase-occurrence-increases-the-message-risk-score-and-multiple-matches-increase-the-score-cumulatively-cap-clamp-the-final-message-risk-score-to-the-existing-scoring-range-e-g-0-100-without-changing-non-message-scoring-behaviors",
-      "title": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
+      "id": "feature-integrate-the-user-provided-critical-words-phrases-list-into-the-existing-critical-risk-dictionary-used-by-message-analysis-frontend-ensuring-matching-is-case-insensitive-and-accent-insensitive-the-integrated-list-must-include-all-of-the-following-exact-triggers-dinheiro-transpar-ncia-ola-pai-ol-m-e-investimento-gr-tis-amigo-amiga-o-seu-filho-a-sua-filha-criptomoedas-dados-banc-rios-morada-liquidez-urgente-urgent-ssimo-a-o-necess-ria-resposta-imediata-responda-agora-act-immediately-ltimo-aviso-final-warning-sua-conta-ser-bloqueada-hoje-seu-acesso-ser-cancelado-atividade-suspeita-suspicious-activity-tentativa-de-acesso-indevido-detect-mos-atividade-suspeita-no-seu-ip-na-sua-conta-sua-conta-est-em-risco-ser-encerrada-foi-suspensa-n-o-conseguimos-processar-o-seu-pagamento-falha-no-pagamento-payment-failed-fatura-em-atraso-invoice-em-aberto-cobran-a-pendente-atualize-seus-dados-confirme-o-cadastro-verifica-o-necess-ria-precisamos-da-sua-informa-o-we-need-your-information-verify-now-envie-o-c-digo-de-6-d-gitos-reenvie-o-c-digo-que-recebeu-por-engano-clique-no-link-para-confirmar-instalar-verificar-informe-os-dados-do-seu-cart-o-dados-banc-rios-cvv-senha-de-acesso-voc-ganhou-pr-mio-sorteio-giveaway-presente-exclusivo-b-nus-especial-cashback-garantido-reembolso-imediato-poucas-horas-de-trabalho-alto-retorno-financeiro-oferta-imperd-vel-uma-oportunidade-nica-na-vida-mudei-de-n-mero-salva-este-novo-estou-com-problema-no-banco-cart-o-podes-fazer-um-pagamento-por-mim-estou-no-estrangeiro-e-tive-um-acidente-preciso-de-ajuda-urgente-faz-uma-transfer-ncia-para-este-iban-pix-mbway-para-mim",
+      "title": "Integrate the user-provided critical words/phrases list into the existing critical risk dictionary used by Message Analysis (frontend), ensuring matching is case-insensitive and accent-insensitive. The integrated list must include all of the following exact triggers: dinheiro, transparência, ola pai, olá mãe, investimento, grátis, amigo, amiga, o seu filho, a sua filha, criptomoedas, dados, bancários, morada, liquidez; Urgente, Urgentíssimo, Ação necessária, Resposta imediata, Responda agora, Act immediately, Último aviso, Final warning; Sua conta será bloqueada hoje, Seu acesso será cancelado, Atividade suspeita, Suspicious activity, Tentativa de acesso indevido; Detectámos atividade suspeita no seu IP, na sua conta, Sua conta está em risco, será encerrada, foi suspensa; Não conseguimos processar o seu pagamento, Falha no pagamento, Payment failed, Fatura em atraso, Invoice em aberto, Cobrança pendente; Atualize seus dados, Confirme o cadastro, Verificação necessária, Precisamos da sua informação, We need your information, Verify now; Envie o código de 6 dígitos, Reenvie o código que recebeu por engano, Clique no link para confirmar/instalar/verificar; Informe os dados do seu cartão, Dados bancários, CVV, Senha de acesso; Você ganhou!, Prémio, Sorteio, Giveaway, Presente exclusivo, Bónus especial, Cashback garantido, Reembolso imediato; Poucas horas de trabalho alto retorno financeiro, Oferta imperdível, Uma oportunidade única na vida; Mudei de número salva este novo, Estou com problema no banco cartão podes fazer um pagamento por mim; Estou no estrangeiro e tive um acidente preciso de ajuda urgente, Faz uma transferência para este IBAN Pix MBWay para mim.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-enforce-the-public-phone-rule-override-in-the-phone-search-flow-when-a-searched-phone-number-is-identified-as-a-public-official-entity-always-display-entity-name-and-country-and-always-force-risk-level-to-low-with-risk-score-shown-as-0-regardless-of-any-other-heuristics-dictionary-scoring-this-override-must-not-affect-non-public-phone-results-and-must-not-affect-message-analysis",
-      "title": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
+      "id": "feature-ensure-the-search-phone-public-number-override-logic-remains-untouched-and-continues-to-execute-before-any-heuristics-in-the-phone-search-flow-this-message-analysis-patch-must-not-modify-any-search-phone-module-files-or-behavior",
+      "title": "Ensure the Search (Phone) public number override logic remains untouched and continues to execute before any heuristics in the phone search flow; this message-analysis patch must not modify any Search (Phone) module files or behavior.",
       "reqIds": [
         "REQ-3"
       ],
@@ -42,38 +39,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add risk_dictionary (severity=\"critical\", risk_level=\"maximum\") to AntiFraud message text analysis with cumulative keyword-based risk score increases (message logic only)",
+      "summary": "Message Analysis scoring refinement: critical trigger phrases set base/min risk_score to 85%; 2 triggers => min 92%; 3+ => 100%, overriding normal incremental scoring; no persistence; no layout/backend changes",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Implement override rule for public/official phone numbers: always show entity name+country and force risk level LOW (0%), never escalate regardless of dictionary logic",
+      "summary": "Search (Phone) public number registry + pre-scoring override: if searched number matches official registry (e.g., 112/911/999/110/118) force risk_score=0 & risk_level=LOW, display entity_name/region and explanation, and skip heuristics; frontend-only; no persistence; no layout/backend changes",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Ensure AntiFraud analysis logic changes are in-memory only (no persistence) and do not modify backend structure or authentication; patch message-analysis module only",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Enforce strict rule: do not include the name “Caffeine” anywhere in application, footer, metadata, interface, or visible code (including after incremental patch)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere in user-facing text, metadata, or visible code as part of this patch.",
-      "reqIds": [
-        "REQ-4"
-      ],
       "status": "pending"
     }
   ],
-  "projectName": "Incremental AntiFraud message dictionary scoring + public phone LOW override (logic-only patch)",
+  "projectName": "Refine Message Analysis critical-trigger scoring thresholds (frontend-only)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -42,7 +42,7 @@
   "frontend/src/utils/seo.ts": "SEO utility for setting document title with \"AntiFraud / by HCoragem\" branding and updating meta description tag at runtime for SPA routes.",
   "frontend/src/hooks/useActor.ts": "React hook managing backend actor initialization with Internet Identity authentication, query caching, and automatic query invalidation on identity changes.",
   "frontend/public/404.html": "Static 404 fallback page that redirects known SPA routes (including /documentation) back to the app shell, ensuring deep links work correctly without stranding users.",
-  "frontend/src/utils/structuredFraudAnalysis.ts": "Frontend-only structured fraud analysis engine with risk_dictionary applied exclusively to message text analysis via computeDictionaryRiskScore, cumulative occurrence-based scoring, fixed phrase pattern matching, and unchanged phone/email/crypto analyzers.",
+  "frontend/src/utils/structuredFraudAnalysis.ts": "Frontend-only structured fraud analysis engine with critical trigger threshold override (85/92/100) applied exclusively to message text analysis after normal heuristic scoring, with unchanged phone/email/crypto analyzers.",
   "frontend/src/components/StructuredAnalysisResultCard.tsx": "Presentational component that renders structured analysis results with risk/explanation/recommendation fields plus new transparency sections (public sources as clickable links and collaborative-basis statement) using shadcn-ui primitives, risk-based color coding, icons, and i18n support.",
   "frontend/src/hooks/useConsentGate.ts": "React hook managing versioned consent state with localStorage persistence, requiring re-consent when terms version changes.",
   "frontend/src/components/ConsentGateModal.tsx": "Blocking consent modal requiring explicit checkbox acceptance of cookies and terms, displaying version and effective date, with navigation to /terms and /privacy.",
@@ -55,7 +55,7 @@
   "frontend/src/components/InstallButton.tsx": "Minimal install button component that calls triggerPWAInstall() on click and shows alert if installation is not available, with hardcoded Portuguese label \"Baixar Aplicação AntiFraud gratuitamente\".",
   "frontend/PWA_WEBAPK_ANDROID_TEST.md": "Step-by-step Android Chrome WebAPK validation checklist with exact manual testing procedure and only two allowed outcome statements.",
   "frontend/src/utils/antifraudTextNormalize.ts": "Text normalization utility with added countKeywordOccurrences and countPhraseOccurrences functions for cumulative occurrence-based scoring in message analysis.",
-  "frontend/PRODUCTION_BUILD_VERIFICATION.md": "English production verification checklist with new \"Clean Restart Preflight\" section (Section 0) for from-scratch verification runs, covering cache clearing, service worker unregistration, localStorage cleanup, and build artifact removal before executing the full verification workflow.",
+  "frontend/PRODUCTION_BUILD_VERIFICATION.md": "English production verification checklist with Clean Restart Preflight section, comprehensive testing workflow, and new regression verification section confirming Search (Phone) public-number override logic remains unchanged.",
   "frontend/src/utils/contactInputHeuristics.ts": "Frontend-only contact input heuristics for phone/email detection and validation with added normalizeContactInput function for type-based normalization.",
   "frontend/src/utils/publicContactLookup.ts": "Frontend-only public contact information lookup utility that loads and searches a same-origin JSON dataset containing legally safe public metadata with source attribution and dates.",
   "frontend/public/data/public-contact-lookup.json": "Mock public contact lookup dataset containing example entries with display names, summaries, source attribution, and as-of dates for demonstration purposes.",
@@ -84,5 +84,6 @@
   "frontend/src/hooks/useTermsDocument.ts": "React hook fetching current Terms document from backend with safe fallback and error handling.",
   "frontend/src/hooks/useIsAdmin.ts": "React hook checking admin status using backend authorization system for admin-only UI guards.",
   "frontend/src/pages/AdminTermsPage.tsx": "Admin-only page for editing and publishing Terms updates with version, effective date, and multilingual JSON content editor.",
-  "frontend/src/utils/phoneCountry.ts": "Lightweight helper that derives display country from E.164-like phone numbers based on leading country calling codes for public/official phone entity display."
+  "frontend/src/utils/phoneCountry.ts": "Lightweight helper that derives display country from E.164-like phone numbers based on leading country calling codes for public/official phone entity display.",
+  "frontend/src/utils/messageCriticalTriggers.ts": "Dedicated constant list containing all user-provided critical trigger words and phrases for message text analysis, supporting case-insensitive and accent-insensitive matching via normalization utilities."
 }

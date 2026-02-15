@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-extend-the-existing-message-text-analysis-logic-to-include-an-internal-risk-dictionary-object-with-severity-critical-and-risk-level-maximum-containing-the-provided-keyword-phrase-groups-and-apply-it-only-when-analyzing-message-text-not-phone-email-crypto-or-public-entity-lookups",
-      "featureTitle": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
+      "featureId": "feature-update-the-message-analysis-text-scoring-logic-so-that-critical-trigger-phrase-detection-overrides-normal-incremental-scoring-and-enforces-minimum-risk-score-thresholds-based-on-the-number-of-detected-critical-triggers-1-trigger-risk-score-must-start-at-or-be-raised-to-at-least-85-2-triggers-risk-score-must-be-at-least-92-3-or-more-triggers-risk-score-must-be-100-maximum-this-refinement-must-apply-only-to-message-text-analysis-and-must-not-affect-phone-email-crypto-analysis-flows",
+      "featureTitle": "Update the Message Analysis text-scoring logic so that critical trigger phrase detection overrides normal incremental scoring and enforces minimum risk_score thresholds based on the number of detected critical triggers: 1 trigger => risk_score must start at (or be raised to) at least 85; 2 triggers => risk_score must be at least 92; 3 or more triggers => risk_score must be 100 (maximum). This refinement must apply only to message text analysis and must not affect phone/email/crypto analysis flows.",
       "files": [
         "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
@@ -22,10 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-cumulative-scoring-for-the-risk-dictionary-in-message-text-analysis-each-matched-keyword-phrase-occurrence-increases-the-message-risk-score-and-multiple-matches-increase-the-score-cumulatively-cap-clamp-the-final-message-risk-score-to-the-existing-scoring-range-e-g-0-100-without-changing-non-message-scoring-behaviors",
-      "featureTitle": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
+      "featureId": "feature-integrate-the-user-provided-critical-words-phrases-list-into-the-existing-critical-risk-dictionary-used-by-message-analysis-frontend-ensuring-matching-is-case-insensitive-and-accent-insensitive-the-integrated-list-must-include-all-of-the-following-exact-triggers-dinheiro-transpar-ncia-ola-pai-ol-m-e-investimento-gr-tis-amigo-amiga-o-seu-filho-a-sua-filha-criptomoedas-dados-banc-rios-morada-liquidez-urgente-urgent-ssimo-a-o-necess-ria-resposta-imediata-responda-agora-act-immediately-ltimo-aviso-final-warning-sua-conta-ser-bloqueada-hoje-seu-acesso-ser-cancelado-atividade-suspeita-suspicious-activity-tentativa-de-acesso-indevido-detect-mos-atividade-suspeita-no-seu-ip-na-sua-conta-sua-conta-est-em-risco-ser-encerrada-foi-suspensa-n-o-conseguimos-processar-o-seu-pagamento-falha-no-pagamento-payment-failed-fatura-em-atraso-invoice-em-aberto-cobran-a-pendente-atualize-seus-dados-confirme-o-cadastro-verifica-o-necess-ria-precisamos-da-sua-informa-o-we-need-your-information-verify-now-envie-o-c-digo-de-6-d-gitos-reenvie-o-c-digo-que-recebeu-por-engano-clique-no-link-para-confirmar-instalar-verificar-informe-os-dados-do-seu-cart-o-dados-banc-rios-cvv-senha-de-acesso-voc-ganhou-pr-mio-sorteio-giveaway-presente-exclusivo-b-nus-especial-cashback-garantido-reembolso-imediato-poucas-horas-de-trabalho-alto-retorno-financeiro-oferta-imperd-vel-uma-oportunidade-nica-na-vida-mudei-de-n-mero-salva-este-novo-estou-com-problema-no-banco-cart-o-podes-fazer-um-pagamento-por-mim-estou-no-estrangeiro-e-tive-um-acidente-preciso-de-ajuda-urgente-faz-uma-transfer-ncia-para-este-iban-pix-mbway-para-mim",
+      "featureTitle": "Integrate the user-provided critical words/phrases list into the existing critical risk dictionary used by Message Analysis (frontend), ensuring matching is case-insensitive and accent-insensitive. The integrated list must include all of the following exact triggers: dinheiro, transparência, ola pai, olá mãe, investimento, grátis, amigo, amiga, o seu filho, a sua filha, criptomoedas, dados, bancários, morada, liquidez; Urgente, Urgentíssimo, Ação necessária, Resposta imediata, Responda agora, Act immediately, Último aviso, Final warning; Sua conta será bloqueada hoje, Seu acesso será cancelado, Atividade suspeita, Suspicious activity, Tentativa de acesso indevido; Detectámos atividade suspeita no seu IP, na sua conta, Sua conta está em risco, será encerrada, foi suspensa; Não conseguimos processar o seu pagamento, Falha no pagamento, Payment failed, Fatura em atraso, Invoice em aberto, Cobrança pendente; Atualize seus dados, Confirme o cadastro, Verificação necessária, Precisamos da sua informação, We need your information, Verify now; Envie o código de 6 dígitos, Reenvie o código que recebeu por engano, Clique no link para confirmar/instalar/verificar; Informe os dados do seu cartão, Dados bancários, CVV, Senha de acesso; Você ganhou!, Prémio, Sorteio, Giveaway, Presente exclusivo, Bónus especial, Cashback garantido, Reembolso imediato; Poucas horas de trabalho alto retorno financeiro, Oferta imperdível, Uma oportunidade única na vida; Mudei de número salva este novo, Estou com problema no banco cartão podes fazer um pagamento por mim; Estou no estrangeiro e tive um acidente preciso de ajuda urgente, Faz uma transferência para este IBAN Pix MBWay para mim.",
       "files": [
-        "frontend/src/utils/antifraudTextNormalize.ts",
+        "frontend/src/utils/messageCriticalTriggers.ts",
         "frontend/src/utils/structuredFraudAnalysis.ts"
       ],
       "components": [
@@ -43,12 +43,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-enforce-the-public-phone-rule-override-in-the-phone-search-flow-when-a-searched-phone-number-is-identified-as-a-public-official-entity-always-display-entity-name-and-country-and-always-force-risk-level-to-low-with-risk-score-shown-as-0-regardless-of-any-other-heuristics-dictionary-scoring-this-override-must-not-affect-non-public-phone-results-and-must-not-affect-message-analysis",
-      "featureTitle": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
+      "featureId": "feature-ensure-the-search-phone-public-number-override-logic-remains-untouched-and-continues-to-execute-before-any-heuristics-in-the-phone-search-flow-this-message-analysis-patch-must-not-modify-any-search-phone-module-files-or-behavior",
+      "featureTitle": "Ensure the Search (Phone) public number override logic remains untouched and continues to execute before any heuristics in the phone search flow; this message-analysis patch must not modify any Search (Phone) module files or behavior.",
       "files": [
-        "frontend/src/components/AdvancedContactLookup.tsx",
-        "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-        "frontend/src/utils/phoneCountry.ts"
+        "frontend/PRODUCTION_BUILD_VERIFICATION.md"
       ],
       "components": [
         "core-infrastructure@1.0.2",

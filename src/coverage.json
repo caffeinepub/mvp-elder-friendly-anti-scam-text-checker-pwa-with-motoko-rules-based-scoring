@@ -1,18 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T15:38:46.528Z",
+  "generatedAt": "2026-02-15T15:56:59.424Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Extend the existing message-text analysis logic to include an internal `risk_dictionary` object with `severity=\"critical\"` and `risk_level=\"maximum\"`, containing the provided keyword/phrase groups, and apply it ONLY when analyzing message text (not phone, email, crypto, or public-entity lookups).",
+        "summary": "Update the Message Analysis text-scoring logic so that critical trigger phrase detection overrides normal incremental scoring and enforces minimum risk_score thresholds based on the number of detected critical triggers: 1 trigger => risk_score must start at (or be raised to) at least 85; 2 triggers => risk_score must be at least 92; 3 or more triggers => risk_score must be 100 (maximum). This refinement must apply only to message text analysis and must not affect phone/email/crypto analysis flows.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/utils/structuredFraudAnalysis.ts"
@@ -23,58 +23,37 @@
       },
       {
         "id": "REQ-2",
-        "summary": "Implement cumulative scoring for the `risk_dictionary` in message-text analysis: each matched keyword/phrase occurrence increases the message risk score, and multiple matches increase the score cumulatively; cap/clamp the final message risk score to the existing scoring range (e.g., 0–100) without changing non-message scoring behaviors.",
+        "summary": "Integrate the user-provided critical words/phrases list into the existing critical risk dictionary used by Message Analysis (frontend), ensuring matching is case-insensitive and accent-insensitive. The integrated list must include all of the following exact triggers: dinheiro, transparência, ola pai, olá mãe, investimento, grátis, amigo, amiga, o seu filho, a sua filha, criptomoedas, dados, bancários, morada, liquidez; Urgente, Urgentíssimo, Ação necessária, Resposta imediata, Responda agora, Act immediately, Último aviso, Final warning; Sua conta será bloqueada hoje, Seu acesso será cancelado, Atividade suspeita, Suspicious activity, Tentativa de acesso indevido; Detectámos atividade suspeita no seu IP, na sua conta, Sua conta está em risco, será encerrada, foi suspensa; Não conseguimos processar o seu pagamento, Falha no pagamento, Payment failed, Fatura em atraso, Invoice em aberto, Cobrança pendente; Atualize seus dados, Confirme o cadastro, Verificação necessária, Precisamos da sua informação, We need your information, Verify now; Envie o código de 6 dígitos, Reenvie o código que recebeu por engano, Clique no link para confirmar/instalar/verificar; Informe os dados do seu cartão, Dados bancários, CVV, Senha de acesso; Você ganhou!, Prémio, Sorteio, Giveaway, Presente exclusivo, Bónus especial, Cashback garantido, Reembolso imediato; Poucas horas de trabalho alto retorno financeiro, Oferta imperdível, Uma oportunidade única na vida; Mudei de número salva este novo, Estou com problema no banco cartão podes fazer um pagamento por mim; Estou no estrangeiro e tive um acidente preciso de ajuda urgente, Faz uma transferência para este IBAN Pix MBWay para mim.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/antifraudTextNormalize.ts",
+          "frontend/src/utils/messageCriticalTriggers.ts",
           "frontend/src/utils/structuredFraudAnalysis.ts"
         ],
         "matchedFiles": [
-          "frontend/src/utils/antifraudTextNormalize.ts",
+          "frontend/src/utils/messageCriticalTriggers.ts",
           "frontend/src/utils/structuredFraudAnalysis.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Enforce the Public Phone Rule override in the phone search flow: when a searched phone number is identified as a public/official entity, always display entity name and country, and always force risk level to LOW with risk score shown as 0%, regardless of any other heuristics/dictionary scoring; this override must not affect non-public phone results, and must not affect message analysis.",
+        "summary": "Ensure the Search (Phone) public number override logic remains untouched and continues to execute before any heuristics in the phone search flow; this message-analysis patch must not modify any Search (Phone) module files or behavior.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/phoneCountry.ts",
-          "frontend/src/components/AdvancedContactLookup.tsx",
-          "frontend/src/components/AdvancedContactLookupResultCard.tsx"
+          "frontend/PRODUCTION_BUILD_VERIFICATION.md"
         ],
         "matchedFiles": [
-          "frontend/src/utils/phoneCountry.ts",
-          "frontend/src/components/AdvancedContactLookup.tsx",
-          "frontend/src/components/AdvancedContactLookupResultCard.tsx"
+          "frontend/PRODUCTION_BUILD_VERIFICATION.md"
         ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Apply the update as a small incremental logic-only patch: do not recreate pages, do not change existing layout/UI structure, do not modify seals/research modules/crypto search/email analysis/phone search flows beyond the specific public-phone LOW override above; do not add persistence; do not change backend storage/schema/auth; and ensure the string \"Caffeine\" is not introduced anywhere in user-facing text, metadata, or visible code as part of this patch.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/scripts/check-prohibited-literals.mjs",
-          "frontend/scripts/restart-live-integration.mjs"
-        ],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/AdvancedContactLookup.tsx",
-    "frontend/src/components/AdvancedContactLookupResultCard.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/utils/antifraudTextNormalize.ts",
-    "frontend/src/utils/phoneCountry.ts",
+    "frontend/PRODUCTION_BUILD_VERIFICATION.md",
+    "frontend/src/utils/messageCriticalTriggers.ts",
     "frontend/src/utils/structuredFraudAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",
